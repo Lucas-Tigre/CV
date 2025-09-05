@@ -1803,6 +1803,7 @@ if (typeof module !== 'undefined' && module.exports) {
         updateHealthBar,
         updateXPBar,
         updateStatsPanel,
-        showGameOver
+        showGameOver,
+        checkForBossDialog // Exporting this for mocking, even if it's empty
     };
 }
