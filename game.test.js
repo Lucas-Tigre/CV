@@ -46,7 +46,6 @@ describe('Original Game Logic', () => {
     beforeEach(() => {
         // Deep copy config to isolate tests
         config = JSON.parse(JSON.stringify(game.config));
-        // Manually assign to the imported module's config
         Object.assign(game.config, config);
 
         // Reset global arrays
@@ -73,12 +72,12 @@ describe('Original Game Logic', () => {
         it('should level up when XP threshold is met', () => {
             game.config.level = 1;
             game.config.xp = 100;
-            const checkLevelUpSpy = jest.spyOn(game, 'checkForBossDialog').mockImplementation(() => {});
+            const checkForBossDialogSpy = jest.spyOn(game, 'checkForBossDialog').mockImplementation(() => {});
             game.checkLevelUp();
             expect(game.config.level).toBe(2);
             expect(game.config.xp).toBe(0);
             expect(game.config.skillPoints).toBe(1);
-            checkLevelUpSpy.mockRestore();
+            checkForBossDialogSpy.mockRestore();
         });
 
         it('should complete a quest and receive XP', () => {
