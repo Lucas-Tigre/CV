@@ -73,15 +73,17 @@ describe('Original Game Logic', () => {
         it('should level up when XP threshold is met', () => {
             game.config.level = 1;
             game.config.xp = 100;
+            const checkLevelUpSpy = jest.spyOn(game, 'checkForBossDialog').mockImplementation(() => {});
             game.checkLevelUp();
             expect(game.config.level).toBe(2);
             expect(game.config.xp).toBe(0);
             expect(game.config.skillPoints).toBe(1);
+            checkLevelUpSpy.mockRestore();
         });
 
         it('should complete a quest and receive XP', () => {
             const checkLevelUpSpy = jest.spyOn(game, 'checkLevelUp').mockImplementation(() => {});
-            game.config.quests.active = [{ id: 'test_quest', target: 1, current: 0, reward: 50 }];
+            game.config.quests.active = [{ id: 'test_quest', target: 1, current: 0, reward: 50, title: "Test Quest" }];
             game.updateQuest('test_quest', 1);
             expect(game.config.quests.completed).toContain('test_quest');
             expect(game.config.xp).toBe(50);
@@ -99,7 +101,7 @@ describe('Original Game Logic', () => {
         it('should attract particles when in attract mode', () => {
             game.setPlayerMode('attract');
             const player = game.config.players[0];
-            const particle = { x: player.x + 10, y: player.y + 10, speedX: 0, speedY: 0 };
+            const particle = { x: player.x + 10, y: player.y + 10, speedX: 0, speedY: 0, trail: [] };
             particles.push(particle);
 
             const initialSpeedX = particle.speedX;
@@ -110,7 +112,7 @@ describe('Original Game Logic', () => {
         it('should repel particles when in repel mode', () => {
             game.setPlayerMode('repel');
             const player = game.config.players[0];
-            const particle = { x: player.x + 10, y: player.y + 10, speedX: 0, speedY: 0 };
+            const particle = { x: player.x + 10, y: player.y + 10, speedX: 0, speedY: 0, trail: [] };
             particles.push(particle);
 
             const initialSpeedX = particle.speedX;
