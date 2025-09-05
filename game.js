@@ -1777,3 +1777,32 @@ window.addEventListener('resize', () => {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 });
+
+// Exporta para testes em ambiente Node.js (Jest)
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = {
+        config,
+        enemies,
+        particles,
+        spawnEnemy,
+        updateEnemies,
+        createParticle,
+        updateParticles,
+        checkLevelUp,
+        updateQuest,
+        upgradeSkill,
+        activateBigBang,
+        restartGame,
+        applySkillEffects,
+        checkSkillRequirements,
+        setPlayerMode,
+        getModeName,
+        toggleCoopMode,
+        initParticles,
+        checkBigBangUnlock,
+        updateHealthBar,
+        updateXPBar,
+        updateStatsPanel,
+        showGameOver
+    };
+}
