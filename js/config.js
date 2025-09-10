@@ -4,7 +4,7 @@ export const config = {
     particleRespawn: {
         minParticles: 150,  // Aumentado de 50
         respawnAmount: 50, // Aumentado de 20
-        checkInterval: 60  // Verifica a cada X frames (60 = ~1 segundo se 60FPS)
+        checkInterval: 30  // Reduzido de 60 para checagens mais frequentes
     },
     galaxies: {
         unlocked: ['classic'],

@@ -184,8 +184,10 @@ function render() {
     // Render the player's damage aura if in attract mode
     if (player.mode === 'attract') {
         const pulse = Math.abs(Math.sin(Date.now() * 0.005)); // Creates a value that pulses between 0 and 1
-        ctx.strokeStyle = `rgba(142, 45, 226, ${0.5 + pulse * 0.5})`; // Pulse opacity
-        ctx.lineWidth = 2 + pulse * 3; // Pulse width
+        // Anima a opacidade para um efeito sutil
+        ctx.strokeStyle = `rgba(142, 45, 226, ${0.2 + pulse * 0.2})`;
+        // Mantém a largura da linha fina e constante
+        ctx.lineWidth = 2;
         ctx.beginPath();
         ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
         ctx.stroke();
@@ -215,6 +217,12 @@ function updatePhysics(deltaTime) {
         config.xp += absorbedXp;
         updateQuest('absorb100', absorbedXp);
         checkLevelUp();
+    }
+
+    // Particle respawn logic
+    config.gameTime++;
+    if (config.gameTime % config.particleRespawn.checkInterval === 0) {
+        state.setParticles(particle.autoRespawnParticles(state.particles, player));
     }
 
     if (state.enemies.length > 0) {
