@@ -40,7 +40,7 @@ export function spawnEnemy(currentEnemies, typeKey = null) {
             y: Math.random() * window.innerHeight,
             type: typeKey,
             health: healthMultiplier,
-            speedX: 0, // Initialize speed components
+            speedX: 0,
             speedY: 0,
             baseSpeed: type.speed * (isElite ? config.enemySystem.eliteMultiplier : 1),
             face: type.face[Math.floor(Math.random() * type.face.length)],
@@ -79,9 +79,13 @@ export function updateEnemies(enemies, player, deltaTime) {
 
         // Black Hole Attraction & Damage Logic
         if (player.mode === 'attract' && distSq < player.radius * player.radius) {
+            // Damping: Reduce the enemy's current velocity.
+            enemy.speedX *= 0.9;
+            enemy.speedY *= 0.9;
+
             const dist = Math.sqrt(distSq);
-            const radialForce = 0.4; // Increased radial force
-            const tangentialForce = 0.2; // Decreased tangential force
+            const radialForce = 0.5; // Strong inward pull.
+            const tangentialForce = 0.25; // Weaker orbital pull.
             const radial_nx = dx / dist;
             const radial_ny = dy / dist;
             const tangential_nx = -radial_ny;
@@ -91,13 +95,11 @@ export function updateEnemies(enemies, player, deltaTime) {
             enemy.speedX += (radial_nx * radialForce + tangential_nx * tangentialForce) * forceMagnitude;
             enemy.speedY += (radial_ny * radialForce + tangential_ny * tangentialForce) * forceMagnitude;
 
-            // Apply damage over time
             enemy.health -= player.attractionDamage;
             if (enemy.health <= 0) {
-                xpFromDefeatedEnemies += enemy.isElite ? 10 : 3; // Give XP for defeated enemy
+                xpFromDefeatedEnemies += enemy.isElite ? 10 : 3;
                 config.enemiesDestroyed++;
-                // Don't add to remainingEnemies array to "kill" it
-                return;
+                return; // Skip the rest of the logic for this defeated enemy
             }
         } else {
              // Normal Behavior
@@ -128,17 +130,14 @@ export function updateEnemies(enemies, player, deltaTime) {
             }
         }
 
-        // Apply speed and friction
         enemy.x += enemy.speedX * (deltaTime / 16.67);
         enemy.y += enemy.speedY * (deltaTime / 16.67);
         enemy.speedX *= 0.95; // Friction
         enemy.speedY *= 0.95;
 
-        // Keep inside screen
         enemy.x = Math.max(10, Math.min(window.innerWidth - 10, enemy.x));
         enemy.y = Math.max(10, Math.min(window.innerHeight - 10, enemy.y));
 
-        // Collision with player (deals damage to player)
         const distToPlayer = Math.sqrt(distSq);
         if (distToPlayer < (player.size + enemy.size) * 0.6) {
             player.health -= 0.3 * (deltaTime / 16.67);

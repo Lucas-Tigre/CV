@@ -1,9 +1,9 @@
 export const config = {
-    particleCount: 150,
+    particleCount: 300, // Aumentado de 150
     mouseRadius: 150,
     particleRespawn: {
-        minParticles: 50,  // Número mínimo de partículas para ativar o respawn
-        respawnAmount: 20, // Quantidade de partículas criadas por respawn
+        minParticles: 150,  // Aumentado de 50
+        respawnAmount: 50, // Aumentado de 20
         checkInterval: 60  // Verifica a cada X frames (60 = ~1 segundo se 60FPS)
     },
     galaxies: {
