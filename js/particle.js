@@ -81,9 +81,6 @@ export function updateParticles(currentParticles, player, deltaTime, lastUpdateI
 
         if (p.size > (p.targetSize || 3)) p.size -= 0.1;
 
-        p.x += p.speedX * (deltaTime / 16.67);
-        p.y += p.speedY * (deltaTime / 16.67);
-
         const dx = player.x - p.x;
         const dy = player.y - p.y;
         const distSq = dx * dx + dy * dy;
@@ -94,14 +91,17 @@ export function updateParticles(currentParticles, player, deltaTime, lastUpdateI
             const isVeryClose = dist < suctionRadius;
 
             if (player.mode === 'attract') {
-                const radialForce = isVeryClose ? 0.8 : 0.4; // Increased radial force
-                const tangentialForce = 0.2; // Decreased tangential force
+                // Damping: Reduce the particle's current velocity to make it more susceptible to the black hole's pull.
+                p.speedX *= 0.9;
+                p.speedY *= 0.9;
+
+                const radialForce = 0.6; // Stronger pull towards the center.
+                const tangentialForce = 0.3; // Weaker orbital force.
                 const radial_nx = dx / dist;
                 const radial_ny = dy / dist;
                 const tangential_nx = -radial_ny;
                 const tangential_ny = radial_nx;
 
-                // Combine radial (pull) and tangential (orbit) forces
                 const forceMagnitude = (1 - dist / player.radius);
                 p.speedX += (radial_nx * radialForce + tangential_nx * tangentialForce) * forceMagnitude * (deltaTime / 16.67);
                 p.speedY += (radial_ny * radialForce + tangential_ny * tangentialForce) * forceMagnitude * (deltaTime / 16.67);
@@ -121,6 +121,10 @@ export function updateParticles(currentParticles, player, deltaTime, lastUpdateI
                 p.speedY -= ny * 0.2 * (1 - dist / player.radius) * (deltaTime / 16.67);
             }
         }
+
+        // General movement update
+        p.x += p.speedX * (deltaTime / 16.67);
+        p.y += p.speedY * (deltaTime / 16.67);
 
         if (p.x < 0 || p.x > window.innerWidth) p.speedX *= -0.8;
         if (p.y < 0 || p.y > window.innerHeight) p.speedY *= -0.8;

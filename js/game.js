@@ -181,6 +181,16 @@ function render() {
         }
     });
 
+    // Render the player's damage aura if in attract mode
+    if (player.mode === 'attract') {
+        const pulse = Math.abs(Math.sin(Date.now() * 0.005)); // Creates a value that pulses between 0 and 1
+        ctx.strokeStyle = `rgba(142, 45, 226, ${0.5 + pulse * 0.5})`; // Pulse opacity
+        ctx.lineWidth = 2 + pulse * 3; // Pulse width
+        ctx.beginPath();
+        ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
+        ctx.stroke();
+    }
+
     ctx.fillStyle = player.color;
     ctx.beginPath();
     ctx.arc(player.x, player.y, player.size, 0, Math.PI * 2);
