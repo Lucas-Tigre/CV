@@ -80,15 +80,16 @@ export function updateEnemies(enemies, player, deltaTime) {
         // Black Hole Attraction & Damage Logic
         if (player.mode === 'attract' && distSq < player.radius * player.radius) {
             const dist = Math.sqrt(distSq);
-            const tangentialForce = 0.4;
+            const radialForce = 0.4; // Increased radial force
+            const tangentialForce = 0.2; // Decreased tangential force
             const radial_nx = dx / dist;
             const radial_ny = dy / dist;
             const tangential_nx = -radial_ny;
             const tangential_ny = radial_nx;
 
             const forceMagnitude = (1 - dist / player.radius);
-            enemy.speedX += (radial_nx * 0.1 + tangential_nx * tangentialForce) * forceMagnitude;
-            enemy.speedY += (radial_ny * 0.1 + tangential_ny * tangentialForce) * forceMagnitude;
+            enemy.speedX += (radial_nx * radialForce + tangential_nx * tangentialForce) * forceMagnitude;
+            enemy.speedY += (radial_ny * radialForce + tangential_ny * tangentialForce) * forceMagnitude;
 
             // Apply damage over time
             enemy.health -= player.attractionDamage;

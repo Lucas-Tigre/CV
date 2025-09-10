@@ -94,8 +94,8 @@ export function updateParticles(currentParticles, player, deltaTime, lastUpdateI
             const isVeryClose = dist < suctionRadius;
 
             if (player.mode === 'attract') {
-                const radialForce = isVeryClose ? 0.5 : 0.1;
-                const tangentialForce = 0.4; // This creates the spiral
+                const radialForce = isVeryClose ? 0.8 : 0.4; // Increased radial force
+                const tangentialForce = 0.2; // Decreased tangential force
                 const radial_nx = dx / dist;
                 const radial_ny = dy / dist;
                 const tangential_nx = -radial_ny;
