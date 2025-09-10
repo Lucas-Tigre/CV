@@ -363,17 +363,19 @@ function initGame() {
         const currentParticles = state.particles;
         for (let i = 0; i < batchSize; i++) {
             if (currentParticles.length < particlesToSpawn) {
-                currentParticles.push(particle.createParticle(player)); // Assuming createParticle is available
+                // Use getParticle which correctly creates a particle at a random location
+                currentParticles.push(particle.getParticle(player));
             } else {
                 return; // All particles spawned
             }
         }
         state.setParticles(currentParticles);
-        requestAnimationFrame(spawnBatch);
+        if (currentParticles.length < particlesToSpawn) {
+            requestAnimationFrame(spawnBatch);
+        }
     }
 
     preloadImages();
-    // state.setParticles(particle.initParticles(player)); // Replaced with gradual spawn
     requestAnimationFrame(spawnBatch);
 
     sound.initSoundSystem();

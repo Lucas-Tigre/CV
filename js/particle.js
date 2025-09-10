@@ -3,7 +3,7 @@ import { playSound } from './utils.js';
 
 const particlePool = [];
 
-function getParticle(player, x, y) {
+export function getParticle(player, x, y) {
     const spawnPadding = 200;
     let posX, posY;
 
