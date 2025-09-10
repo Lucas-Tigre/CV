@@ -64,7 +64,9 @@ export const config = {
             active: true,
             lastModeChange: 0,
             damage: 0.5, // Dano de colisão normal
-            attractionDamage: 0.2, // Dano por frame do modo "Buraco Negro"
+            attractionDamage: 0.5, // Aumentado de 0.2 para acelerar o jogo
+            isPoweredUp: false,
+            powerUpTimer: 0,
             skills: {
                 attractRadius: 1,
                 vortexPower: 1,

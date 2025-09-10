@@ -78,7 +78,8 @@ export function updateEnemies(enemies, player, deltaTime) {
         const distSq = dx * dx + dy * dy;
 
         // Black Hole Attraction & Damage Logic
-        if (player.mode === 'attract' && distSq < player.radius * player.radius) {
+        const effectiveRadius = player.isPoweredUp ? player.radius * 1.5 : player.radius;
+        if (player.mode === 'attract' && distSq < effectiveRadius * effectiveRadius) {
             // Damping: Reduce the enemy's current velocity.
             enemy.speedX *= 0.9;
             enemy.speedY *= 0.9;
@@ -91,11 +92,13 @@ export function updateEnemies(enemies, player, deltaTime) {
             const tangential_nx = -radial_ny;
             const tangential_ny = radial_nx;
 
-            const forceMagnitude = (1 - dist / player.radius);
+            const forceMagnitude = (1 - dist / effectiveRadius);
             enemy.speedX += (radial_nx * radialForce + tangential_nx * tangentialForce) * forceMagnitude;
             enemy.speedY += (radial_ny * radialForce + tangential_ny * tangentialForce) * forceMagnitude;
 
-            enemy.health -= player.attractionDamage;
+            const damage = player.isPoweredUp ? player.attractionDamage * 3 : player.attractionDamage;
+            enemy.health -= damage;
+
             if (enemy.health <= 0) {
                 xpFromDefeatedEnemies += enemy.isElite ? 10 : 3;
                 config.enemiesDestroyed++;
