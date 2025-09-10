@@ -52,7 +52,7 @@ export const config = {
             id: 1,
             x: null,
             y: null,
-            mode: 'normal',
+            mode: 'attract', // Começar com o modo de atração ativo
             color: '#4A00E0',
             radius: 150,
             size: 30,

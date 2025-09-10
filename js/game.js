@@ -189,7 +189,8 @@ function render() {
         // Mantém a largura da linha fina e constante
         ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
+        // O raio visual da aura é menor que o raio de efeito para ser mais discreto
+        ctx.arc(player.x, player.y, player.radius * 0.5, 0, Math.PI * 2);
         ctx.stroke();
     }
 
@@ -354,8 +355,27 @@ function initGame() {
     const player = config.players[0];
     player.x = canvas.width / 2;
     player.y = canvas.height / 2;
+
+    // Gradual particle spawn to prevent startup lag
+    let particlesToSpawn = config.particleCount;
+    function spawnBatch() {
+        const batchSize = 25;
+        const currentParticles = state.particles;
+        for (let i = 0; i < batchSize; i++) {
+            if (currentParticles.length < particlesToSpawn) {
+                currentParticles.push(particle.createParticle(player)); // Assuming createParticle is available
+            } else {
+                return; // All particles spawned
+            }
+        }
+        state.setParticles(currentParticles);
+        requestAnimationFrame(spawnBatch);
+    }
+
     preloadImages();
-    state.setParticles(particle.initParticles(player));
+    // state.setParticles(particle.initParticles(player)); // Replaced with gradual spawn
+    requestAnimationFrame(spawnBatch);
+
     sound.initSoundSystem();
     audio.playMusic('mainTheme');
     ui.updateHealthBar(player.health, player.maxHealth);
