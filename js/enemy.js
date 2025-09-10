@@ -13,7 +13,7 @@ export function spawnEnemy(currentEnemies, typeKey = null) {
             let random = Math.random();
             let cumulativeChance = 0;
             for (const [key, type] of Object.entries(config.enemySystem.types)) {
-                if (type.chance > 0) { // Only consider enemies that can spawn randomly
+                if (type.chance > 0) {
                     cumulativeChance += type.chance;
                     if (random <= cumulativeChance) {
                         typeKey = key;
@@ -22,8 +22,6 @@ export function spawnEnemy(currentEnemies, typeKey = null) {
                 }
             }
         }
-
-        // If no type was selected (e.g., all have 0 chance), default to normal
         if (!typeKey) {
             typeKey = 'normal';
         }
@@ -42,7 +40,9 @@ export function spawnEnemy(currentEnemies, typeKey = null) {
             y: Math.random() * window.innerHeight,
             type: typeKey,
             health: healthMultiplier,
-            speed: type.speed * (isElite ? config.enemySystem.eliteMultiplier : 1),
+            speedX: 0, // Initialize speed components
+            speedY: 0,
+            baseSpeed: type.speed * (isElite ? config.enemySystem.eliteMultiplier : 1),
             face: type.face[Math.floor(Math.random() * type.face.length)],
             isElite,
             behavior: type.behavior,
@@ -50,12 +50,8 @@ export function spawnEnemy(currentEnemies, typeKey = null) {
             size: type.size || (config.enemySystem.baseSize * (isElite ? config.enemySystem.eliteSizeMultiplier : 1))
         };
 
-        if (typeKey === 'hunter' || typeKey === 'boss' || typeKey === 'finalBoss') {
-            enemy.huntRadius = type.huntRadius;
-        }
-        if (type.special === 'teleport') {
-            enemy.teleportChance = type.teleportChance;
-        }
+        if (typeKey === 'hunter' || typeKey === 'boss' || typeKey === 'finalBoss') enemy.huntRadius = type.huntRadius;
+        if (type.special === 'teleport') enemy.teleportChance = type.teleportChance;
 
         newEnemies.push(enemy);
     } catch (error) {
@@ -69,64 +65,90 @@ export function spawnEnemy(currentEnemies, typeKey = null) {
  * @param {Array} enemies - The array of enemies to update.
  * @param {object} player - The player object.
  * @param {number} deltaTime - The time since the last frame.
- * @returns {boolean} - Returns true if the game should be over.
+ * @returns {object} - An object containing gameOver status, xp from defeated enemies, and the new enemies array.
  */
 export function updateEnemies(enemies, player, deltaTime) {
     let gameOver = false;
+    let xpFromDefeatedEnemies = 0;
+    let remainingEnemies = [];
+
     enemies.forEach(enemy => {
-        // Behavior logic
-        switch (enemy.behavior) {
-            case 'hunt':
-                const dx = player.x - enemy.x;
-                const dy = player.y - enemy.y;
-                const distSq = dx * dx + dy * dy;
+        const dx = player.x - enemy.x;
+        const dy = player.y - enemy.y;
+        const distSq = dx * dx + dy * dy;
 
-                if (enemy.huntRadius && distSq < enemy.huntRadius * enemy.huntRadius) {
-                    const dist = Math.sqrt(distSq);
-                    if (dist > 0) {
-                        enemy.x += (dx / dist) * enemy.speed * (deltaTime / 16.67);
-                        enemy.y += (dy / dist) * enemy.speed * (deltaTime / 16.67);
+        // Black Hole Attraction & Damage Logic
+        if (player.mode === 'attract' && distSq < player.radius * player.radius) {
+            const dist = Math.sqrt(distSq);
+            const tangentialForce = 0.4;
+            const radial_nx = dx / dist;
+            const radial_ny = dy / dist;
+            const tangential_nx = -radial_ny;
+            const tangential_ny = radial_nx;
+
+            const forceMagnitude = (1 - dist / player.radius);
+            enemy.speedX += (radial_nx * 0.1 + tangential_nx * tangentialForce) * forceMagnitude;
+            enemy.speedY += (radial_ny * 0.1 + tangential_ny * tangentialForce) * forceMagnitude;
+
+            // Apply damage over time
+            enemy.health -= player.attractionDamage;
+            if (enemy.health <= 0) {
+                xpFromDefeatedEnemies += enemy.isElite ? 10 : 3; // Give XP for defeated enemy
+                config.enemiesDestroyed++;
+                // Don't add to remainingEnemies array to "kill" it
+                return;
+            }
+        } else {
+             // Normal Behavior
+            switch (enemy.behavior) {
+                case 'hunt':
+                     if (enemy.huntRadius && distSq < enemy.huntRadius * enemy.huntRadius) {
+                        const dist = Math.sqrt(distSq);
+                        if (dist > 0) {
+                           enemy.speedX = (dx / dist) * enemy.baseSpeed;
+                           enemy.speedY = (dy / dist) * enemy.baseSpeed;
+                        }
+                    } else {
+                        enemy.speedX += (Math.random() - 0.5) * 0.5;
+                        enemy.speedY += (Math.random() - 0.5) * 0.5;
                     }
-                } else {
-                    // Wander if player is out of range
-                    enemy.x += (Math.random() - 0.5) * enemy.speed * 0.5 * (deltaTime / 16.67);
-                    enemy.y += (Math.random() - 0.5) * enemy.speed * 0.5 * (deltaTime / 16.67);
-                }
-                break;
-
-            case 'teleport':
-                enemy.x += (Math.random() - 0.5) * enemy.speed * (deltaTime / 16.67);
-                enemy.y += (Math.random() - 0.5) * enemy.speed * (deltaTime / 16.67);
-
-                if (enemy.teleportChance && Math.random() < enemy.teleportChance) {
-                    enemy.x = Math.random() * window.innerWidth;
-                    enemy.y = Math.random() * window.innerHeight;
-                }
-                break;
-
-            default: // 'wander'
-                enemy.x += (Math.random() - 0.5) * enemy.speed * (deltaTime / 16.67);
-                enemy.y += (Math.random() - 0.5) * enemy.speed * (deltaTime / 16.67);
+                    break;
+                case 'teleport':
+                    enemy.speedX += (Math.random() - 0.5) * 0.5;
+                    enemy.speedY += (Math.random() - 0.5) * 0.5;
+                    if (enemy.teleportChance && Math.random() < enemy.teleportChance) {
+                        enemy.x = Math.random() * window.innerWidth;
+                        enemy.y = Math.random() * window.innerHeight;
+                    }
+                    break;
+                default: // 'wander'
+                    enemy.speedX += (Math.random() - 0.5) * 0.5;
+                    enemy.speedY += (Math.random() - 0.5) * 0.5;
+            }
         }
+
+        // Apply speed and friction
+        enemy.x += enemy.speedX * (deltaTime / 16.67);
+        enemy.y += enemy.speedY * (deltaTime / 16.67);
+        enemy.speedX *= 0.95; // Friction
+        enemy.speedY *= 0.95;
 
         // Keep inside screen
         enemy.x = Math.max(10, Math.min(window.innerWidth - 10, enemy.x));
         enemy.y = Math.max(10, Math.min(window.innerHeight - 10, enemy.y));
 
-        // Collision with player
-        const distToPlayer = Math.sqrt(
-            Math.pow(enemy.x - player.x, 2) +
-            Math.pow(enemy.y - player.y, 2)
-        );
-
+        // Collision with player (deals damage to player)
+        const distToPlayer = Math.sqrt(distSq);
         if (distToPlayer < (player.size + enemy.size) * 0.6) {
             player.health -= 0.3 * (deltaTime / 16.67);
-
             if (player.health <= 0) {
                 player.health = 0;
                 gameOver = true;
             }
         }
+
+        remainingEnemies.push(enemy);
     });
-    return gameOver;
+
+    return { gameOver, xpFromDefeatedEnemies, newEnemies: remainingEnemies };
 }

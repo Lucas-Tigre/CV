@@ -32,21 +32,14 @@ function getParticle(player, x, y) {
 
 function createParticle(x, y) {
     const types = [
-        { color: `hsl(${Math.random() * 60 + 180}, 80%, 60%)`, size: 3, xp: 1 }, // Normal
-        { color: `hsl(${Math.random() * 60 + 60}, 80%, 60%)`, size: 5, xp: 2 }, // Grande
-        { color: `hsl(${Math.random() * 60 + 300}, 80%, 60%)`, size: 2, xp: 3, special: 'speed' }, // Rápida
-        { color: 'white', size: 6, xp: 5, special: 'heal' } // Cura
+        { color: `hsl(${Math.random() * 60 + 180}, 80%, 60%)`, size: 3, xp: 1 },
+        { color: `hsl(${Math.random() * 60 + 60}, 80%, 60%)`, size: 5, xp: 2 },
+        { color: `hsl(${Math.random() * 60 + 300}, 80%, 60%)`, size: 2, xp: 3, special: 'speed' },
+        { color: 'white', size: 6, xp: 5, special: 'heal' }
     ];
-
     const type = Math.random() > 0.8 ? types[Math.floor(Math.random() * types.length)] : types[0];
-
     return {
-        x: x,
-        y: y,
-        size: type.size,
-        color: type.color,
-        xpValue: type.xp,
-        special: type.special,
+        x: x, y: y, size: type.size, color: type.color, xpValue: type.xp, special: type.special,
         speedX: (Math.random() - 0.5) * (type.special === 'speed' ? 6 : 3),
         speedY: (Math.random() - 0.5) * (type.special === 'speed' ? 6 : 3),
         trail: []
@@ -66,8 +59,8 @@ export function autoRespawnParticles(currentParticles, player) {
     if (newParticles.length < config.particleRespawn.minParticles) {
         for (let i = 0; i < config.particleRespawn.respawnAmount; i++) {
             const p = getParticle(player);
-            p.size = 3; // Partículas começam grandes
-            p.targetSize = p.size; // Tamanho original
+            p.size = 3;
+            p.targetSize = p.size;
             newParticles.push(p);
         }
         playSound('respawn');
@@ -84,12 +77,9 @@ export function updateParticles(currentParticles, player, deltaTime, lastUpdateI
     for (let i = 0; i < updatesThisFrame; i++) {
         const idx = (newLastUpdateIndex + i) % newParticles.length;
         const p = newParticles[idx];
-
         if (!p) continue;
 
-        if (p.size > (p.targetSize || 3)) {
-            p.size -= 0.1;
-        }
+        if (p.size > (p.targetSize || 3)) p.size -= 0.1;
 
         p.x += p.speedX * (deltaTime / 16.67);
         p.y += p.speedY * (deltaTime / 16.67);
@@ -104,19 +94,24 @@ export function updateParticles(currentParticles, player, deltaTime, lastUpdateI
             const isVeryClose = dist < suctionRadius;
 
             if (player.mode === 'attract') {
-                const force = isVeryClose ? 0.5 : 0.1;
-                const nx = dx / dist;
-                const ny = dy / dist;
+                const radialForce = isVeryClose ? 0.5 : 0.1;
+                const tangentialForce = 0.4; // This creates the spiral
+                const radial_nx = dx / dist;
+                const radial_ny = dy / dist;
+                const tangential_nx = -radial_ny;
+                const tangential_ny = radial_nx;
 
-                p.speedX += nx * force * (1 - dist / player.radius) * (deltaTime / 16.67);
-                p.speedY += ny * force * (1 - dist / player.radius) * (deltaTime / 16.67);
+                // Combine radial (pull) and tangential (orbit) forces
+                const forceMagnitude = (1 - dist / player.radius);
+                p.speedX += (radial_nx * radialForce + tangential_nx * tangentialForce) * forceMagnitude * (deltaTime / 16.67);
+                p.speedY += (radial_ny * radialForce + tangential_ny * tangentialForce) * forceMagnitude * (deltaTime / 16.67);
 
                 if (isVeryClose && dist < player.size * 0.8) {
                     absorbedXp += p.xpValue || 1;
                     config.particlesAbsorbed++;
                     playSound('absorb');
                     particlePool.push(newParticles.splice(idx, 1)[0]);
-                    i--; // Decrement i because we removed an element
+                    i--;
                     continue;
                 }
             } else if (player.mode === 'repel') {
