@@ -2,9 +2,10 @@
   "name": "game-tests",
   "version": "1.0.0",
   "description": "Tests for the game",
-  "main": "game.js",
+  "type": "module",
+  "main": "js/game.js",
   "scripts": {
-    "test": "jest"
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
   },
   "keywords": [],
   "author": "",

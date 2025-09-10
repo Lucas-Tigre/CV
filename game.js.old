@@ -74,33 +74,8 @@ const config = {
                 healthBoost: 1,
                 bigBangPower: 1
             }
-        },
-        {
-            id: 2,
-            x: null,
-            y: null,
-            mode: 'normal',
-            color: '#00F5A0',
-            radius: 150,
-            size: 30,
-            face: "🐱",
-            faceSize: 28,
-            power: 1,
-            health: 100,
-            maxHealth: 100,
-            active: false,
-            lastModeChange: 0,
-            damage: 0.5,
-            skills: {
-                attractRadius: 1,
-                vortexPower: 1,
-                doubleVortex: false,
-                healthBoost: 1,
-                bigBangPower: 1
-            }
         }
     ],
-    coopMode: false,
     soundEnabled: true,
     gamePaused: false,
     wave: {
@@ -276,7 +251,6 @@ const config = {
             "Sabia que cada galáxia tem suas próprias leis da física? Divertido, né?",
             "Eu já vi jogadores melhores... mas também vi piores.",
             "Quer um conselho? Não confie nas partículas roxas.",
-            "O modo cooperativo é para quem não consegue sozinho... igual você!",
             "Já perdi a conta de quantos universos eu vi serem destruídos...",
             "Você está evoluindo... mas ainda tem muito o que aprender.",
             "As habilidades que você desbloqueia são só a ponta do iceberg!",
@@ -809,10 +783,6 @@ function setupControls() {
                 highlightActiveMode();
                 break;
                 
-            case 'toggleCoop':
-                toggleCoopMode();
-                break;
-                
             case 'showGalaxies':
                 showGalaxyMap();
                 break;
@@ -872,19 +842,6 @@ function setupControls() {
     // Controles de teclado
     window.addEventListener('keydown', (e) => {
         if (config.gamePaused) return;
-        
-        const player2 = config.players[1];
-        const speed = 5;
-        
-        // Controles do jogador 2 (WASD)
-        if (config.coopMode && player2.active) {
-            switch(e.key.toLowerCase()) {
-                case 'w': player2.y -= speed; break;
-                case 'a': player2.x -= speed; break;
-                case 's': player2.y += speed; break;
-                case 'd': player2.x += speed; break;
-            }
-        }
         
         // Controles do jogador 1 (1-3 e espaço)
         switch(e.key) {
@@ -972,20 +929,6 @@ function highlightActiveMode() {
             item.classList.remove('active');
         }
     });
-}
-
-function toggleCoopMode() {
-    config.coopMode = !config.coopMode;
-    config.players[1].active = config.coopMode;
-    
-    document.getElementById('coop-status').textContent = config.coopMode ? 'ON' : 'OFF';
-    showUnlockMessage(`Modo Cooperativo ${config.coopMode ? 'ativado' : 'desativado'}`);
-    
-    // Posiciona o jogador 2 em uma posição inicial
-    if (config.coopMode) {
-        config.players[1].x = canvas.width * 0.3;
-        config.players[1].y = canvas.height * 0.5;
-    }
 }
 
 function toggleSound() {
@@ -1619,18 +1562,6 @@ function render() {
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(player.face, player.x, player.y);
-        
-        // Desenha jogador 2 se o modo coop estiver ativo
-        if (config.coopMode && config.players[1].active) {
-            const player2 = config.players[1];
-            ctx.fillStyle = player2.color;
-            ctx.beginPath();
-            ctx.arc(player2.x, player2.y, player2.size, 0, Math.PI * 2);
-            ctx.fill();
-            
-            ctx.font = `${player2.faceSize}px Arial`;
-            ctx.fillText(player2.face, player2.x, player2.y);
-        }
         
         // Desenha inimigos
         enemies.forEach(enemy => {
