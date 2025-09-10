@@ -63,7 +63,8 @@ export const config = {
             maxHealth: 100,
             active: true,
             lastModeChange: 0,
-            damage: 0.5,
+            damage: 0.5, // Dano de colisão normal
+            attractionDamage: 0.2, // Dano por frame do modo "Buraco Negro"
             skills: {
                 attractRadius: 1,
                 vortexPower: 1,
@@ -123,25 +124,29 @@ export const config = {
                 teleportChance: 0.008
             },
             boss: {
-                chance: 0, // Bosses are spawned manually
+                chance: 0, // Bosses são spawnados manualmente
                 speed: 2.5,
                 behavior: 'hunt',
-                face: ["😈", "💀", "👹"],
-                color: '#FF8C00', // DarkOrange
+                // TODO: USER - Adicione a URL da sua imagem para o chefe aqui
+                imageUrl: null, // Ex: 'https://seusite.com/imagem_chefe.png'
+                face: ["😈", "💀", "👹"], // Fallback caso a imagem não carregue
+                color: '#FF8C00',
                 size: 40,
                 health: 50,
-                huntRadius: 1000, // Hunts across the whole screen
+                huntRadius: 1000,
             },
             finalBoss: {
-                chance: 0, // Spawned manually at level 50
+                chance: 0, // Spawnado manualmente no nível 50
                 speed: 3.0,
                 behavior: 'hunt',
-                face: ["🔥", "💥", "☄️"],
-                color: '#DC143C', // Crimson
+                // TODO: USER - Adicione a URL da sua imagem para o chefe final aqui
+                imageUrl: null,
+                face: ["🔥", "💥", "☄️"], // Fallback
+                color: '#DC143C',
                 size: 60,
                 health: 150,
                 huntRadius: 2000,
-                special: 'teleport', // Add a special ability
+                special: 'teleport',
                 teleportChance: 0.01
             }
         },

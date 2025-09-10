@@ -2,11 +2,18 @@
 // AUDIO MODULE FOR BACKGROUND MUSIC
 // =============================================
 
-// TODO: USER - Replace these placeholder URLs with your actual music file links from GitHub.
+// TODO: USER - Substitua estas URLs de placeholder pelos links dos seus arquivos de música.
+// Você pode usar links diretos para arquivos .mp3, .wav, .ogg, etc.
+// Exemplo: 'https://github.com/seu-usuario/seu-repo/raw/main/musica.mp3'
 const musicTracks = {
-    mainTheme: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3', // Placeholder
-    bossBattle: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3', // Placeholder
-    finalBossTheme: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3' // Placeholder
+    // Música que toca durante o gameplay normal.
+    mainTheme: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
+
+    // Música que toca durante as batalhas com chefes normais (níveis 10, 20, 30, 40).
+    bossBattle: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3',
+
+    // Música especial que toca durante a batalha com o chefe final (nível 50).
+    finalBossTheme: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3'
 };
 
 let currentTrack = null;

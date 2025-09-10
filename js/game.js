@@ -10,10 +10,11 @@ import * as sound from './utils.js';
 import * as audio from './audio.js';
 
 // =============================================
-// DOM ELEMENTS
+// DOM ELEMENTS & ASSETS
 // =============================================
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
+const imageCache = {};
 
 // =============================================
 // CORE GAME LOGIC
@@ -35,7 +36,6 @@ function checkLevelUp() {
     if (config.level >= 50) {
         config.xp = config.level * 100; // Cap XP
         if (state.enemies.length === 0 && !config.bossFightActive) {
-             // Trigger final boss if player is already at level 50 and no boss is active
             triggerBossFight(50);
         }
         return;
@@ -108,15 +108,12 @@ function updateStats() {
 
 function restartGame() {
     document.getElementById('game-over-screen').style.display = 'none';
-
     const player = config.players[0];
     player.health = player.maxHealth;
     config.gamePaused = false;
     config.bossFightActive = false;
-
     state.setParticles(particle.initParticles(player));
     state.setEnemies([]);
-
     Object.assign(config, {
         wave: { number: 1, enemiesToSpawn: 5, spawned: 0, timer: 0 },
         xp: 0,
@@ -125,16 +122,12 @@ function restartGame() {
         enemiesDestroyed: 0,
         skillPoints: 0
     });
-
     config.quests.active = [
         { id: 'absorb100', target: 100, current: 0, reward: 50, title: "Absorver 100 partículas" },
         { id: 'defeat20', target: 20, current: 0, reward: 100, title: "Derrotar 20 inimigos" },
         { id: 'wave5', target: 5, current: 1, reward: 200, title: "Alcançar onda 5" }
     ];
-    config.quests.completed = [];
-
     audio.playMusic('mainTheme');
-
     if (!state.gameLoopRunning) {
         state.setGameLoopRunning(true);
         requestAnimationFrame(gameLoop);
@@ -163,18 +156,29 @@ function render() {
     });
 
     state.enemies.forEach(e => {
-        ctx.fillStyle = e.color;
-        ctx.beginPath();
-        ctx.arc(e.x, e.y, e.size, 0, Math.PI * 2);
-        ctx.fill();
-        if (e.isElite) {
-            ctx.strokeStyle = 'gold';
-            ctx.lineWidth = 3;
-            ctx.stroke();
+        const enemyType = config.enemySystem.types[e.type];
+        const image = imageCache[enemyType.imageUrl];
+
+        if (image && image.complete) {
+            // Draw image if it's loaded
+            ctx.drawImage(image, e.x - e.size, e.y - e.size, e.size * 2, e.size * 2);
+        } else {
+            // Fallback to drawing a circle and emoji
+            ctx.fillStyle = e.color;
+            ctx.beginPath();
+            ctx.arc(e.x, e.y, e.size, 0, Math.PI * 2);
+            ctx.fill();
+            if (e.isElite) {
+                ctx.strokeStyle = 'gold';
+                ctx.lineWidth = 3;
+                ctx.stroke();
+            }
+            ctx.font = `${e.size * 0.8}px Arial`;
+            ctx.fillStyle = 'white';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(e.face, e.x, e.y);
         }
-        ctx.font = `${e.size * 0.8}px Arial`;
-        ctx.fillStyle = 'white';
-        ctx.fillText(e.face, e.x, e.y);
     });
 
     ctx.fillStyle = player.color;
@@ -192,7 +196,6 @@ function render() {
 // =============================================
 function updatePhysics(deltaTime) {
     if (config.gamePaused) return;
-
     const player = config.players[0];
 
     const { newParticles, absorbedXp, newLastUpdateIndex } = particle.updateParticles(state.particles, player, deltaTime, state.lastUpdateIndex);
@@ -205,8 +208,16 @@ function updatePhysics(deltaTime) {
     }
 
     if (state.enemies.length > 0) {
-        const gameOver = enemy.updateEnemies(state.enemies, player, deltaTime);
-        if (gameOver) {
+        const enemyUpdate = enemy.updateEnemies(state.enemies, player, deltaTime);
+        state.setEnemies(enemyUpdate.newEnemies);
+
+        if (enemyUpdate.xpFromDefeatedEnemies > 0) {
+            config.xp += enemyUpdate.xpFromDefeatedEnemies;
+            updateQuest('defeat20', 1); // Assuming 1 enemy defeated for now
+            checkLevelUp();
+        }
+
+        if (enemyUpdate.gameOver) {
             config.gamePaused = true;
             sound.playSound('gameOver');
             audio.stopMusic();
@@ -218,45 +229,47 @@ function updatePhysics(deltaTime) {
             });
         }
     }
-
     updateWave();
 }
 
 function gameLoop(timestamp) {
     if (!state.gameLoopRunning) return;
     requestAnimationFrame(gameLoop);
-
     state.setLastTime(state.lastTime || timestamp);
     const deltaTime = timestamp - state.lastTime;
     state.setLastTime(timestamp);
-
     state.incrementFrameCount();
     if (timestamp - state.fpsLastChecked >= 1000) {
         const newFps = Math.round((state.frameCount * 1000) / (timestamp - state.fpsLastChecked));
         state.setFps(newFps, timestamp, 0);
         ui.updateFps(newFps);
     }
-
     const physicsSteps = Math.min(Math.floor(deltaTime / (1000 / 60)), 3);
     for (let i = 0; i < physicsSteps; i++) {
         updatePhysics(1000 / 60);
     }
-
     ui.updateHealthBar(config.players[0].health, config.players[0].maxHealth);
     ui.updateXPBar(config.xp, config.level);
     updateStats();
-
     render();
 }
 
 // =============================================
 // INITIALIZATION
 // =============================================
+function preloadImages() {
+    for (const type of Object.values(config.enemySystem.types)) {
+        if (type.imageUrl) {
+            const img = new Image();
+            img.src = type.imageUrl;
+            imageCache[type.imageUrl] = img;
+        }
+    }
+}
+
 function setupControls() {
     const player = config.players[0];
-
     canvas.addEventListener('mousemove', (e) => { player.x = e.clientX; player.y = e.clientY; });
-
     window.addEventListener('keydown', (e) => {
         if (config.gamePaused) return;
         switch (e.key) {
@@ -266,25 +279,21 @@ function setupControls() {
         }
         ui.highlightActiveMode(player.mode);
     });
-
     window.addEventListener('keyup', (e) => {
         if (['1', '2', '3'].includes(e.key)) {
             player.mode = 'normal';
             ui.highlightActiveMode(player.mode);
         }
     });
-
     document.getElementById('menu-toggle').addEventListener('click', (e) => {
         e.stopPropagation();
         const menu = document.getElementById('menu');
         menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
     });
-
     document.getElementById('menu').addEventListener('click', (e) => {
         const menuItem = e.target.closest('.menu-item');
         if (!menuItem) return;
         const action = menuItem.getAttribute('data-action');
-
         switch(action) {
             case 'setMode':
                 player.mode = menuItem.getAttribute('data-mode');
@@ -318,30 +327,25 @@ function setupControls() {
                 break;
         }
     });
-
     document.getElementById('restart-btn').addEventListener('click', restartGame);
 }
 
 function initGame() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-
     const player = config.players[0];
     player.x = canvas.width / 2;
     player.y = canvas.height / 2;
-
+    preloadImages();
     state.setParticles(particle.initParticles(player));
     sound.initSoundSystem();
     audio.playMusic('mainTheme');
-
     ui.updateHealthBar(player.health, player.maxHealth);
     ui.updateXPBar(config.xp, config.level);
     updateStats();
     ui.updateQuestUI(config.quests.active);
     ui.toggleSoundUI(config.soundEnabled);
-
     setupControls();
-
     state.setGameLoopRunning(true);
     requestAnimationFrame(gameLoop);
 }
