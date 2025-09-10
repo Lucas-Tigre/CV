@@ -6,7 +6,6 @@ const particlePool = [];
 export function getParticle(player, x, y) {
     const spawnPadding = 200;
     let posX, posY;
-
     do {
         posX = x !== undefined ? x : Math.random() * window.innerWidth;
         posY = y !== undefined ? y : Math.random() * window.innerHeight;
@@ -31,17 +30,24 @@ export function getParticle(player, x, y) {
 }
 
 export function createParticle(x, y) {
-    const types = [
-        { color: `hsl(${Math.random() * 60 + 180}, 80%, 60%)`, size: 3, xp: 1 },
-        { color: `hsl(${Math.random() * 60 + 60}, 80%, 60%)`, size: 5, xp: 2 },
-        { color: `hsl(${Math.random() * 60 + 300}, 80%, 60%)`, size: 2, xp: 3, special: 'speed' },
-        { color: 'white', size: 6, xp: 5, special: 'heal' }
-    ];
-    const type = Math.random() > 0.8 ? types[Math.floor(Math.random() * types.length)] : types[0];
+    let particleType;
+    // Adiciona uma pequena chance de criar um power-up
+    if (Math.random() < 0.02) { // 2% de chance
+        particleType = { color: 'gold', size: 10, xp: 50, special: 'powerup' };
+    } else {
+        const types = [
+            { color: `hsl(${Math.random() * 60 + 180}, 80%, 60%)`, size: 3, xp: 2 },
+            { color: `hsl(${Math.random() * 60 + 60}, 80%, 60%)`, size: 5, xp: 5 },
+            { color: `hsl(${Math.random() * 60 + 300}, 80%, 60%)`, size: 2, xp: 7, special: 'speed' },
+            { color: 'white', size: 6, xp: 10, special: 'heal' }
+        ];
+        particleType = Math.random() > 0.8 ? types[Math.floor(Math.random() * types.length)] : types[0];
+    }
+
     return {
-        x: x, y: y, size: type.size, color: type.color, xpValue: type.xp, special: type.special,
-        speedX: (Math.random() - 0.5) * (type.special === 'speed' ? 6 : 3),
-        speedY: (Math.random() - 0.5) * (type.special === 'speed' ? 6 : 3),
+        x: x, y: y, size: particleType.size, color: particleType.color, xpValue: particleType.xp, special: particleType.special,
+        speedX: (Math.random() - 0.5) * (particleType.special === 'speed' ? 6 : 3),
+        speedY: (Math.random() - 0.5) * (particleType.special === 'speed' ? 6 : 3),
         trail: []
     };
 }
@@ -71,6 +77,7 @@ export function autoRespawnParticles(currentParticles, player) {
 export function updateParticles(currentParticles, player, deltaTime, lastUpdateIndex) {
     let newParticles = [...currentParticles];
     let absorbedXp = 0;
+    let powerupCollected = false;
     const updatesThisFrame = Math.min(100, newParticles.length);
     let newLastUpdateIndex = lastUpdateIndex;
 
@@ -85,28 +92,30 @@ export function updateParticles(currentParticles, player, deltaTime, lastUpdateI
         const dy = player.y - p.y;
         const distSq = dx * dx + dy * dy;
 
-        if (distSq < player.radius * player.radius) {
+        const effectiveRadius = player.isPoweredUp ? player.radius * 1.5 : player.radius;
+
+        if (distSq < effectiveRadius * effectiveRadius) {
             const dist = Math.sqrt(distSq);
-            const suctionRadius = player.radius * 0.2;
+            const suctionRadius = effectiveRadius * 0.2;
             const isVeryClose = dist < suctionRadius;
 
             if (player.mode === 'attract') {
-                // Damping: Reduce the particle's current velocity to make it more susceptible to the black hole's pull.
                 p.speedX *= 0.9;
                 p.speedY *= 0.9;
-
-                const radialForce = 0.6; // Stronger pull towards the center.
-                const tangentialForce = 0.3; // Weaker orbital force.
+                const radialForce = 0.6;
+                const tangentialForce = 0.3;
                 const radial_nx = dx / dist;
                 const radial_ny = dy / dist;
                 const tangential_nx = -radial_ny;
                 const tangential_ny = radial_nx;
-
                 const forceMagnitude = (1 - dist / player.radius);
                 p.speedX += (radial_nx * radialForce + tangential_nx * tangentialForce) * forceMagnitude * (deltaTime / 16.67);
                 p.speedY += (radial_ny * radialForce + tangential_ny * tangentialForce) * forceMagnitude * (deltaTime / 16.67);
 
                 if (isVeryClose && dist < player.size * 0.8) {
+                    if (p.special === 'powerup') {
+                        powerupCollected = true;
+                    }
                     absorbedXp += p.xpValue || 1;
                     config.particlesAbsorbed++;
                     playSound('absorb');
@@ -122,7 +131,6 @@ export function updateParticles(currentParticles, player, deltaTime, lastUpdateI
             }
         }
 
-        // General movement update
         p.x += p.speedX * (deltaTime / 16.67);
         p.y += p.speedY * (deltaTime / 16.67);
 
@@ -135,5 +143,5 @@ export function updateParticles(currentParticles, player, deltaTime, lastUpdateI
 
     newLastUpdateIndex = (newLastUpdateIndex + updatesThisFrame) % (newParticles.length || 1);
 
-    return { newParticles, absorbedXp, newLastUpdateIndex };
+    return { newParticles, absorbedXp, newLastUpdateIndex, powerupCollected };
 }
