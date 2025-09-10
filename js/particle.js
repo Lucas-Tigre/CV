@@ -30,7 +30,7 @@ function getParticle(player, x, y) {
     return createParticle(posX, posY);
 }
 
-function createParticle(x, y) {
+export function createParticle(x, y) {
     const types = [
         { color: `hsl(${Math.random() * 60 + 180}, 80%, 60%)`, size: 3, xp: 1 },
         { color: `hsl(${Math.random() * 60 + 60}, 80%, 60%)`, size: 5, xp: 2 },
