@@ -96,7 +96,7 @@ export const config = {
     screenShakeIntensity: 0,
     enemySystem: {
         spawnRate: 180,
-        baseHealth: 3,
+        baseHealth: 5, // Aumentado de 3
         baseSize: 20,
         eliteSizeMultiplier: 1.3,
         healthIncreasePerLevel: 0.3,
@@ -134,7 +134,7 @@ export const config = {
                 face: ["😈", "💀", "👹"], // Fallback caso a imagem não carregue
                 color: '#FF8C00',
                 size: 40,
-                health: 50,
+                health: 200, // Aumentado de 50
                 huntRadius: 1000,
             },
             finalBoss: {
@@ -146,7 +146,7 @@ export const config = {
                 face: ["🔥", "💥", "☄️"], // Fallback
                 color: '#DC143C',
                 size: 60,
-                health: 150,
+                health: 600, // Aumentado de 150
                 huntRadius: 2000,
                 special: 'teleport',
                 teleportChance: 0.01

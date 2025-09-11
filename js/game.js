@@ -17,6 +17,18 @@ const ctx = canvas.getContext("2d");
 const imageCache = {};
 
 // =============================================
+// HELPER FUNCTIONS
+// =============================================
+function toggleMenu(menuElement, show) {
+    const display = show ? 'block' : 'none';
+    if (menuElement) {
+        menuElement.style.display = display;
+    }
+    // Pause the game if any menu is shown, unpause if all are hidden.
+    config.gamePaused = show;
+}
+
+// =============================================
 // CORE GAME LOGIC
 // =============================================
 
@@ -111,7 +123,6 @@ function handlePowerUpTimer() {
     }
 }
 
-// Moved spawnBatch to the top level scope so it can be called by restartGame
 function spawnBatch() {
     const player = config.players[0];
     const particlesToSpawn = config.particleCount;
@@ -139,7 +150,7 @@ function restartGame() {
     config.gamePaused = false;
     config.bossFightActive = false;
     state.setParticles([]);
-    requestAnimationFrame(spawnBatch); // Re-initiate gradual spawn
+    requestAnimationFrame(spawnBatch);
     state.setEnemies([]);
     Object.assign(config, {
         wave: { number: 1, enemiesToSpawn: 5, spawned: 0, timer: 0 },
@@ -204,21 +215,51 @@ function render() {
             ctx.textBaseline = 'middle';
             ctx.fillText(e.face, e.x, e.y);
         }
+
+        // Draw health bar if enemy has taken damage
+        if (e.health < e.maxHealth) {
+            const barWidth = e.size * 1.5;
+            const barHeight = 5;
+            const x = e.x - barWidth / 2;
+            const y = e.y - e.size - 15;
+
+            // Background
+            ctx.fillStyle = '#333';
+            ctx.fillRect(x, y, barWidth, barHeight);
+
+            // Health
+            const healthPercent = e.health / e.maxHealth;
+            ctx.fillStyle = healthPercent > 0.5 ? '#00F5A0' : healthPercent > 0.2 ? '#FFA500' : '#FF0000';
+            ctx.fillRect(x, y, barWidth * healthPercent, barHeight);
+        }
     });
 
     if (player.mode === 'attract') {
-        const pulse = Math.abs(Math.sin(Date.now() * 0.005));
         const effectiveRadius = player.isPoweredUp ? player.radius * 1.5 : player.radius;
+
+        ctx.save(); // Salva o estado do canvas
+
+        // Efeito de pulso rotativo
+        const rotation = Date.now() * 0.001;
+        ctx.lineDashOffset = -rotation * 50;
+
         if (player.isPoweredUp) {
-            ctx.strokeStyle = `rgba(255, 215, 0, ${0.5 + pulse * 0.4})`;
-            ctx.lineWidth = 4;
+            const pulse = Math.abs(Math.sin(Date.now() * 0.01));
+            ctx.strokeStyle = `rgba(255, 215, 0, ${0.6 + pulse * 0.4})`;
+            ctx.lineWidth = 5;
+            ctx.setLineDash([25, 15]); // Traços maiores para o power-up
         } else {
+            const pulse = Math.abs(Math.sin(Date.now() * 0.005));
             ctx.strokeStyle = `rgba(142, 45, 226, ${0.2 + pulse * 0.2})`;
             ctx.lineWidth = 2;
+            ctx.setLineDash([20, 20]);
         }
+
         ctx.beginPath();
         ctx.arc(player.x, player.y, effectiveRadius * 0.5, 0, Math.PI * 2);
         ctx.stroke();
+
+        ctx.restore(); // Restaura o estado para não afetar outros desenhos
     }
 
     ctx.fillStyle = player.color;
@@ -322,8 +363,16 @@ function preloadImages() {
 function setupControls() {
     const player = config.players[0];
     canvas.addEventListener('mousemove', (e) => { player.x = e.clientX; player.y = e.clientY; });
+
     window.addEventListener('keydown', (e) => {
-        if (config.gamePaused) return;
+        if (e.key.toLowerCase() === 'm') {
+            const menu = document.getElementById('menu');
+            const isVisible = menu.style.display === 'block';
+            toggleMenu(menu, !isVisible);
+        }
+
+        if (config.gamePaused && e.key.toLowerCase() !== 'm') return;
+
         switch (e.key) {
             case '1': player.mode = 'attract'; break;
             case '2': player.mode = 'repel'; break;
@@ -331,44 +380,62 @@ function setupControls() {
         }
         ui.highlightActiveMode(player.mode);
     });
+
     window.addEventListener('keyup', (e) => {
         if (['1', '2', '3'].includes(e.key)) {
             player.mode = 'normal';
             ui.highlightActiveMode(player.mode);
         }
     });
+
     document.getElementById('menu-toggle').addEventListener('click', (e) => {
         e.stopPropagation();
         const menu = document.getElementById('menu');
-        menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+        const isVisible = menu.style.display === 'block';
+        toggleMenu(menu, !isVisible);
     });
+
     document.getElementById('menu').addEventListener('click', (e) => {
         const menuItem = e.target.closest('.menu-item');
         if (!menuItem) return;
         const action = menuItem.getAttribute('data-action');
+
+        // Hide main menu before showing a submenu
+        toggleMenu(document.getElementById('menu'), false);
+
         switch(action) {
             case 'setMode':
                 player.mode = menuItem.getAttribute('data-mode');
                 ui.highlightActiveMode(player.mode);
                 break;
             case 'showGalaxies':
-                ui.showGalaxyMap(config.galaxies.list, config.galaxies.unlocked, (key) => {
-                    config.galaxies.current = key;
-                    document.body.style.background = config.galaxies.list[key].background;
-                    sound.showUnlockMessage(`Galáxia ${config.galaxies.list[key].name} selecionada!`);
-                });
+                ui.showGalaxyMap(config.galaxies.list, config.galaxies.unlocked,
+                    (key) => { // onSelect
+                        config.galaxies.current = key;
+                        document.body.style.background = config.galaxies.list[key].background;
+                        sound.showUnlockMessage(`Galáxia ${config.galaxies.list[key].name} selecionada!`);
+                    },
+                    () => toggleMenu(null, false) // onClose
+                );
+                toggleMenu(document.getElementById('galaxy-map'), true);
                 break;
             case 'showSkills':
-                ui.showSkillTree(config.skills.tree, config.skillPoints, (key) => {
-                    console.log(`Upgrade skill: ${key}`);
-                });
+                ui.showSkillTree(config.skills.tree, config.skillPoints,
+                    (key) => { console.log(`Upgrade skill: ${key}`); },
+                    () => toggleMenu(null, false) // onClose
+                );
+                toggleMenu(document.getElementById('skill-tree'), true);
                 break;
             case 'showSkins':
-                ui.showSkinsModal(config.skins.available, config.skins.current, (id) => {
-                    config.skins.current = id;
-                    player.face = config.skins.available.find(s => s.id === id).emoji;
-                    sound.showUnlockMessage(`Skin selecionada!`);
-                });
+                ui.showSkinsModal(config.skins.available, config.skins.current,
+                    (id) => {
+                        config.skins.current = id;
+                        player.face = config.skins.available.find(s => s.id === id).emoji;
+                        sound.showUnlockMessage(`Skin selecionada!`);
+                    },
+                    () => toggleMenu(null, false) // onClose
+                );
+                toggleMenu(document.getElementById('skins-modal'), true);
                 break;
             case 'resetGame':
                 restartGame();
@@ -379,7 +446,11 @@ function setupControls() {
                 break;
         }
     });
-    document.getElementById('restart-btn').addEventListener('click', restartGame);
+
+    document.getElementById('restart-btn').addEventListener('click', () => {
+        toggleMenu(null, false); // Unpause
+        restartGame();
+    });
 }
 
 function initGame() {

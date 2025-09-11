@@ -67,7 +67,7 @@ describe('Modular Game Logic', () => {
             const newEnemies = spawnEnemy(initialEnemies, 'boss');
             expect(newEnemies.length).toBe(1);
             expect(newEnemies[0].type).toBe('boss');
-            expect(newEnemies[0].size).toBe(40);
+            expect(newEnemies[0].health).toBe(200);
         });
 
         it('should spawn a finalBoss enemy', () => {
@@ -75,7 +75,7 @@ describe('Modular Game Logic', () => {
             const newEnemies = spawnEnemy(initialEnemies, 'finalBoss');
             expect(newEnemies.length).toBe(1);
             expect(newEnemies[0].type).toBe('finalBoss');
-            expect(newEnemies[0].health).toBe(150);
+            expect(newEnemies[0].health).toBe(600);
         });
     });
 

@@ -96,8 +96,7 @@ export function updateFps(fps) {
     document.getElementById('fps-counter').textContent = `FPS: ${fps}`;
 }
 
-export function showGalaxyMap(galaxies, unlockedGalaxies, onSelect) {
-    document.getElementById('menu').style.display = 'none';
+export function showGalaxyMap(galaxies, unlockedGalaxies, onSelect, onClose) {
     const map = document.getElementById('galaxy-map');
     map.style.display = 'block';
 
@@ -118,14 +117,14 @@ export function showGalaxyMap(galaxies, unlockedGalaxies, onSelect) {
             galaxyEl.addEventListener('click', () => {
                 onSelect(key);
                 map.style.display = 'none';
+                onClose(); // Game is unpaused when a selection is made
             });
         }
         galaxiesList.appendChild(galaxyEl);
     }
 }
 
-export function showSkillTree(skills, skillPoints, onUpgrade) {
-    document.getElementById('menu').style.display = 'none';
+export function showSkillTree(skills, skillPoints, onUpgrade, onClose) {
     const tree = document.getElementById('skill-tree');
     tree.style.display = 'block';
 
@@ -148,13 +147,12 @@ export function showSkillTree(skills, skillPoints, onUpgrade) {
         btn.addEventListener('click', function() {
             const skillKey = this.getAttribute('data-skill');
             onUpgrade(skillKey);
-            // Re-render the tree after upgrade
-            showSkillTree(skills, skillPoints - skills[skillKey].cost, onUpgrade);
+            showSkillTree(skills, skillPoints - skills[skillKey].cost, onUpgrade, onClose);
         });
     });
 }
 
-export function showSkinsModal(skins, currentSkin, onSelect) {
+export function showSkinsModal(skins, currentSkin, onSelect, onClose) {
     const modal = document.getElementById('skins-modal');
     modal.style.display = 'flex';
     const grid = document.getElementById('skins-grid');
@@ -171,21 +169,25 @@ export function showSkinsModal(skins, currentSkin, onSelect) {
         if (skin.unlocked) {
             skinCard.addEventListener('click', () => {
                 onSelect(skin.id);
-                // Re-render to show selection
-                showSkinsModal(skins, skin.id, onSelect);
+                showSkinsModal(skins, skin.id, onSelect, onClose);
             });
         }
         grid.appendChild(skinCard);
     });
 }
 
-// Add event listeners for close buttons
-document.getElementById('close-galaxy-map').addEventListener('click', () => {
-    document.getElementById('galaxy-map').style.display = 'none';
-});
-document.getElementById('close-skill-tree').addEventListener('click', () => {
-    document.getElementById('skill-tree').style.display = 'none';
-});
-document.getElementById('close-skins').addEventListener('click', () => {
-    document.getElementById('skins-modal').style.display = 'none';
-});
+// This function needs to be called from game.js to set up the callbacks
+export function setupModalCloseButtons(onClose) {
+    document.getElementById('close-galaxy-map').addEventListener('click', () => {
+        document.getElementById('galaxy-map').style.display = 'none';
+        onClose();
+    });
+    document.getElementById('close-skill-tree').addEventListener('click', () => {
+        document.getElementById('skill-tree').style.display = 'none';
+        onClose();
+    });
+    document.getElementById('close-skins').addEventListener('click', () => {
+        document.getElementById('skins-modal').style.display = 'none';
+        onClose();
+    });
+}

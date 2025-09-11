@@ -35,11 +35,14 @@ export function spawnEnemy(currentEnemies, typeKey = null) {
         const isElite = typeKey === 'boss' || typeKey === 'finalBoss' || Math.random() < 0.1;
         const healthMultiplier = type.health || (config.enemySystem.baseHealth + (config.wave.number * config.enemySystem.healthIncreasePerLevel));
 
+        const health = type.health || (config.enemySystem.baseHealth + (config.wave.number * config.enemySystem.healthIncreasePerLevel));
+
         const enemy = {
             x: Math.random() * window.innerWidth,
             y: Math.random() * window.innerHeight,
             type: typeKey,
-            health: healthMultiplier,
+            health: health,
+            maxHealth: health,
             speedX: 0,
             speedY: 0,
             baseSpeed: type.speed * (isElite ? config.enemySystem.eliteMultiplier : 1),
