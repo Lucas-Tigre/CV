@@ -64,7 +64,7 @@ export const config = {
             active: true,
             lastModeChange: 0,
             damage: 0.5, // Dano de colisão normal
-            attractionDamage: 0.5, // Aumentado de 0.2 para acelerar o jogo
+            attractionDamage: 0.05, // Reduzido drasticamente para aumentar a dificuldade
             isPoweredUp: false,
             powerUpTimer: 0,
             skills: {

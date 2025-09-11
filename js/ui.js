@@ -96,7 +96,7 @@ export function updateFps(fps) {
     document.getElementById('fps-counter').textContent = `FPS: ${fps}`;
 }
 
-export function showGalaxyMap(galaxies, unlockedGalaxies, onSelect, onClose) {
+export function showGalaxyMap(galaxies, unlockedGalaxies, onSelect) {
     const map = document.getElementById('galaxy-map');
     map.style.display = 'block';
 
@@ -114,17 +114,19 @@ export function showGalaxyMap(galaxies, unlockedGalaxies, onSelect, onClose) {
         `;
 
         if (isUnlocked) {
-            galaxyEl.addEventListener('click', () => {
+            // This is not ideal, but for now we remove and re-add to avoid duplicates
+            const newGalaxyEl = galaxyEl.cloneNode(true);
+            galaxyEl.parentNode?.replaceChild(newGalaxyEl, galaxyEl);
+            newGalaxyEl.addEventListener('click', () => {
                 onSelect(key);
                 map.style.display = 'none';
-                onClose(); // Game is unpaused when a selection is made
             });
         }
         galaxiesList.appendChild(galaxyEl);
     }
 }
 
-export function showSkillTree(skills, skillPoints, onUpgrade, onClose) {
+export function showSkillTree(skills, skillPoints, onUpgrade) {
     const tree = document.getElementById('skill-tree');
     tree.style.display = 'block';
 
@@ -144,15 +146,16 @@ export function showSkillTree(skills, skillPoints, onUpgrade, onClose) {
     }
 
     document.querySelectorAll('.upgrade-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
+        const newBtn = btn.cloneNode(true);
+        btn.parentNode.replaceChild(newBtn, btn);
+        newBtn.addEventListener('click', function() {
             const skillKey = this.getAttribute('data-skill');
             onUpgrade(skillKey);
-            showSkillTree(skills, skillPoints - skills[skillKey].cost, onUpgrade, onClose);
         });
     });
 }
 
-export function showSkinsModal(skins, currentSkin, onSelect, onClose) {
+export function showSkinsModal(skins, currentSkin, onSelect) {
     const modal = document.getElementById('skins-modal');
     modal.style.display = 'flex';
     const grid = document.getElementById('skins-grid');
@@ -167,27 +170,12 @@ export function showSkinsModal(skins, currentSkin, onSelect, onClose) {
             ${!skin.unlocked ? `<div class="skin-requirement">${skin.unlockCondition}</div>` : ''}
         `;
         if (skin.unlocked) {
-            skinCard.addEventListener('click', () => {
+            const newSkinCard = skinCard.cloneNode(true);
+            skinCard.parentNode?.replaceChild(newSkinCard, skinCard);
+            newSkinCard.addEventListener('click', () => {
                 onSelect(skin.id);
-                showSkinsModal(skins, skin.id, onSelect, onClose);
             });
         }
         grid.appendChild(skinCard);
-    });
-}
-
-// This function needs to be called from game.js to set up the callbacks
-export function setupModalCloseButtons(onClose) {
-    document.getElementById('close-galaxy-map').addEventListener('click', () => {
-        document.getElementById('galaxy-map').style.display = 'none';
-        onClose();
-    });
-    document.getElementById('close-skill-tree').addEventListener('click', () => {
-        document.getElementById('skill-tree').style.display = 'none';
-        onClose();
-    });
-    document.getElementById('close-skins').addEventListener('click', () => {
-        document.getElementById('skins-modal').style.display = 'none';
-        onClose();
     });
 }
