@@ -111,6 +111,25 @@ function handlePowerUpTimer() {
     }
 }
 
+// Moved spawnBatch to the top level scope so it can be called by restartGame
+function spawnBatch() {
+    const player = config.players[0];
+    const particlesToSpawn = config.particleCount;
+    const batchSize = 25;
+    const currentParticles = state.particles;
+    for (let i = 0; i < batchSize; i++) {
+        if (currentParticles.length < particlesToSpawn) {
+            currentParticles.push(particle.getParticle(player));
+        } else {
+            return;
+        }
+    }
+    state.setParticles(currentParticles);
+    if (currentParticles.length < particlesToSpawn) {
+        requestAnimationFrame(spawnBatch);
+    }
+}
+
 function restartGame() {
     document.getElementById('game-over-screen').style.display = 'none';
     const player = config.players[0];
@@ -150,30 +169,66 @@ function render() {
     const player = config.players[0];
 
     state.particles.forEach(p => {
-        // ... particle rendering logic ...
+        p.trail.forEach((trail, i) => {
+            const alpha = i / p.trail.length;
+            ctx.fillStyle = p.color.replace(')', `, ${alpha})`).replace('hsl', 'hsla');
+            ctx.beginPath();
+            ctx.arc(trail.x, trail.y, trail.size * alpha, 0, Math.PI * 2);
+            ctx.fill();
+        });
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
     });
 
     state.enemies.forEach(e => {
-        // ... enemy rendering logic ...
+        const enemyType = config.enemySystem.types[e.type];
+        const image = enemyType && imageCache[enemyType.imageUrl];
+
+        if (image && image.complete) {
+            ctx.drawImage(image, e.x - e.size, e.y - e.size, e.size * 2, e.size * 2);
+        } else {
+            ctx.fillStyle = e.color;
+            ctx.beginPath();
+            ctx.arc(e.x, e.y, e.size, 0, Math.PI * 2);
+            ctx.fill();
+            if (e.isElite) {
+                ctx.strokeStyle = 'gold';
+                ctx.lineWidth = 3;
+                ctx.stroke();
+            }
+            ctx.font = `${e.size * 0.8}px Arial`;
+            ctx.fillStyle = 'white';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(e.face, e.x, e.y);
+        }
     });
 
-    // Render the player's damage aura
     if (player.mode === 'attract') {
         const pulse = Math.abs(Math.sin(Date.now() * 0.005));
+        const effectiveRadius = player.isPoweredUp ? player.radius * 1.5 : player.radius;
         if (player.isPoweredUp) {
-            // Brighter, more intense aura for power-up
-            ctx.strokeStyle = `rgba(255, 215, 0, ${0.5 + pulse * 0.4})`; // Gold color
+            ctx.strokeStyle = `rgba(255, 215, 0, ${0.5 + pulse * 0.4})`;
             ctx.lineWidth = 4;
         } else {
             ctx.strokeStyle = `rgba(142, 45, 226, ${0.2 + pulse * 0.2})`;
             ctx.lineWidth = 2;
         }
         ctx.beginPath();
-        ctx.arc(player.x, player.y, player.radius * 0.5, 0, Math.PI * 2);
+        ctx.arc(player.x, player.y, effectiveRadius * 0.5, 0, Math.PI * 2);
         ctx.stroke();
     }
 
-    // ... player rendering logic ...
+    ctx.fillStyle = player.color;
+    ctx.beginPath();
+    ctx.arc(player.x, player.y, player.size, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.font = `${player.faceSize}px Arial`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(player.face, player.x, player.y);
 }
 
 // =============================================
@@ -191,8 +246,8 @@ function updatePhysics(deltaTime) {
 
     if (powerupCollected) {
         player.isPoweredUp = true;
-        player.powerUpTimer = 300; // 5 seconds at 60fps
-        sound.playSound('levelUp'); // Placeholder for powerup sound
+        player.powerUpTimer = 300;
+        sound.playSound('levelUp');
     }
 
     if (absorbedXp > 0) {
@@ -229,9 +284,6 @@ function updatePhysics(deltaTime) {
     updateWave();
 }
 
-// ... rest of gameLoop and initGame ...
-// NOTE: I am omitting the full file content for brevity, as the changes are concentrated here.
-// The full file will be overwritten.
 function gameLoop(timestamp) {
     if (!state.gameLoopRunning) return;
     requestAnimationFrame(gameLoop);
@@ -254,6 +306,9 @@ function gameLoop(timestamp) {
     render();
 }
 
+// =============================================
+// INITIALIZATION
+// =============================================
 function preloadImages() {
     for (const type of Object.values(config.enemySystem.types)) {
         if (type.imageUrl) {
@@ -333,24 +388,6 @@ function initGame() {
     const player = config.players[0];
     player.x = canvas.width / 2;
     player.y = canvas.height / 2;
-
-    // Gradual particle spawn to prevent startup lag
-    let particlesToSpawn = config.particleCount;
-    function spawnBatch() {
-        const batchSize = 25;
-        const currentParticles = state.particles;
-        for (let i = 0; i < batchSize; i++) {
-            if (currentParticles.length < particlesToSpawn) {
-                currentParticles.push(particle.getParticle(player));
-            } else {
-                return;
-            }
-        }
-        state.setParticles(currentParticles);
-        if (currentParticles.length < particlesToSpawn) {
-            requestAnimationFrame(spawnBatch);
-        }
-    }
 
     preloadImages();
     requestAnimationFrame(spawnBatch);
