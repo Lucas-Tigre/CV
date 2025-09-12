@@ -230,26 +230,19 @@ function render() {
         }
     });
 
+    // Render the player's damage aura if in attract mode
     if (player.mode === 'attract') {
         const effectiveRadius = player.isPoweredUp ? player.radius * 1.5 : player.radius;
-        ctx.save();
-        const rotation = Date.now() * 0.001;
-        ctx.lineDashOffset = -rotation * 50;
-        if (player.isPoweredUp) {
-            const pulse = Math.abs(Math.sin(Date.now() * 0.01));
-            ctx.strokeStyle = `rgba(255, 215, 0, ${0.6 + pulse * 0.4})`;
-            ctx.lineWidth = 5;
-            ctx.setLineDash([25, 15]);
-        } else {
-            const pulse = Math.abs(Math.sin(Date.now() * 0.005));
-            ctx.strokeStyle = `rgba(142, 45, 226, ${0.2 + pulse * 0.2})`;
-            ctx.lineWidth = 2;
-            ctx.setLineDash([20, 20]);
-        }
+        const auraColor = player.isPoweredUp ? '255, 215, 0' : '142, 45, 226';
+
+        // Calculate opacity so it fades out as it expands
+        const opacity = 1 - (state.auraPulseRadius / effectiveRadius);
+
+        ctx.strokeStyle = `rgba(${auraColor}, ${opacity})`;
+        ctx.lineWidth = 3;
         ctx.beginPath();
-        ctx.arc(player.x, player.y, effectiveRadius * 0.5, 0, Math.PI * 2);
+        ctx.arc(player.x, player.y, state.auraPulseRadius, 0, Math.PI * 2);
         ctx.stroke();
-        ctx.restore();
     }
 
     ctx.fillStyle = player.color;
@@ -270,6 +263,14 @@ function updatePhysics(deltaTime) {
     const player = config.players[0];
 
     handlePowerUpTimer();
+
+    // Update aura pulse
+    const effectiveRadius = player.isPoweredUp ? player.radius * 1.5 : player.radius;
+    let newAuraRadius = state.auraPulseRadius + 2; // Speed of the wave
+    if (newAuraRadius > effectiveRadius) {
+        newAuraRadius = 0;
+    }
+    state.setAuraPulseRadius(newAuraRadius);
 
     const { newParticles, absorbedXp, newLastUpdateIndex, powerupCollected } = particle.updateParticles(state.particles, player, deltaTime, state.lastUpdateIndex);
     state.setParticles(newParticles);
