@@ -74,7 +74,8 @@ export function createParticleExplosion(x, y, existingParticles) {
             size: 5,
             color: 'hsl(0, 100%, 70%)', // Bright red
             isHostile: true,
-            lifespan: 120 // 2 seconds at 60fps
+            lifespan: 120, // 2 seconds at 60fps
+            trail: []
         };
         newParticles.push(particle);
     }
