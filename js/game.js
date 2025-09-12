@@ -153,6 +153,16 @@ function restartGame() {
     state.setParticles([]);
     requestAnimationFrame(spawnBatch);
     state.setEnemies([]);
+    // Reset skills
+    for (const key in config.skills.tree) {
+        config.skills.tree[key].currentLevel = 0;
+    }
+    player.radius = player.baseRadius;
+    player.attractionDamage = player.baseAttractionDamage;
+    player.maxHealth = player.baseMaxHealth;
+    player.health = player.baseMaxHealth; // Restore health to new max
+    config.xpMultiplier = config.baseXpMultiplier;
+
     Object.assign(config, {
         wave: { number: 1, enemiesToSpawn: 5, spawned: 0, timer: 0 },
         xp: 0,
@@ -171,6 +181,65 @@ function restartGame() {
         state.setGameLoopRunning(true);
         requestAnimationFrame(gameLoop);
     }
+}
+
+function upgradeSkill(key) {
+    const skill = config.skills.tree[key];
+    const player = config.players[0];
+
+    if (!skill) {
+        console.error(`Tentativa de upgrade para skill inexistente: ${key}`);
+        return;
+    }
+
+    // 1. Checar pré-requisitos
+    if (skill.requires) {
+        for (const req of skill.requires) {
+            const [reqKey, reqLevel] = req.split(':');
+            if (config.skills.tree[reqKey]?.currentLevel < parseInt(reqLevel, 10)) {
+                sound.showUnlockMessage(`Requisito não cumprido: ${config.skills.tree[reqKey].name} Nível ${reqLevel}`);
+                // Idealmente, tocar um som de falha aqui
+                return;
+            }
+        }
+    }
+
+    // 2. Checar custo e nível máximo
+    if (config.skillPoints < skill.cost) {
+        sound.showUnlockMessage("Pontos de habilidade insuficientes!");
+        return; // Não tem pontos suficientes
+    }
+    if (skill.currentLevel >= skill.maxLevel) {
+        sound.showUnlockMessage("Nível máximo já alcançado!");
+        return; // Nível máximo
+    }
+
+    // 3. Aplicar custo e upgrade
+    config.skillPoints -= skill.cost;
+    skill.currentLevel++;
+    sound.playSound('levelUp'); // Reutilizar som de level up para sucesso
+
+    // 4. Aplicar efeito da skill
+    switch (key) {
+        case 'healthBoost':
+            const healthIncrease = player.baseMaxHealth * 0.10;
+            player.maxHealth += healthIncrease;
+            player.health += healthIncrease; // Curar o jogador pelo mesmo montante
+            break;
+        case 'attractRadius':
+            player.radius = player.baseRadius * (1 + 0.20 * skill.currentLevel);
+            break;
+        case 'vortexPower':
+            // Este é o dano por frame, então o aumento é pequeno
+            player.attractionDamage = player.baseAttractionDamage * (1 + 0.30 * skill.currentLevel);
+            break;
+        case 'particleMastery':
+            config.xpMultiplier = config.baseXpMultiplier * (1 + 0.20 * skill.currentLevel);
+            break;
+    }
+
+    // 5. Re-renderizar a UI da árvore de habilidades para refletir a mudança
+    // A UI será atualizada no próximo passo do plano, ao integrar a chamada.
 }
 
 // =============================================
@@ -283,8 +352,9 @@ function updatePhysics(deltaTime) {
     }
 
     if (absorbedXp > 0) {
-        config.xp += absorbedXp;
-        updateQuest('absorb100', absorbedXp);
+        const finalXp = Math.round(absorbedXp * (config.xpMultiplier || 1));
+        config.xp += finalXp;
+        updateQuest('absorb100', finalXp);
         checkLevelUp();
     }
 
@@ -294,8 +364,9 @@ function updatePhysics(deltaTime) {
     }
 
     if (state.enemies.length > 0) {
-        const enemyUpdate = enemy.updateEnemies(state.enemies, player, deltaTime);
+        const enemyUpdate = enemy.updateEnemies(state.enemies, player, deltaTime, state.particles);
         state.setEnemies(enemyUpdate.newEnemies);
+        state.setParticles(enemyUpdate.newParticles); // Update particles with explosions
         if (enemyUpdate.xpFromDefeatedEnemies > 0) {
             config.xp += enemyUpdate.xpFromDefeatedEnemies;
             updateQuest('defeat20', 1);
@@ -314,6 +385,28 @@ function updatePhysics(deltaTime) {
         }
     }
     updateWave();
+
+    // Hostile particle collision check
+    const player = config.players[0];
+    let particles = state.particles;
+    for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        if (p.isHostile) {
+            const dx = player.x - p.x;
+            const dy = player.y - p.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < player.size + p.size) {
+                player.health -= 5; // 5 damage per particle hit
+                sound.playSound('hit'); // Need to add this sound
+                particles.splice(i, 1); // Remove particle on hit
+                if (player.health <= 0) {
+                    player.health = 0;
+                    // Game over logic is handled in the enemy update loop, but we should ensure it's triggered
+                }
+            }
+        }
+    }
+    state.setParticles(particles);
 }
 
 function gameLoop(timestamp) {
@@ -405,10 +498,20 @@ function setupControls() {
                 });
                 break;
             case 'showSkills':
-                toggleMenu(document.getElementById('skill-tree'), true);
-                ui.showSkillTree(config.skills.tree, config.skillPoints, (key) => {
-                    console.log(`Upgrade skill: ${key}`);
-                });
+                { // Use a block to scope these constants
+                    const skillTreeMenu = document.getElementById('skill-tree');
+                    toggleMenu(skillTreeMenu, true);
+
+                    // This function both renders and sets up the listeners.
+                    const refreshUI = () => {
+                        ui.showSkillTree(config.skills.tree, config.skillPoints, (skillKey) => {
+                            upgradeSkill(skillKey); // Perform the upgrade
+                            refreshUI(); // Immediately re-render the UI
+                        });
+                    };
+
+                    refreshUI(); // Initial render
+                }
                 break;
             case 'showSkins':
                 toggleMenu(document.getElementById('skins-modal'), true);
@@ -450,6 +553,15 @@ function initGame() {
     const player = config.players[0];
     player.x = canvas.width / 2;
     player.y = canvas.height / 2;
+
+    // Store base values for skills
+    if (player.baseRadius === undefined) {
+        player.baseRadius = player.radius;
+        player.baseAttractionDamage = player.attractionDamage;
+        player.baseMaxHealth = player.maxHealth;
+        config.baseXpMultiplier = 1;
+        config.xpMultiplier = 1; // Initialize the active multiplier
+    }
 
     preloadImages();
     requestAnimationFrame(spawnBatch);

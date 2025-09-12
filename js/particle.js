@@ -60,6 +60,27 @@ export function initParticles(player) {
     return particles;
 }
 
+export function createParticleExplosion(x, y, existingParticles) {
+    const newParticles = [...existingParticles];
+    const count = 20;
+    const speed = 5;
+    for (let i = 0; i < count; i++) {
+        const angle = (i / count) * Math.PI * 2;
+        const particle = {
+            x,
+            y,
+            speedX: Math.cos(angle) * speed * (Math.random() * 0.5 + 0.75),
+            speedY: Math.sin(angle) * speed * (Math.random() * 0.5 + 0.75),
+            size: 5,
+            color: 'hsl(0, 100%, 70%)', // Bright red
+            isHostile: true,
+            lifespan: 120 // 2 seconds at 60fps
+        };
+        newParticles.push(particle);
+    }
+    return newParticles;
+}
+
 export function autoRespawnParticles(currentParticles, player) {
     let newParticles = [...currentParticles];
     if (newParticles.length < config.particleRespawn.minParticles) {
@@ -85,6 +106,17 @@ export function updateParticles(currentParticles, player, deltaTime, lastUpdateI
         const idx = (newLastUpdateIndex + i) % newParticles.length;
         const p = newParticles[idx];
         if (!p) continue;
+
+        if (p.isHostile) {
+            p.x += p.speedX;
+            p.y += p.speedY;
+            p.lifespan--;
+            if (p.lifespan <= 0) {
+                newParticles.splice(idx, 1);
+                i--; // Adjust index after splice
+            }
+            continue; // Hostile particles skip all other logic
+        }
 
         if (p.size > (p.targetSize || 3)) p.size -= 0.1;
 

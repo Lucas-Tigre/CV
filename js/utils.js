@@ -42,7 +42,8 @@ export function initSoundSystem() {
         bigBang: 'https://assets.mixkit.co/sfx/preview/mixkit-big-explosion-2814.mp3',
         gameOver: 'https://assets.mixkit.co/sfx/preview/mixkit-arcade-retro-game-over-213.mp3',
         respawn: 'https://assets.mixkit.co/sfx/preview/mixkit-achievement-bell-600.mp3',
-        bossRoar: 'https://assets.mixkit.co/sfx/preview/mixkit-monster-deep-rumble-395.mp3'
+        bossRoar: 'https://assets.mixkit.co/sfx/preview/mixkit-monster-deep-rumble-395.mp3',
+        hit: 'https://assets.mixkit.co/sfx/preview/mixkit-player-losing-or-failing-2042.mp3'
     };
 
     for (const [key, url] of Object.entries(soundPaths)) {
