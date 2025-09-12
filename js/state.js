@@ -36,6 +36,12 @@ export function incrementFrameCount() {
     frameCount++;
 }
 
+export let auraPulseRadius = 0;
+
 export function setLastUpdateIndex(index) {
     lastUpdateIndex = index;
+}
+
+export function setAuraPulseRadius(radius) {
+    auraPulseRadius = radius;
 }
