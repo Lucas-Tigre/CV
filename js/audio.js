@@ -7,6 +7,8 @@
 // Exemplo: 'https://github.com/seu-usuario/seu-repo/raw/main/musica.mp3'
 const musicTracks = {
     // Música que toca durante o gameplay normal.
+const musicTracks = {
+    // Música que toca durante o gameplay normal.
     mainTheme: 'assets/audio/main_theme.mp3',
 
     // Música que toca durante as batalhas com chefes normais (níveis 10, 20, 30, 40).
