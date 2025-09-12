@@ -33,7 +33,7 @@ export function createParticle(x, y) {
     let particleType;
     // Adiciona uma pequena chance de criar um power-up
     if (Math.random() < 0.02) { // 2% de chance
-        particleType = { color: 'gold', size: 10, xp: 500, special: 'powerup' };
+        particleType = { color: 'gold', size: 10, xp: 50, special: 'powerup' };
     } else {
         const types = [
             { color: `hsl(${Math.random() * 60 + 180}, 80%, 60%)`, size: 3, xp: 2 },

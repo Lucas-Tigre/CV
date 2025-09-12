@@ -387,7 +387,6 @@ function updatePhysics(deltaTime) {
     updateWave();
 
     // Hostile particle collision check
-    const player = config.players[0];
     let particles = state.particles;
     for (let i = particles.length - 1; i >= 0; i--) {
         const p = particles[i];
