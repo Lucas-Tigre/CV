@@ -36,14 +36,14 @@ export function showUnlockMessage(message) {
 
 export function initSoundSystem() {
     const soundPaths = {
-        absorb: 'https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.mp3',
-        enemyDefeat: 'https://assets.mixkit.co/sfx/preview/mixkit-explosion-impact-1684.mp3',
-        levelUp: 'https://assets.mixkit.co/sfx/preview/mixkit-unlock-game-notification-253.mp3',
-        bigBang: 'https://assets.mixkit.co/sfx/preview/mixkit-big-explosion-2814.mp3',
-        gameOver: 'https://assets.mixkit.co/sfx/preview/mixkit-arcade-retro-game-over-213.mp3',
-        respawn: 'https://assets.mixkit.co/sfx/preview/mixkit-achievement-bell-600.mp3',
-        bossRoar: 'https://assets.mixkit.co/sfx/preview/mixkit-monster-deep-rumble-395.mp3',
-        hit: 'https://assets.mixkit.co/sfx/preview/mixkit-player-losing-or-failing-2042.mp3'
+        absorb: 'assets/audio/absorb.mp3',
+        enemyDefeat: 'assets/audio/enemy_defeat.mp3',
+        levelUp: 'assets/audio/level_up.mp3',
+        gameOver: 'assets/audio/game_over.mp3',
+        hit: 'assets/audio/hit.mp3',
+        respawn: 'assets/audio/respawn.mp3',
+        bossRoar: 'assets/audio/boss_roar.mp3',
+        // bigBang sound was removed from the game logic, so we can remove it here too.
     };
 
     for (const [key, url] of Object.entries(soundPaths)) {

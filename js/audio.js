@@ -7,13 +7,15 @@
 // Exemplo: 'https://github.com/seu-usuario/seu-repo/raw/main/musica.mp3'
 const musicTracks = {
     // Música que toca durante o gameplay normal.
-    mainTheme: 'WordCLASSIC.mp3',
+const musicTracks = {
+    // Música que toca durante o gameplay normal.
+    mainTheme: 'assets/audio/main_theme.mp3',
 
     // Música que toca durante as batalhas com chefes normais (níveis 10, 20, 30, 40).
-    bossBattle: '10.40BFTHT.mp3',
+    bossBattle: 'assets/audio/boss_battle.mp3',
 
     // Música especial que toca durante a batalha com o chefe final (nível 50).
-    finalBossTheme: ''
+    finalBossTheme: 'assets/audio/final_boss_theme.mp3'
 };
 
 let currentTrack = null;
