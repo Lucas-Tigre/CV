@@ -1,4 +1,5 @@
 import { config } from './config.js';
+import * as particle from './particle.js';
 
 /**
  * Spawns a new enemy and adds it to the enemies array.
@@ -55,6 +56,9 @@ export function spawnEnemy(currentEnemies, typeKey = null) {
 
         if (typeKey === 'hunter' || typeKey === 'boss' || typeKey === 'finalBoss') enemy.huntRadius = type.huntRadius;
         if (type.special === 'teleport') enemy.teleportChance = type.teleportChance;
+        if (typeKey === 'boss' || typeKey === 'finalBoss') {
+            enemy.attackCooldown = Math.random() * 120 + 180; // Cooldown between 3-5 seconds (at 60fps)
+        }
 
         newEnemies.push(enemy);
     } catch (error) {
@@ -70,12 +74,22 @@ export function spawnEnemy(currentEnemies, typeKey = null) {
  * @param {number} deltaTime - The time since the last frame.
  * @returns {object} - An object containing gameOver status, xp from defeated enemies, and the new enemies array.
  */
-export function updateEnemies(enemies, player, deltaTime) {
+export function updateEnemies(enemies, player, deltaTime, particles) {
     let gameOver = false;
     let xpFromDefeatedEnemies = 0;
     let remainingEnemies = [];
+    let particlesFromExplosions = particles;
 
     enemies.forEach(enemy => {
+        // Boss attack logic
+        if (enemy.attackCooldown !== undefined) {
+            enemy.attackCooldown--;
+            if (enemy.attackCooldown <= 0) {
+                particlesFromExplosions = particle.createParticleExplosion(enemy.x, enemy.y, particlesFromExplosions);
+                enemy.attackCooldown = Math.random() * 120 + 180; // Reset cooldown
+            }
+        }
+
         const dx = player.x - enemy.x;
         const dy = player.y - enemy.y;
         const distSq = dx * dx + dy * dy;
@@ -83,9 +97,10 @@ export function updateEnemies(enemies, player, deltaTime) {
         // Black Hole Attraction & Damage Logic
         const effectiveRadius = player.isPoweredUp ? player.radius * 1.5 : player.radius;
         if (player.mode === 'attract' && distSq < effectiveRadius * effectiveRadius) {
-            // Damping: Reduce the enemy's current velocity.
-            enemy.speedX *= 0.9;
-            enemy.speedY *= 0.9;
+            // Damping: Reduce the enemy's current velocity. Bosses have more inertia.
+            const damping = (enemy.type === 'boss' || enemy.type === 'finalBoss') ? 0.98 : 0.9;
+            enemy.speedX *= damping;
+            enemy.speedY *= damping;
 
             const dist = Math.sqrt(distSq);
             const radialForce = 0.5; // Strong inward pull.
@@ -156,5 +171,5 @@ export function updateEnemies(enemies, player, deltaTime) {
         remainingEnemies.push(enemy);
     });
 
-    return { gameOver, xpFromDefeatedEnemies, newEnemies: remainingEnemies };
+    return { gameOver, xpFromDefeatedEnemies, newEnemies: remainingEnemies, newParticles: particlesFromExplosions };
 }
