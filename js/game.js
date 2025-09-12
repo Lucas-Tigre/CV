@@ -24,7 +24,8 @@ function toggleMenu(menuElement, show) {
     if (menuElement) {
         menuElement.style.display = display;
     }
-    // Pause the game if any menu is shown, unpause if all are hidden.
+    // This is the correct logic: the game's paused state should
+    // directly reflect whether the menu is being shown or hidden.
     config.gamePaused = show;
 }
 
@@ -216,18 +217,13 @@ function render() {
             ctx.fillText(e.face, e.x, e.y);
         }
 
-        // Draw health bar if enemy has taken damage
         if (e.health < e.maxHealth) {
             const barWidth = e.size * 1.5;
             const barHeight = 5;
             const x = e.x - barWidth / 2;
             const y = e.y - e.size - 15;
-
-            // Background
             ctx.fillStyle = '#333';
             ctx.fillRect(x, y, barWidth, barHeight);
-
-            // Health
             const healthPercent = e.health / e.maxHealth;
             ctx.fillStyle = healthPercent > 0.5 ? '#00F5A0' : healthPercent > 0.2 ? '#FFA500' : '#FF0000';
             ctx.fillRect(x, y, barWidth * healthPercent, barHeight);
@@ -236,30 +232,24 @@ function render() {
 
     if (player.mode === 'attract') {
         const effectiveRadius = player.isPoweredUp ? player.radius * 1.5 : player.radius;
-
-        ctx.save(); // Salva o estado do canvas
-
-        // Efeito de pulso rotativo
+        ctx.save();
         const rotation = Date.now() * 0.001;
         ctx.lineDashOffset = -rotation * 50;
-
         if (player.isPoweredUp) {
             const pulse = Math.abs(Math.sin(Date.now() * 0.01));
             ctx.strokeStyle = `rgba(255, 215, 0, ${0.6 + pulse * 0.4})`;
             ctx.lineWidth = 5;
-            ctx.setLineDash([25, 15]); // Traços maiores para o power-up
+            ctx.setLineDash([25, 15]);
         } else {
             const pulse = Math.abs(Math.sin(Date.now() * 0.005));
             ctx.strokeStyle = `rgba(142, 45, 226, ${0.2 + pulse * 0.2})`;
             ctx.lineWidth = 2;
             ctx.setLineDash([20, 20]);
         }
-
         ctx.beginPath();
         ctx.arc(player.x, player.y, effectiveRadius * 0.5, 0, Math.PI * 2);
         ctx.stroke();
-
-        ctx.restore(); // Restaura o estado para não afetar outros desenhos
+        ctx.restore();
     }
 
     ctx.fillStyle = player.color;
@@ -362,18 +352,17 @@ function preloadImages() {
 
 function setupControls() {
     const player = config.players[0];
+    const menu = document.getElementById('menu');
+
     canvas.addEventListener('mousemove', (e) => { player.x = e.clientX; player.y = e.clientY; });
 
     window.addEventListener('keydown', (e) => {
-        if (e.key.toLowerCase() === 'm') {
-            const menu = document.getElementById('menu');
-            const isVisible = menu.style.display === 'block';
-            toggleMenu(menu, !isVisible);
+        const key = e.key.toLowerCase();
+        if (key === 'm') {
+            toggleMenu(menu, menu.style.display !== 'block');
         }
-
-        if (config.gamePaused && e.key.toLowerCase() !== 'm') return;
-
-        switch (e.key) {
+        if (config.gamePaused && key !== 'm') return;
+        switch (key) {
             case '1': player.mode = 'attract'; break;
             case '2': player.mode = 'repel'; break;
             case '3': player.mode = 'vortex'; break;
@@ -390,18 +379,15 @@ function setupControls() {
 
     document.getElementById('menu-toggle').addEventListener('click', (e) => {
         e.stopPropagation();
-        const menu = document.getElementById('menu');
-        const isVisible = menu.style.display === 'block';
-        toggleMenu(menu, !isVisible);
+        toggleMenu(menu, menu.style.display !== 'block');
     });
 
-    document.getElementById('menu').addEventListener('click', (e) => {
+    menu.addEventListener('click', (e) => {
         const menuItem = e.target.closest('.menu-item');
         if (!menuItem) return;
         const action = menuItem.getAttribute('data-action');
 
-        // Hide main menu before showing a submenu
-        toggleMenu(document.getElementById('menu'), false);
+        toggleMenu(menu, false);
 
         switch(action) {
             case 'setMode':
@@ -409,33 +395,27 @@ function setupControls() {
                 ui.highlightActiveMode(player.mode);
                 break;
             case 'showGalaxies':
-                ui.showGalaxyMap(config.galaxies.list, config.galaxies.unlocked,
-                    (key) => { // onSelect
-                        config.galaxies.current = key;
-                        document.body.style.background = config.galaxies.list[key].background;
-                        sound.showUnlockMessage(`Galáxia ${config.galaxies.list[key].name} selecionada!`);
-                    },
-                    () => toggleMenu(null, false) // onClose
-                );
                 toggleMenu(document.getElementById('galaxy-map'), true);
+                ui.showGalaxyMap(config.galaxies.list, config.galaxies.unlocked, (key) => {
+                    config.galaxies.current = key;
+                    document.body.style.background = config.galaxies.list[key].background;
+                    sound.showUnlockMessage(`Galáxia ${config.galaxies.list[key].name} selecionada!`);
+                    toggleMenu(document.getElementById('galaxy-map'), false);
+                });
                 break;
             case 'showSkills':
-                ui.showSkillTree(config.skills.tree, config.skillPoints,
-                    (key) => { console.log(`Upgrade skill: ${key}`); },
-                    () => toggleMenu(null, false) // onClose
-                );
                 toggleMenu(document.getElementById('skill-tree'), true);
+                ui.showSkillTree(config.skills.tree, config.skillPoints, (key) => {
+                    console.log(`Upgrade skill: ${key}`);
+                });
                 break;
             case 'showSkins':
-                ui.showSkinsModal(config.skins.available, config.skins.current,
-                    (id) => {
-                        config.skins.current = id;
-                        player.face = config.skins.available.find(s => s.id === id).emoji;
-                        sound.showUnlockMessage(`Skin selecionada!`);
-                    },
-                    () => toggleMenu(null, false) // onClose
-                );
                 toggleMenu(document.getElementById('skins-modal'), true);
+                ui.showSkinsModal(config.skins.available, config.skins.current, (id) => {
+                    config.skins.current = id;
+                    player.face = config.skins.available.find(s => s.id === id).emoji;
+                    sound.showUnlockMessage(`Skin selecionada!`);
+                });
                 break;
             case 'resetGame':
                 restartGame();
@@ -448,8 +428,18 @@ function setupControls() {
     });
 
     document.getElementById('restart-btn').addEventListener('click', () => {
-        toggleMenu(null, false); // Unpause
+        toggleMenu(null, false);
         restartGame();
+    });
+
+    document.getElementById('close-galaxy-map').addEventListener('click', () => {
+        toggleMenu(document.getElementById('galaxy-map'), false);
+    });
+    document.getElementById('close-skill-tree').addEventListener('click', () => {
+        toggleMenu(document.getElementById('skill-tree'), false);
+    });
+    document.getElementById('close-skins').addEventListener('click', () => {
+        toggleMenu(document.getElementById('skins-modal'), false);
     });
 }
 
