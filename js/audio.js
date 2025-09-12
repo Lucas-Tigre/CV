@@ -7,13 +7,13 @@
 // Exemplo: 'https://github.com/seu-usuario/seu-repo/raw/main/musica.mp3'
 const musicTracks = {
     // Música que toca durante o gameplay normal.
-    mainTheme: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
+    mainTheme: 'WordCLASSIC.mp3',
 
     // Música que toca durante as batalhas com chefes normais (níveis 10, 20, 30, 40).
-    bossBattle: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3',
+    bossBattle: '10.40BFTHT.mp3',
 
     // Música especial que toca durante a batalha com o chefe final (nível 50).
-    finalBossTheme: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3'
+    finalBossTheme: ''
 };
 
 let currentTrack = null;
