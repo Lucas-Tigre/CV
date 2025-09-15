@@ -2,15 +2,18 @@
 // AUDIO MODULE FOR BACKGROUND MUSIC
 // =============================================
 
+// TODO: USER - Substitua estas URLs de placeholder pelos links dos seus arquivos de música.
+// Você pode usar links diretos para arquivos .mp3, .wav, .ogg, etc.
+// Exemplo: 'https://github.com/seu-usuario/seu-repo/raw/main/musica.mp3'
 const musicTracks = {
     // Música que toca durante o gameplay normal.
-    mainTheme: 'assets/audio/WordCLASSIC.mp3',
+    mainTheme: 'assets/audio/main_theme.mp3',
 
     // Música que toca durante as batalhas com chefes normais (níveis 10, 20, 30, 40).
-    bossBattle: 'assets/audio/boss_battle.mp3', // Se quiser mudar, coloque o nome do seu arquivo aqui
+    bossBattle: 'assets/audio/boss_battle.mp3',
 
     // Música especial que toca durante a batalha com o chefe final (nível 50).
-    finalBossTheme: 'assets/audio/final_boss_theme.mp3' // E aqui também
+    finalBossTheme: 'assets/audio/final_boss_theme.mp3'
 };
 
 let currentTrack = null;
@@ -53,6 +56,7 @@ export function playMusic(trackName) {
             if (currentTrack.audio.volume === 0) {
                 clearInterval(fadeOutInterval);
                 currentTrack.audio.pause();
+                currentTrack.audio.src = ''; // Force unload
                 startFadeIn();
             }
         }, 100);
