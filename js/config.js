@@ -15,13 +15,17 @@ export const config = {
                 description: "O universo original de partículas",
                 unlockCondition: "Inicial",
                 particleColorRange: { h: [0, 360], s: [80, 90], l: [50, 70] },
-                background: 'radial-gradient(ellipse at bottom, #1B2735 0%, #090A0F 100%)'
+                // TODO: USER - Para usar uma imagem, substitua a linha abaixo por:
+                // background: "url('assets/images/custom_background.jpg')"
+                background: "url('assets/images/custom_background.jpg')"
             },
             neon: {
                 name: "Neon",
                 description: "Cores vibrantes e partículas brilhantes",
                 unlockCondition: "Alcançar nível 5",
                 particleColorRange: { h: [280, 320], s: [100, 100], l: [60, 80] },
+                // TODO: USER - Para usar uma imagem, substitua a linha abaixo por:
+                // background: "url('assets/images/custom_background.jpg')"
                 background: 'radial-gradient(ellipse at bottom, #0f0c29 0%, #302b63 50%, #24243e 100%)'
             },
             fire: {
@@ -29,6 +33,8 @@ export const config = {
                 description: "Partículas flamejantes e inimigos furiosos",
                 unlockCondition: "Derrotar 50 inimigos",
                 particleColorRange: { h: [10, 40], s: [80, 100], l: [50, 70] },
+                // TODO: USER - Para usar uma imagem, substitua a linha abaixo por:
+                // background: "url('assets/images/custom_background.jpg')"
                 background: 'radial-gradient(ellipse at bottom, #200122 0%, #6f0000 100%)'
             }
         }
