@@ -7,10 +7,10 @@ const musicTracks = {
     mainTheme: 'assets/audio/WordCLASSIC.mp3',
 
     // Música que toca durante as batalhas com chefes normais (níveis 10, 20, 30, 40).
-    bossBattle: 'assets/audio/10.40BFHT.mp3',
+    bossBattle: 'assets/audio/boss_battle.mp3', // Se quiser mudar, coloque o nome do seu arquivo aqui
 
     // Música especial que toca durante a batalha com o chefe final (nível 50).
-    finalBossTheme: 'assets/audio/FinalBoss50.mp3',
+    finalBossTheme: 'assets/audio/final_boss_theme.mp3' // E aqui também
 };
 
 let currentTrack = null;
