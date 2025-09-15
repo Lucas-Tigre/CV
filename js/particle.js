@@ -32,7 +32,7 @@ export function getParticle(player, x, y) {
 export function createParticle(x, y) {
     let particleType;
     // Adiciona uma pequena chance de criar um power-up
-    if (Math.random() < 0.02) { // 2% de chance
+    if (Math.random() < 0.2) { // 2% de chance
         particleType = { color: 'gold', size: 10, xp: 50, special: 'powerup' };
     } else {
         const types = [
