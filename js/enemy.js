@@ -56,8 +56,46 @@ export function spawnEnemy(currentEnemies, typeKey = null) {
             size: type.size || (config.enemySystem.baseSize * (isElite ? config.enemySystem.eliteSizeMultiplier : 1))
         };
 
+        if (enemy.behavior === 'crossScreen') {
+            const edge = Math.floor(Math.random() * 4);
+            let targetX, targetY;
+            const padding = 100; // Spawn off-screen
+
+            switch (edge) {
+                case 0: // Top
+                    enemy.x = Math.random() * window.innerWidth;
+                    enemy.y = -padding;
+                    targetX = Math.random() * window.innerWidth;
+                    targetY = window.innerHeight + padding;
+                    break;
+                case 1: // Right
+                    enemy.x = window.innerWidth + padding;
+                    enemy.y = Math.random() * window.innerHeight;
+                    targetX = -padding;
+                    targetY = Math.random() * window.innerHeight;
+                    break;
+                case 2: // Bottom
+                    enemy.x = Math.random() * window.innerWidth;
+                    enemy.y = window.innerHeight + padding;
+                    targetX = Math.random() * window.innerWidth;
+                    targetY = -padding;
+                    break;
+                case 3: // Left
+                    enemy.x = -padding;
+                    enemy.y = Math.random() * window.innerHeight;
+                    targetX = window.innerWidth + padding;
+                    targetY = Math.random() * window.innerHeight;
+                    break;
+            }
+
+            const dx = targetX - enemy.x;
+            const dy = targetY - enemy.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            enemy.speedX = (dx / dist) * enemy.baseSpeed;
+            enemy.speedY = (dy / dist) * enemy.baseSpeed;
+        }
+
         if (type.huntRadius) enemy.huntRadius = type.huntRadius;
-        if (type.special === 'teleport') enemy.teleportChance = type.teleportChance;
         if (type.behavior === 'huntAndShoot') {
             enemy.shootCooldown = type.shootCooldown;
             enemy.preferredDistance = type.preferredDistance;
@@ -169,13 +207,8 @@ export function updateEnemies(enemies, player, deltaTime, particles, projectiles
                         enemy.speedY += (Math.random() - 0.5) * 0.5;
                     }
                     break;
-                case 'teleport':
-                    enemy.speedX += (Math.random() - 0.5) * 0.5;
-                    enemy.speedY += (Math.random() - 0.5) * 0.5;
-                    if (enemy.teleportChance && Math.random() < enemy.teleportChance) {
-                        enemy.x = Math.random() * window.innerWidth;
-                        enemy.y = Math.random() * window.innerHeight;
-                    }
+                case 'crossScreen':
+                    // Do nothing, let the initial velocity carry it.
                     break;
                 default: // 'wander'
                     enemy.speedX += (Math.random() - 0.5) * 0.5;
@@ -193,7 +226,8 @@ export function updateEnemies(enemies, player, deltaTime, particles, projectiles
 
         const distToPlayer = Math.sqrt(distSq);
         if (distToPlayer < (player.size + enemy.size) * 0.6) {
-            player.health -= 0.3 * (deltaTime / 16.67);
+            const damage = (config.enemySystem.types[enemy.type].damage || 5) * (deltaTime / 16.67);
+            player.health -= damage;
             if (player.health <= 0) {
                 player.health = 0;
                 gameOver = true;

@@ -127,13 +127,13 @@ export const config = {
                 shootCooldown: 120 // Fires every 2 seconds
             },
             cosmic: {
-                chance: 0.1,
-                speed: 1.8,
-                behavior: 'teleport',
-                face: ["☄️", "🌌", "🌠", "✨"],
-                special: 'shield',
+                name: "Cósmico",
+                chance: 0.1, // Will keep this chance for now
+                speed: 4.0, // Faster than 'fast' enemies
+                behavior: 'crossScreen', // New behavior
+                face: ["☄️", "🌠"],
                 color: '#00AAFF',
-                teleportChance: 0.008
+                damage: 25 // High damage on collision
             },
             boss: {
                 chance: 0, // Bosses são spawnados manualmente
