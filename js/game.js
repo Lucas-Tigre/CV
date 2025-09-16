@@ -6,6 +6,7 @@ import * as state from './state.js';
 import * as ui from './ui.js';
 import * as particle from './particle.js';
 import * as enemy from './enemy.js';
+import * as projectile from './projectile.js';
 import * as sound from './utils.js';
 import * as audio from './audio.js';
 
@@ -299,6 +300,8 @@ function render() {
         }
     });
 
+    projectile.renderProjectiles(ctx, state.projectiles);
+
     // Render the player's damage aura if in attract mode
     if (player.mode === 'attract') {
         const effectiveRadius = player.isPoweredUp ? player.radius * 1.5 : player.radius;
@@ -341,6 +344,7 @@ function updatePhysics(deltaTime) {
     }
     state.setAuraPulseRadius(newAuraRadius);
 
+    // Update particles
     const { newParticles, absorbedXp, newLastUpdateIndex, powerupCollected } = particle.updateParticles(state.particles, player, deltaTime, state.lastUpdateIndex);
     state.setParticles(newParticles);
     state.setLastUpdateIndex(newLastUpdateIndex);
@@ -363,10 +367,16 @@ function updatePhysics(deltaTime) {
         state.setParticles(particle.autoRespawnParticles(state.particles, player));
     }
 
+    // Update projectiles
+    state.setProjectiles(projectile.updateProjectiles(state.projectiles));
+
+    // Update enemies (which may create new projectiles)
     if (state.enemies.length > 0) {
-        const enemyUpdate = enemy.updateEnemies(state.enemies, player, deltaTime, state.particles);
+        const enemyUpdate = enemy.updateEnemies(state.enemies, player, deltaTime, state.particles, state.projectiles);
         state.setEnemies(enemyUpdate.newEnemies);
-        state.setParticles(enemyUpdate.newParticles); // Update particles with explosions
+        state.setParticles(enemyUpdate.newParticles);
+        state.setProjectiles(enemyUpdate.newProjectiles);
+
         if (enemyUpdate.xpFromDefeatedEnemies > 0) {
             config.xp += enemyUpdate.xpFromDefeatedEnemies;
             updateQuest('defeat20', 1);
@@ -386,26 +396,44 @@ function updatePhysics(deltaTime) {
     }
     updateWave();
 
-    // Hostile particle collision check
-    let particles = state.particles;
-    for (let i = particles.length - 1; i >= 0; i--) {
-        const p = particles[i];
+    // Hostile particle collision check (player vs hostile particles)
+    let hostileParticles = state.particles;
+    for (let i = hostileParticles.length - 1; i >= 0; i--) {
+        const p = hostileParticles[i];
         if (p.isHostile) {
             const dx = player.x - p.x;
             const dy = player.y - p.y;
             const dist = Math.sqrt(dx * dx + dy * dy);
             if (dist < player.size + p.size) {
                 player.health -= 5; // 5 damage per particle hit
-                sound.playSound('hit'); // Need to add this sound
-                particles.splice(i, 1); // Remove particle on hit
+                sound.playSound('hit');
+                hostileParticles.splice(i, 1);
                 if (player.health <= 0) {
                     player.health = 0;
-                    // Game over logic is handled in the enemy update loop, but we should ensure it's triggered
                 }
             }
         }
     }
-    state.setParticles(particles);
+    state.setParticles(hostileParticles);
+
+    // Projectile collision check (player vs enemy projectiles)
+    let currentProjectiles = state.projectiles;
+    for (let i = currentProjectiles.length - 1; i >= 0; i--) {
+        const proj = currentProjectiles[i];
+        const dx = player.x - proj.x;
+        const dy = player.y - proj.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        if (dist < player.size + proj.size) {
+            player.health -= proj.damage;
+            sound.playSound('hit');
+            currentProjectiles.splice(i, 1); // Remove projectile on hit
+            if (player.health <= 0) {
+                player.health = 0;
+            }
+        }
+    }
+    state.setProjectiles(currentProjectiles);
 }
 
 function gameLoop(timestamp) {

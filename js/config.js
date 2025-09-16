@@ -116,11 +116,13 @@ export const config = {
             },
             hunter: {
                 chance: 0.3,
-                speed: 3.0,
-                behavior: 'hunt',
-                face: ["◉_◉", "⊙_⊙", "⚆_⚆"],
-                color: '#FF0000',
-                huntRadius: 300
+                speed: 2.0, // A bit slower so they don't just rush in
+                behavior: 'huntAndShoot', // New behavior
+                face: ["🎯", "🔫", "💥"], // New face
+                color: '#FF9900', // Orange to distinguish them
+                huntRadius: 500,
+                preferredDistance: 250, // Tries to stay this far away
+                shootCooldown: 120 // Fires every 2 seconds
             },
             cosmic: {
                 chance: 0.1,
