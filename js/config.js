@@ -107,12 +107,14 @@ export const config = {
         eliteSizeMultiplier: 1.3,
         healthIncreasePerLevel: 0.3,
         types: {
-            normal: {
+            fast: {
+                name: "Rápido",
                 chance: 0.6,
-                speed: 2.0,
+                speed: 3.5, // Faster than the old hunter
                 behavior: 'wander',
-                face: [">:(", "X_X", ">_<", ":O"],
-                color: '#FF5555'
+                face: ["😠", "😡", "😤"],
+                color: '#FFDD00', // Yellow to signify speed
+                healthMultiplier: 0.8 // 80% of base health
             },
             hunter: {
                 chance: 0.3,

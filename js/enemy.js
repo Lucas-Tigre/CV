@@ -25,7 +25,7 @@ export function spawnEnemy(currentEnemies, typeKey = null) {
             }
         }
         if (!typeKey) {
-            typeKey = 'normal';
+            typeKey = 'fast';
         }
 
         const type = config.enemySystem.types[typeKey];
@@ -35,9 +35,10 @@ export function spawnEnemy(currentEnemies, typeKey = null) {
         }
 
         const isElite = typeKey === 'boss' || typeKey === 'finalBoss' || Math.random() < 0.1;
-        const healthMultiplier = type.health || (config.enemySystem.baseHealth + (config.wave.number * config.enemySystem.healthIncreasePerLevel));
-
-        const health = type.health || (config.enemySystem.baseHealth + (config.wave.number * config.enemySystem.healthIncreasePerLevel));
+        let health = type.health || (config.enemySystem.baseHealth + (config.wave.number * config.enemySystem.healthIncreasePerLevel));
+        if (type.healthMultiplier) {
+            health *= type.healthMultiplier;
+        }
 
         const enemy = {
             x: Math.random() * window.innerWidth,
