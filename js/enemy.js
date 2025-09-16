@@ -1,5 +1,6 @@
 import { config } from './config.js';
 import * as particle from './particle.js';
+import * as projectile from './projectile.js';
 
 /**
  * Spawns a new enemy and adds it to the enemies array.
@@ -54,8 +55,12 @@ export function spawnEnemy(currentEnemies, typeKey = null) {
             size: type.size || (config.enemySystem.baseSize * (isElite ? config.enemySystem.eliteSizeMultiplier : 1))
         };
 
-        if (typeKey === 'hunter' || typeKey === 'boss' || typeKey === 'finalBoss') enemy.huntRadius = type.huntRadius;
+        if (type.huntRadius) enemy.huntRadius = type.huntRadius;
         if (type.special === 'teleport') enemy.teleportChance = type.teleportChance;
+        if (type.behavior === 'huntAndShoot') {
+            enemy.shootCooldown = type.shootCooldown;
+            enemy.preferredDistance = type.preferredDistance;
+        }
         if (typeKey === 'boss' || typeKey === 'finalBoss') {
             enemy.attackCooldown = Math.random() * 120 + 180; // Cooldown between 3-5 seconds (at 60fps)
         }
@@ -74,11 +79,12 @@ export function spawnEnemy(currentEnemies, typeKey = null) {
  * @param {number} deltaTime - The time since the last frame.
  * @returns {object} - An object containing gameOver status, xp from defeated enemies, and the new enemies array.
  */
-export function updateEnemies(enemies, player, deltaTime, particles) {
+export function updateEnemies(enemies, player, deltaTime, particles, projectiles) {
     let gameOver = false;
     let xpFromDefeatedEnemies = 0;
     let remainingEnemies = [];
     let particlesFromExplosions = particles;
+    let newProjectiles = projectiles;
 
     enemies.forEach(enemy => {
         // Boss attack logic
@@ -125,6 +131,31 @@ export function updateEnemies(enemies, player, deltaTime, particles) {
         } else {
              // Normal Behavior
             switch (enemy.behavior) {
+                case 'huntAndShoot':
+                    {
+                        const dist = Math.sqrt(distSq);
+                        if (dist > enemy.preferredDistance) {
+                            // Move closer
+                            enemy.speedX = (dx / dist) * enemy.baseSpeed;
+                            enemy.speedY = (dy / dist) * enemy.baseSpeed;
+                        } else if (dist < enemy.preferredDistance * 0.8) {
+                            // Move away
+                            enemy.speedX = -(dx / dist) * enemy.baseSpeed;
+                            enemy.speedY = -(dy / dist) * enemy.baseSpeed;
+                        } else {
+                            // Correct distance, stop and shoot
+                            enemy.speedX *= 0.8;
+                            enemy.speedY *= 0.8;
+                        }
+
+                        // Shooting logic
+                        enemy.shootCooldown--;
+                        if (enemy.shootCooldown <= 0) {
+                            newProjectiles.push(projectile.createProjectile(enemy.x, enemy.y, player.x, player.y));
+                            enemy.shootCooldown = config.enemySystem.types.hunter.shootCooldown;
+                        }
+                    }
+                    break;
                 case 'hunt':
                      if (enemy.huntRadius && distSq < enemy.huntRadius * enemy.huntRadius) {
                         const dist = Math.sqrt(distSq);
@@ -171,5 +202,5 @@ export function updateEnemies(enemies, player, deltaTime, particles) {
         remainingEnemies.push(enemy);
     });
 
-    return { gameOver, xpFromDefeatedEnemies, newEnemies: remainingEnemies, newParticles: particlesFromExplosions };
+    return { gameOver, xpFromDefeatedEnemies, newEnemies: remainingEnemies, newParticles: particlesFromExplosions, newProjectiles };
 }
