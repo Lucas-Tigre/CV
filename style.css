@@ -200,7 +200,14 @@ canvas {
     border-left: 3px solid #4A00E0;
 }
 
+/*
+=====================================================
+    ESTILOS DO MAPA DE GALÁXIAS (TELA DE SELEÇÃO)
+    TODO: USER - Modifique aqui para mudar o design.
+=====================================================
+*/
 #galaxy-map {
+    /* Esta é a caixa principal (o modal) que segura a lista de galáxias. */
     position: fixed;
     top: 50%;
     left: 50%;
@@ -227,6 +234,7 @@ canvas {
     text-shadow: 0 0 10px rgba(0, 245, 160, 0.5);
 }
 
+/* Este é o estilo para cada item individual na lista de galáxias. */
 .galaxy {
     margin: 15px 0;
     padding: 15px;
