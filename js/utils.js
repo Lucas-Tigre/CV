@@ -58,3 +58,13 @@ export function initSoundSystem() {
         config.soundEnabled = savedSoundPref === 'true';
     }
 }
+
+let audioUnlocked = false;
+export function unlockAudio() {
+    if (audioUnlocked) return;
+    audioUnlocked = true;
+
+    Object.values(config.soundEffects).forEach(sound => {
+        sound.play().then(() => sound.pause()).catch(() => {});
+    });
+}

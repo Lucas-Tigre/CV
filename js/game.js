@@ -488,6 +488,16 @@ function setupControls() {
     const player = config.players[0];
     const menu = document.getElementById('menu');
 
+    const handleFirstInteraction = () => {
+        sound.unlockAudio();
+        // Remove the listeners after the first interaction
+        canvas.removeEventListener('mousemove', handleFirstInteraction);
+        window.removeEventListener('keydown', handleFirstInteraction);
+    };
+
+    canvas.addEventListener('mousemove', handleFirstInteraction);
+    window.addEventListener('keydown', handleFirstInteraction);
+
     canvas.addEventListener('mousemove', (e) => { player.x = e.clientX; player.y = e.clientY; });
 
     window.addEventListener('keydown', (e) => {
