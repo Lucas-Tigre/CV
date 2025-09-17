@@ -3,6 +3,7 @@
 export let particles = [];
 export let enemies = [];
 export let projectiles = [];
+export let explosions = [];
 export let lastUpdateIndex = 0;
 export let lastTime = 0;
 export let fps = 60;
@@ -21,6 +22,10 @@ export function setEnemies(newEnemies) {
 
 export function setProjectiles(newProjectiles) {
     projectiles = newProjectiles;
+}
+
+export function setExplosions(newExplosions) {
+    explosions = newExplosions;
 }
 
 export function setGameLoopRunning(value) {

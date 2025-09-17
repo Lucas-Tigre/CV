@@ -16,7 +16,14 @@ export function spawnEnemy(currentEnemies, typeKey = null) {
             let cumulativeChance = 0;
             for (const [key, type] of Object.entries(config.enemySystem.types)) {
                 if (type.chance > 0) {
-                    cumulativeChance += type.chance;
+                    let currentChance = type.chance;
+                    // Special progressive spawning for shooters
+                    if (key === 'shooter') {
+                        // The chance increases by 1% each wave, capped at a max of, say, 40%
+                        currentChance += (config.wave.number * 0.01);
+                        currentChance = Math.min(currentChance, 0.40);
+                    }
+                    cumulativeChance += currentChance;
                     if (random <= cumulativeChance) {
                         typeKey = key;
                         break;
@@ -96,8 +103,11 @@ export function spawnEnemy(currentEnemies, typeKey = null) {
         }
 
         if (type.huntRadius) enemy.huntRadius = type.huntRadius;
-        if (type.behavior === 'huntAndShoot') {
+        if (type.shootCooldown) {
             enemy.shootCooldown = type.shootCooldown;
+            enemy.projectileType = type.projectileType || 'normal';
+        }
+        if (type.behavior === 'huntAndShoot') {
             enemy.preferredDistance = type.preferredDistance;
         }
         if (typeKey === 'boss' || typeKey === 'finalBoss') {
@@ -190,8 +200,22 @@ export function updateEnemies(enemies, player, deltaTime, particles, projectiles
                         // Shooting logic
                         enemy.shootCooldown--;
                         if (enemy.shootCooldown <= 0) {
-                            newProjectiles.push(projectile.createProjectile(enemy.x, enemy.y, player.x, player.y));
-                            enemy.shootCooldown = config.enemySystem.types.hunter.shootCooldown;
+                            newProjectiles.push(projectile.createProjectile(enemy.x, enemy.y, player.x, player.y, enemy.projectileType));
+                            enemy.shootCooldown = config.enemySystem.types[enemy.type].shootCooldown;
+                        }
+                    }
+                    break;
+                case 'static':
+                    {
+                        // Stand still
+                        enemy.speedX *= 0.8;
+                        enemy.speedY *= 0.8;
+
+                        // Shooting logic
+                        enemy.shootCooldown--;
+                        if (enemy.shootCooldown <= 0) {
+                            newProjectiles.push(projectile.createProjectile(enemy.x, enemy.y, player.x, player.y, enemy.projectileType));
+                            enemy.shootCooldown = config.enemySystem.types[enemy.type].shootCooldown;
                         }
                     }
                     break;

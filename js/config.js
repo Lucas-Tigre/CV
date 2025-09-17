@@ -135,6 +135,17 @@ export const config = {
                 color: '#00AAFF',
                 damage: 25 // High damage on collision
             },
+            shooter: {
+                name: "Atirador",
+                chance: 0.05, // Starts low
+                speed: 0,
+                behavior: 'static',
+                face: ["🛰️", "📡"],
+                color: '#00FFFF', // Cyan
+                healthMultiplier: 1.2, // A bit tanky
+                shootCooldown: 180, // Fires every 3 seconds
+                projectileType: 'explosive'
+            },
             boss: {
                 chance: 0, // Bosses são spawnados manualmente
                 speed: 2.5,

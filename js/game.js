@@ -7,6 +7,7 @@ import * as ui from './ui.js';
 import * as particle from './particle.js';
 import * as enemy from './enemy.js';
 import * as projectile from './projectile.js';
+import * as explosion from './explosion.js';
 import * as sound from './utils.js';
 import * as audio from './audio.js';
 
@@ -250,6 +251,7 @@ function render() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     const player = config.players[0];
 
+    // Render particles
     state.particles.forEach(p => {
         p.trail.forEach((trail, i) => {
             const alpha = i / p.trail.length;
@@ -264,6 +266,7 @@ function render() {
         ctx.fill();
     });
 
+    // Render enemies
     state.enemies.forEach(e => {
         const enemyType = config.enemySystem.types[e.type];
         const image = enemyType && imageCache[enemyType.imageUrl];
@@ -300,16 +303,15 @@ function render() {
         }
     });
 
+    // Render projectiles and explosions
     projectile.renderProjectiles(ctx, state.projectiles);
+    explosion.renderExplosions(ctx, state.explosions);
 
-    // Render the player's damage aura if in attract mode
+    // Render the player's damage aura
     if (player.mode === 'attract') {
         const effectiveRadius = player.isPoweredUp ? player.radius * 1.5 : player.radius;
         const auraColor = player.isPoweredUp ? '255, 215, 0' : '142, 45, 226';
-
-        // Calculate opacity so it fades out as it expands
         const opacity = 1 - (state.auraPulseRadius / effectiveRadius);
-
         ctx.strokeStyle = `rgba(${auraColor}, ${opacity})`;
         ctx.lineWidth = 3;
         ctx.beginPath();
@@ -317,6 +319,7 @@ function render() {
         ctx.stroke();
     }
 
+    // Render player
     ctx.fillStyle = player.color;
     ctx.beginPath();
     ctx.arc(player.x, player.y, player.size, 0, Math.PI * 2);
@@ -338,10 +341,8 @@ function updatePhysics(deltaTime) {
 
     // Update aura pulse
     const effectiveRadius = player.isPoweredUp ? player.radius * 1.5 : player.radius;
-    let newAuraRadius = state.auraPulseRadius + 2; // Speed of the wave
-    if (newAuraRadius > effectiveRadius) {
-        newAuraRadius = 0;
-    }
+    let newAuraRadius = state.auraPulseRadius + 2;
+    if (newAuraRadius > effectiveRadius) newAuraRadius = 0;
     state.setAuraPulseRadius(newAuraRadius);
 
     // Update particles
@@ -367,10 +368,18 @@ function updatePhysics(deltaTime) {
         state.setParticles(particle.autoRespawnParticles(state.particles, player));
     }
 
-    // Update projectiles
-    state.setProjectiles(projectile.updateProjectiles(state.projectiles));
+    // Update projectiles and handle explosions
+    const projectileUpdate = projectile.updateProjectiles(state.projectiles);
+    state.setProjectiles(projectileUpdate.remainingProjectiles);
+    if (projectileUpdate.newExplosions.length > 0) {
+        state.setExplosions([...state.explosions, ...projectileUpdate.newExplosions]);
+        sound.playSound('enemyDefeat'); // Re-use explosion sound
+    }
 
-    // Update enemies (which may create new projectiles)
+    // Update explosions
+    state.setExplosions(explosion.updateExplosions(state.explosions));
+
+    // Update enemies
     if (state.enemies.length > 0) {
         const enemyUpdate = enemy.updateEnemies(state.enemies, player, deltaTime, state.particles, state.projectiles);
         state.setEnemies(enemyUpdate.newEnemies);
@@ -386,54 +395,58 @@ function updatePhysics(deltaTime) {
             config.gamePaused = true;
             sound.playSound('gameOver');
             audio.stopMusic();
-            ui.showGameOver({
-                level: config.level,
-                wave: config.wave.number,
-                particles: config.particlesAbsorbed,
-                enemies: config.enemiesDestroyed
-            });
+            ui.showGameOver({ level: config.level, wave: config.wave.number, particles: config.particlesAbsorbed, enemies: config.enemiesDestroyed });
         }
     }
     updateWave();
 
-    // Hostile particle collision check (player vs hostile particles)
+    // --- COLLISION DETECTION ---
+
+    // Player vs hostile particles (from boss)
     let hostileParticles = state.particles;
     for (let i = hostileParticles.length - 1; i >= 0; i--) {
         const p = hostileParticles[i];
         if (p.isHostile) {
             const dx = player.x - p.x;
             const dy = player.y - p.y;
-            const dist = Math.sqrt(dx * dx + dy * dy);
-            if (dist < player.size + p.size) {
-                player.health -= 5; // 5 damage per particle hit
+            if (Math.sqrt(dx * dx + dy * dy) < player.size + p.size) {
+                player.health -= 5;
                 sound.playSound('hit');
                 hostileParticles.splice(i, 1);
-                if (player.health <= 0) {
-                    player.health = 0;
-                }
             }
         }
     }
     state.setParticles(hostileParticles);
 
-    // Projectile collision check (player vs enemy projectiles)
+    // Player vs enemy projectiles
     let currentProjectiles = state.projectiles;
     for (let i = currentProjectiles.length - 1; i >= 0; i--) {
         const proj = currentProjectiles[i];
         const dx = player.x - proj.x;
         const dy = player.y - proj.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-
-        if (dist < player.size + proj.size) {
+        if (Math.sqrt(dx * dx + dy * dy) < player.size + proj.size) {
             player.health -= proj.damage;
             sound.playSound('hit');
-            currentProjectiles.splice(i, 1); // Remove projectile on hit
-            if (player.health <= 0) {
-                player.health = 0;
+            // When a projectile hits the player, it might also explode
+            if (proj.onDeath === 'explode') {
+                state.setExplosions([...state.explosions, { x: proj.x, y: proj.y, radius: proj.explosionRadius, damage: proj.damage, duration: 30, color: proj.color }]);
+                sound.playSound('enemyDefeat');
             }
+            currentProjectiles.splice(i, 1);
         }
     }
     state.setProjectiles(currentProjectiles);
+
+    // Player vs explosions
+    state.explosions.forEach(exp => {
+        const dx = player.x - exp.x;
+        const dy = player.y - exp.y;
+        if (Math.sqrt(dx * dx + dy * dy) < exp.radius) {
+            player.health -= exp.damage * (deltaTime / 16.67); // Damage over time while inside
+        }
+    });
+
+    if (player.health <= 0) player.health = 0;
 }
 
 function gameLoop(timestamp) {
