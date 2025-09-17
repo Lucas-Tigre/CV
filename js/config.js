@@ -109,7 +109,7 @@ export const config = {
         types: {
             fast: {
                 name: "Rápido",
-                chance: 0.6,
+                chance: 0.55,
                 speed: 3.5, // Faster than the old hunter
                 behavior: 'wander',
                 face: ["😠", "😡", "😤"],
@@ -117,7 +117,7 @@ export const config = {
                 healthMultiplier: 0.8 // 80% of base health
             },
             hunter: {
-                chance: 0.3,
+                chance: 0.25,
                 speed: 2.0, // A bit slower so they don't just rush in
                 behavior: 'huntAndShoot', // New behavior
                 face: ["🎯", "🔫", "💥"], // New face
@@ -128,7 +128,7 @@ export const config = {
             },
             cosmic: {
                 name: "Cósmico",
-                chance: 0.1,
+                chance: 0.10,
                 speed: 4.5,
                 behavior: 'crossScreen',
                 face: ["☄️", "🌠"],
@@ -138,7 +138,7 @@ export const config = {
             },
             shooter: {
                 name: "Atirador",
-                chance: 0.05, // Starts low
+                chance: 0.10,
                 speed: 0,
                 behavior: 'static',
                 face: ["🛰️", "📡"],

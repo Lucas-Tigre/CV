@@ -17,12 +17,14 @@ export function spawnEnemy(currentEnemies, typeKey = null) {
             for (const [key, type] of Object.entries(config.enemySystem.types)) {
                 if (type.chance > 0) {
                     let currentChance = type.chance;
-                    // Special progressive spawning for shooters
+                    // Special progressive spawning for shooters (temporarily disabled to fix spawn bug)
+                    /*
                     if (key === 'shooter') {
                         // The chance increases by 1% each wave, capped at a max of, say, 40%
                         currentChance += (config.wave.number * 0.01);
                         currentChance = Math.min(currentChance, 0.40);
                     }
+                    */
                     cumulativeChance += currentChance;
                     if (random <= cumulativeChance) {
                         typeKey = key;
