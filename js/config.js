@@ -128,12 +128,13 @@ export const config = {
             },
             cosmic: {
                 name: "Cósmico",
-                chance: 0.1, // Will keep this chance for now
-                speed: 4.0, // Faster than 'fast' enemies
-                behavior: 'crossScreen', // New behavior
+                chance: 0.1,
+                speed: 4.5,
+                behavior: 'crossScreen',
                 face: ["☄️", "🌠"],
                 color: '#00AAFF',
-                damage: 25 // High damage on collision
+                damage: 25, // High damage on collision
+                ignoresAttraction: true
             },
             shooter: {
                 name: "Atirador",

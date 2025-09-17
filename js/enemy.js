@@ -150,8 +150,9 @@ export function updateEnemies(enemies, player, deltaTime, particles, projectiles
         const distSq = dx * dx + dy * dy;
 
         // Black Hole Attraction & Damage Logic
+        const enemyType = config.enemySystem.types[enemy.type];
         const effectiveRadius = player.isPoweredUp ? player.radius * 1.5 : player.radius;
-        if (player.mode === 'attract' && distSq < effectiveRadius * effectiveRadius) {
+        if (player.mode === 'attract' && distSq < effectiveRadius * effectiveRadius && !enemyType.ignoresAttraction) {
             // Damping: Reduce the enemy's current velocity. Bosses have more inertia.
             const damping = (enemy.type === 'boss' || enemy.type === 'finalBoss') ? 0.98 : 0.9;
             enemy.speedX *= damping;
