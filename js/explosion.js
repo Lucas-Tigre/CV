@@ -1,10 +1,10 @@
 /**
- * Updates the state of all active explosions.
- * @param {Array} explosions - The array of explosions to update.
- * @returns {Array} The new array of explosions after culling finished ones.
+ * Atualiza o estado de todas as explosões ativas.
+ * @param {Array} explosions - O array de explosões para atualizar.
+ * @returns {Array} O novo array de explosões após remover as que terminaram.
  */
 export function updateExplosions(explosions) {
-    // Each explosion has a duration. We decrement it and remove it when it's over.
+    // Cada explosão tem uma duração. Decrementamos e removemos quando acaba.
     return explosions.filter(e => {
         e.duration--;
         return e.duration > 0;
@@ -12,18 +12,18 @@ export function updateExplosions(explosions) {
 }
 
 /**
- * Renders all active explosions on the canvas.
- * @param {CanvasRenderingContext2D} ctx - The canvas rendering context.
- * @param {Array} explosions - The array of explosions to render.
+ * Renderiza todas as explosões ativas no canvas.
+ * @param {CanvasRenderingContext2D} ctx - O contexto de renderização do canvas.
+ * @param {Array} explosions - O array de explosões para renderizar.
  */
 export function renderExplosions(ctx, explosions) {
     explosions.forEach(e => {
-        // The explosion is a circle that quickly expands and fades.
-        const progress = 1 - (e.duration / 30); // Assuming initial duration is 30
+        // A explosão é um círculo que expande rapidamente e desaparece.
+        const progress = 1 - (e.duration / 30); // Assumindo que a duração inicial é 30
         const currentRadius = e.radius * progress;
 
         ctx.save();
-        ctx.globalAlpha = 1 - progress; // Fade out effect
+        ctx.globalAlpha = 1 - progress; // Efeito de fade out
         ctx.beginPath();
         ctx.fillStyle = e.color;
         ctx.arc(e.x, e.y, currentRadius, 0, Math.PI * 2);

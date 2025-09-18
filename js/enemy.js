@@ -3,10 +3,10 @@ import * as particle from './particle.js';
 import * as projectile from './projectile.js';
 
 /**
- * Spawns a new enemy and adds it to the enemies array.
- * @param {Array} currentEnemies - The current array of enemies.
- * @param {string|null} typeKey - The specific type of enemy to spawn. If null, a random enemy is spawned.
- * @returns {Array} The new array of enemies.
+ * Gera um novo inimigo e o adiciona ao array de inimigos.
+ * @param {Array} currentEnemies - O array atual de inimigos.
+ * @param {string|null} typeKey - O tipo específico de inimigo a ser gerado. Se nulo, um inimigo aleatório é gerado.
+ * @returns {Array} O novo array de inimigos.
  */
 export function spawnEnemy(currentEnemies, typeKey = null) {
     let newEnemies = [...currentEnemies];
@@ -17,10 +17,10 @@ export function spawnEnemy(currentEnemies, typeKey = null) {
             for (const [key, type] of Object.entries(config.enemySystem.types)) {
                 if (type.chance > 0) {
                     let currentChance = type.chance;
-                    // Special progressive spawning for shooters (temporarily disabled to fix spawn bug)
+                    // Lógica de spawn progressivo para atiradores (temporariamente desativada para corrigir bug de spawn)
                     /*
                     if (key === 'shooter') {
-                        // The chance increases by 1% each wave, capped at a max of, say, 40%
+                        // A chance aumenta 1% por onda, com um teto de 40%
                         currentChance += (config.wave.number * 0.01);
                         currentChance = Math.min(currentChance, 0.40);
                     }
@@ -34,12 +34,12 @@ export function spawnEnemy(currentEnemies, typeKey = null) {
             }
         }
         if (!typeKey) {
-            typeKey = 'fast';
+            typeKey = 'fast'; // Inimigo padrão caso a lógica de chance falhe.
         }
 
         const type = config.enemySystem.types[typeKey];
         if (!type) {
-            console.error(`Enemy type "${typeKey}" not found in config.`);
+            console.error(`Tipo de inimigo "${typeKey}" não encontrado na configuração.`);
             return newEnemies;
         }
 
@@ -65,31 +65,32 @@ export function spawnEnemy(currentEnemies, typeKey = null) {
             size: type.size || (config.enemySystem.baseSize * (isElite ? config.enemySystem.eliteSizeMultiplier : 1))
         };
 
+        // Lógica de spawn para inimigos que cruzam a tela.
         if (enemy.behavior === 'crossScreen') {
             const edge = Math.floor(Math.random() * 4);
             let targetX, targetY;
-            const padding = 100; // Spawn off-screen
+            const padding = 100; // Gera o inimigo fora da tela.
 
             switch (edge) {
-                case 0: // Top
+                case 0: // Topo
                     enemy.x = Math.random() * window.innerWidth;
                     enemy.y = -padding;
                     targetX = Math.random() * window.innerWidth;
                     targetY = window.innerHeight + padding;
                     break;
-                case 1: // Right
+                case 1: // Direita
                     enemy.x = window.innerWidth + padding;
                     enemy.y = Math.random() * window.innerHeight;
                     targetX = -padding;
                     targetY = Math.random() * window.innerHeight;
                     break;
-                case 2: // Bottom
+                case 2: // Fundo
                     enemy.x = Math.random() * window.innerWidth;
                     enemy.y = window.innerHeight + padding;
                     targetX = Math.random() * window.innerWidth;
                     targetY = -padding;
                     break;
-                case 3: // Left
+                case 3: // Esquerda
                     enemy.x = -padding;
                     enemy.y = Math.random() * window.innerHeight;
                     targetX = window.innerWidth + padding;
@@ -104,6 +105,7 @@ export function spawnEnemy(currentEnemies, typeKey = null) {
             enemy.speedY = (dy / dist) * enemy.baseSpeed;
         }
 
+        // Atribui propriedades específicas baseadas no tipo de inimigo.
         if (type.huntRadius) enemy.huntRadius = type.huntRadius;
         if (type.shootCooldown) {
             enemy.shootCooldown = type.shootCooldown;
@@ -113,37 +115,38 @@ export function spawnEnemy(currentEnemies, typeKey = null) {
             enemy.preferredDistance = type.preferredDistance;
         }
         if (typeKey === 'boss' || typeKey === 'finalBoss') {
-            enemy.attackCooldown = Math.random() * 120 + 180; // Cooldown between 3-5 seconds (at 60fps)
+            enemy.attackCooldown = Math.random() * 120 + 180; // Cooldown de 3-5 segundos.
         }
 
         newEnemies.push(enemy);
     } catch (error) {
-        console.error("Erro ao spawnar inimigo:", error);
+        console.error("Erro ao gerar inimigo:", error);
     }
     return newEnemies;
 }
 
 /**
- * Updates the position and state of all enemies.
- * @param {Array} enemies - The array of enemies to update.
- * @param {object} player - The player object.
- * @param {number} deltaTime - The time since the last frame.
- * @returns {object} - An object containing gameOver status, xp from defeated enemies, and the new enemies array.
+ * Atualiza a posição e o estado de todos os inimigos.
+ * @param {Array} enemies - O array de inimigos para atualizar.
+ * @param {object} player - O objeto do jogador.
+ * @param {number} deltaTime - O tempo desde o último frame.
+ * @param {Array} particles - O array de partículas (para explosões de chefe).
+ * @param {Array} projectiles - O array de projéteis.
+ * @returns {object} Um objeto contendo o estado do jogo (gameOver), XP ganho e os novos arrays de entidades.
  */
 export function updateEnemies(enemies, player, deltaTime, particles, projectiles) {
-    let gameOver = false;
     let xpFromDefeatedEnemies = 0;
     let remainingEnemies = [];
     let particlesFromExplosions = particles;
     let newProjectiles = projectiles;
 
     enemies.forEach(enemy => {
-        // Boss attack logic
+        // Lógica de ataque do chefe.
         if (enemy.attackCooldown !== undefined) {
             enemy.attackCooldown--;
             if (enemy.attackCooldown <= 0) {
                 particlesFromExplosions = particle.createParticleExplosion(enemy.x, enemy.y, particlesFromExplosions);
-                enemy.attackCooldown = Math.random() * 120 + 180; // Reset cooldown
+                enemy.attackCooldown = Math.random() * 120 + 180; // Reinicia o cooldown.
             }
         }
 
@@ -151,18 +154,18 @@ export function updateEnemies(enemies, player, deltaTime, particles, projectiles
         const dy = player.y - enemy.y;
         const distSq = dx * dx + dy * dy;
 
-        // Black Hole Attraction & Damage Logic
+        // Lógica de Atração e Dano do Buraco Negro.
         const enemyType = config.enemySystem.types[enemy.type];
         const effectiveRadius = player.isPoweredUp ? player.radius * 1.5 : player.radius;
         if (player.mode === 'attract' && distSq < effectiveRadius * effectiveRadius && !enemyType.ignoresAttraction) {
-            // Damping: Reduce the enemy's current velocity. Bosses have more inertia.
+            // Amortecimento: Reduz a velocidade atual do inimigo. Chefes têm mais inércia.
             const damping = (enemy.type === 'boss' || enemy.type === 'finalBoss') ? 0.98 : 0.9;
             enemy.speedX *= damping;
             enemy.speedY *= damping;
 
             const dist = Math.sqrt(distSq);
-            const radialForce = 0.5; // Strong inward pull.
-            const tangentialForce = 0.25; // Weaker orbital pull.
+            const radialForce = 0.5; // Puxada forte para dentro.
+            const tangentialForce = 0.25; // Puxada orbital mais fraca.
             const radial_nx = dx / dist;
             const radial_ny = dy / dist;
             const tangential_nx = -radial_ny;
@@ -178,29 +181,29 @@ export function updateEnemies(enemies, player, deltaTime, particles, projectiles
             if (enemy.health <= 0) {
                 xpFromDefeatedEnemies += enemy.isElite ? 10 : 3;
                 config.enemiesDestroyed++;
-                return; // Skip the rest of the logic for this defeated enemy
+                return; // Pula o resto da lógica para este inimigo derrotado.
             }
         } else {
-             // Normal Behavior
+             // Comportamento Normal dos Inimigos
             switch (enemy.behavior) {
                 case 'huntAndShoot':
                     {
                         const dist = Math.sqrt(distSq);
                         if (dist > enemy.preferredDistance) {
-                            // Move closer
+                            // Se afasta para manter distância.
                             enemy.speedX = (dx / dist) * enemy.baseSpeed;
                             enemy.speedY = (dy / dist) * enemy.baseSpeed;
                         } else if (dist < enemy.preferredDistance * 0.8) {
-                            // Move away
+                            // Se afasta se estiver muito perto.
                             enemy.speedX = -(dx / dist) * enemy.baseSpeed;
                             enemy.speedY = -(dy / dist) * enemy.baseSpeed;
                         } else {
-                            // Correct distance, stop and shoot
+                            // Para de se mover para atirar.
                             enemy.speedX *= 0.8;
                             enemy.speedY *= 0.8;
                         }
 
-                        // Shooting logic
+                        // Lógica de tiro
                         enemy.shootCooldown--;
                         if (enemy.shootCooldown <= 0) {
                             newProjectiles.push(projectile.createProjectile(enemy.x, enemy.y, player.x, player.y, enemy.projectileType));
@@ -210,11 +213,11 @@ export function updateEnemies(enemies, player, deltaTime, particles, projectiles
                     break;
                 case 'static':
                     {
-                        // Stand still
+                        // Fica parado.
                         enemy.speedX *= 0.8;
                         enemy.speedY *= 0.8;
 
-                        // Shooting logic
+                        // Lógica de tiro.
                         enemy.shootCooldown--;
                         if (enemy.shootCooldown <= 0) {
                             newProjectiles.push(projectile.createProjectile(enemy.x, enemy.y, player.x, player.y, enemy.projectileType));
@@ -235,7 +238,7 @@ export function updateEnemies(enemies, player, deltaTime, particles, projectiles
                     }
                     break;
                 case 'crossScreen':
-                    // Do nothing, let the initial velocity carry it.
+                    // Não faz nada, deixa a velocidade inicial o carregar.
                     break;
                 default: // 'wander'
                     enemy.speedX += (Math.random() - 0.5) * 0.5;
@@ -243,14 +246,17 @@ export function updateEnemies(enemies, player, deltaTime, particles, projectiles
             }
         }
 
+        // Atualização de Posição e Fricção
         enemy.x += enemy.speedX * (deltaTime / 16.67);
         enemy.y += enemy.speedY * (deltaTime / 16.67);
-        enemy.speedX *= 0.95; // Friction
+        enemy.speedX *= 0.95; // Fricção
         enemy.speedY *= 0.95;
 
+        // Mantém o inimigo dentro da tela.
         enemy.x = Math.max(10, Math.min(window.innerWidth - 10, enemy.x));
         enemy.y = Math.max(10, Math.min(window.innerHeight - 10, enemy.y));
 
+        // Lógica de Colisão com o Jogador
         const distToPlayer = Math.sqrt(distSq);
         if (distToPlayer < (player.size + enemy.size) * 0.6) {
             const damage = (config.enemySystem.types[enemy.type].damage || 5) * (deltaTime / 16.67);
@@ -260,5 +266,5 @@ export function updateEnemies(enemies, player, deltaTime, particles, projectiles
         remainingEnemies.push(enemy);
     });
 
-    return { gameOver, xpFromDefeatedEnemies, newEnemies: remainingEnemies, newParticles: particlesFromExplosions, newProjectiles };
+    return { xpFromDefeatedEnemies, newEnemies: remainingEnemies, newParticles: particlesFromExplosions, newProjectiles };
 }
