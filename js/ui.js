@@ -1,5 +1,5 @@
 /**
- * This module contains all functions that directly manipulate the DOM to update the UI.
+ * Este módulo contém todas as funções que manipulam diretamente o DOM para atualizar a UI.
  */
 
 export function updateHealthBar(health, maxHealth) {
@@ -57,8 +57,8 @@ export function updateQuestUI(activeQuests) {
 export function showGameOver(stats) {
     document.getElementById('go-level').textContent = stats.level;
     document.getElementById('go-wave').textContent = stats.wave;
-    document.getElementById('go-particles').textContent = stats.particles;
-    document.getElementById('go-enemies').textContent = stats.enemies;
+    document.getElementById('go-particles').textContent = stats.particlesAbsorbed;
+    document.getElementById('go-enemies').textContent = stats.enemiesDestroyed;
     createStars();
     document.getElementById('game-over-screen').style.display = 'flex';
 }
@@ -114,7 +114,6 @@ export function showGalaxyMap(galaxies, unlockedGalaxies, onSelect) {
         `;
 
         if (isUnlocked) {
-            // This is not ideal, but for now we remove and re-add to avoid duplicates
             const newGalaxyEl = galaxyEl.cloneNode(true);
             galaxyEl.parentNode?.replaceChild(newGalaxyEl, galaxyEl);
             newGalaxyEl.addEventListener('click', () => {

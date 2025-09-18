@@ -1,10 +1,11 @@
 /**
- * Creates a new projectile.
- * @param {number} x - The starting x-coordinate.
- * @param {number} y - The starting y-coordinate.
- * @param {number} targetX - The x-coordinate of the target.
- * @param {number} targetY - The y-coordinate of the target.
- * @returns {object} The new projectile object.
+ * Cria um novo projétil.
+ * @param {number} x - A coordenada X inicial.
+ * @param {number} y - A coordenada Y inicial.
+ * @param {number} targetX - A coordenada X do alvo.
+ * @param {number} targetY - A coordenada Y do alvo.
+ * @param {string} type - O tipo de projétil ('normal' ou 'explosive').
+ * @returns {object} O novo objeto de projétil.
  */
 export function createProjectile(x, y, targetX, targetY, type = 'normal') {
     const dx = targetX - x;
@@ -14,14 +15,14 @@ export function createProjectile(x, y, targetX, targetY, type = 'normal') {
     const projectileData = {
         speed: 5,
         size: 5,
-        color: '#FF00FF', // Magenta for normal
+        color: '#FF00FF', // Magenta para projéteis normais
         damage: 10,
-        lifespan: 180, // 3 seconds
+        lifespan: 180, // 3 segundos
         onDeath: null
     };
 
     if (type === 'explosive') {
-        projectileData.color = '#FFA500'; // Orange for explosive
+        projectileData.color = '#FFA500'; // Laranja para explosivos
         projectileData.onDeath = 'explode';
         projectileData.explosionRadius = 50;
     }
@@ -41,9 +42,9 @@ export function createProjectile(x, y, targetX, targetY, type = 'normal') {
 }
 
 /**
- * Updates the position of all active projectiles.
- * @param {Array} projectiles - The array of projectiles to update.
- * @returns {object} An object containing the new projectiles and explosions.
+ * Atualiza a posição de todos os projéteis ativos.
+ * @param {Array} projectiles - O array de projéteis para atualizar.
+ * @returns {object} Um objeto contendo os projéteis restantes e novas explosões.
  */
 export function updateProjectiles(projectiles) {
     const remainingProjectiles = [];
@@ -59,14 +60,14 @@ export function updateProjectiles(projectiles) {
         if (p.lifespan > 0 && isOnScreen) {
             remainingProjectiles.push(p);
         } else {
-            // Projectile is removed, check for onDeath event
+            // Projétil removido, verifica se há um evento de morte.
             if (p.onDeath === 'explode') {
                 newExplosions.push({
                     x: p.x,
                     y: p.y,
                     radius: p.explosionRadius,
-                    damage: p.damage, // Explosion damage can be the same as projectile damage
-                    duration: 30, // 0.5 seconds
+                    damage: p.damage, // Dano da explosão pode ser o mesmo do projétil.
+                    duration: 30, // 0.5 segundos
                     color: p.color
                 });
             }
@@ -77,9 +78,9 @@ export function updateProjectiles(projectiles) {
 }
 
 /**
- * Renders all active projectiles on the canvas.
- * @param {CanvasRenderingContext2D} ctx - The canvas rendering context.
- * @param {Array} projectiles - The array of projectiles to render.
+ * Renderiza todos os projéteis ativos no canvas.
+ * @param {CanvasRenderingContext2D} ctx - O contexto de renderização do canvas.
+ * @param {Array} projectiles - O array de projéteis para renderizar.
  */
 export function renderProjectiles(ctx, projectiles) {
     projectiles.forEach(p => {

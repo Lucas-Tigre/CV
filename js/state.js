@@ -1,4 +1,4 @@
-// This file holds the dynamic state of the game.
+// Este arquivo guarda o estado dinâmico do jogo.
 
 export let particles = [];
 export let enemies = [];
@@ -10,8 +10,9 @@ export let fps = 60;
 export let fpsLastChecked = 0;
 export let frameCount = 0;
 export let gameLoopRunning = false;
+export let auraPulseRadius = 0;
 
-// We need functions to modify the state from other modules.
+// Funções para modificar o estado a partir de outros módulos.
 export function setParticles(newParticles) {
     particles = newParticles;
 }
@@ -45,8 +46,6 @@ export function setFps(newFps, lastChecked, newFrameCount) {
 export function incrementFrameCount() {
     frameCount++;
 }
-
-export let auraPulseRadius = 0;
 
 export function setLastUpdateIndex(index) {
     lastUpdateIndex = index;

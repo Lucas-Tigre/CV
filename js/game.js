@@ -1,5 +1,5 @@
 // =============================================
-// IMPORTS
+// IMPORTAÇÕES DOS MÓDULOS
 // =============================================
 import { config } from './config.js';
 import * as state from './state.js';
@@ -12,29 +12,29 @@ import * as sound from './utils.js';
 import * as audio from './audio.js';
 
 // =============================================
-// DOM ELEMENTS & ASSETS
+// ELEMENTOS DO DOM E ASSETS
 // =============================================
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 const imageCache = {};
 
 // =============================================
-// HELPER FUNCTIONS
+// FUNÇÕES AUXILIARES
 // =============================================
 function toggleMenu(menuElement, show) {
     const display = show ? 'block' : 'none';
     if (menuElement) {
         menuElement.style.display = display;
     }
-    // This is the correct logic: the game's paused state should
-    // directly reflect whether the menu is being shown or hidden.
+    // Pausa o jogo quando qualquer menu é aberto.
     config.gamePaused = show;
 }
 
 // =============================================
-// CORE GAME LOGIC
+// LÓGICA PRINCIPAL DO JOGO
 // =============================================
 
+/** Ativa uma batalha de chefe, limpando inimigos normais e tocando música de chefe. */
 function triggerBossFight(level) {
     state.setEnemies([]);
     config.bossFightActive = true;
@@ -45,6 +45,7 @@ function triggerBossFight(level) {
     state.setEnemies(enemy.spawnEnemy(state.enemies, bossType));
 }
 
+/** Verifica se o jogador tem XP suficiente para subir de nível. */
 function checkLevelUp() {
     if (config.level >= 50) {
         config.xp = config.level * 100;
@@ -66,6 +67,7 @@ function checkLevelUp() {
     }
 }
 
+/** Atualiza o progresso de uma missão ativa. */
 function updateQuest(questId, amount = 1) {
     const quest = config.quests.active.find(q => q.id === questId);
     if (quest) {
@@ -81,6 +83,7 @@ function updateQuest(questId, amount = 1) {
     }
 }
 
+/** Gerencia as ondas de inimigos, iniciando novas ondas quando necessário. */
 function updateWave() {
     if (config.bossFightActive) {
         if (state.enemies.length === 0) {
@@ -105,6 +108,7 @@ function updateWave() {
     }
 }
 
+/** Atualiza o painel de estatísticas na tela. */
 function updateStats() {
     const stats = {
         level: config.level,
@@ -116,6 +120,7 @@ function updateStats() {
     ui.updateStatsPanel(stats);
 }
 
+/** Gerencia o timer do power-up do jogador. */
 function handlePowerUpTimer() {
     const player = config.players[0];
     if (player.isPoweredUp && player.powerUpTimer > 0) {
@@ -126,6 +131,7 @@ function handlePowerUpTimer() {
     }
 }
 
+/** Gera um lote inicial de partículas de forma assíncrona para não travar o jogo. */
 function spawnBatch() {
     const player = config.players[0];
     const particlesToSpawn = config.particleCount;
@@ -144,27 +150,35 @@ function spawnBatch() {
     }
 }
 
+/** Reinicia o jogo para o estado inicial, resetando progresso e habilidades. */
 function restartGame() {
     document.getElementById('game-over-screen').style.display = 'none';
     const player = config.players[0];
-    player.health = player.maxHealth;
+
+    // Reseta o estado do jogador para os valores base
+    player.health = player.baseMaxHealth;
     player.isPoweredUp = false;
     player.powerUpTimer = 0;
+    player.radius = player.baseRadius;
+    player.attractionDamage = player.baseAttractionDamage;
+    player.maxHealth = player.baseMaxHealth;
+    config.xpMultiplier = config.baseXpMultiplier;
+
+    // Reseta o estado do jogo
     config.gamePaused = false;
     config.bossFightActive = false;
     state.setParticles([]);
     requestAnimationFrame(spawnBatch);
     state.setEnemies([]);
-    // Reset skills
+    state.setProjectiles([]);
+    state.setExplosions([]);
+
+    // Reseta as habilidades
     for (const key in config.skills.tree) {
         config.skills.tree[key].currentLevel = 0;
     }
-    player.radius = player.baseRadius;
-    player.attractionDamage = player.baseAttractionDamage;
-    player.maxHealth = player.baseMaxHealth;
-    player.health = player.baseMaxHealth; // Restore health to new max
-    config.xpMultiplier = config.baseXpMultiplier;
 
+    // Reseta progresso de nível, onda e missões
     Object.assign(config, {
         wave: { number: 1, enemiesToSpawn: 5, spawned: 0, timer: 0 },
         xp: 0,
@@ -178,6 +192,8 @@ function restartGame() {
         { id: 'defeat20', target: 20, current: 0, reward: 100, title: "Derrotar 20 inimigos" },
         { id: 'wave5', target: 5, current: 1, reward: 200, title: "Alcançar onda 5" }
     ];
+
+    // Reinicia a música e o loop do jogo
     audio.playMusic('mainTheme');
     if (!state.gameLoopRunning) {
         state.setGameLoopRunning(true);
@@ -185,6 +201,7 @@ function restartGame() {
     }
 }
 
+/** Aplica o upgrade de uma habilidade se o jogador tiver pontos suficientes. */
 function upgradeSkill(key) {
     const skill = config.skills.tree[key];
     const player = config.players[0];
@@ -194,120 +211,60 @@ function upgradeSkill(key) {
         return;
     }
 
-    // 1. Checar pré-requisitos
     if (skill.requires) {
         for (const req of skill.requires) {
             const [reqKey, reqLevel] = req.split(':');
             if (config.skills.tree[reqKey]?.currentLevel < parseInt(reqLevel, 10)) {
                 sound.showUnlockMessage(`Requisito não cumprido: ${config.skills.tree[reqKey].name} Nível ${reqLevel}`);
-                // Idealmente, tocar um som de falha aqui
                 return;
             }
         }
     }
 
-    // 2. Checar custo e nível máximo
     if (config.skillPoints < skill.cost) {
         sound.showUnlockMessage("Pontos de habilidade insuficientes!");
-        return; // Não tem pontos suficientes
+        return;
     }
     if (skill.currentLevel >= skill.maxLevel) {
         sound.showUnlockMessage("Nível máximo já alcançado!");
-        return; // Nível máximo
+        return;
     }
 
-    // 3. Aplicar custo e upgrade
     config.skillPoints -= skill.cost;
     skill.currentLevel++;
-    sound.playSound('levelUp'); // Reutilizar som de level up para sucesso
+    sound.playSound('levelUp');
 
-    // 4. Aplicar efeito da skill
     switch (key) {
         case 'healthBoost':
             const healthIncrease = player.baseMaxHealth * 0.10;
             player.maxHealth += healthIncrease;
-            player.health += healthIncrease; // Curar o jogador pelo mesmo montante
+            player.health += healthIncrease;
             break;
         case 'attractRadius':
             player.radius = player.baseRadius * (1 + 0.20 * skill.currentLevel);
             break;
         case 'vortexPower':
-            // Este é o dano por frame, então o aumento é pequeno
             player.attractionDamage = player.baseAttractionDamage * (1 + 0.30 * skill.currentLevel);
             break;
         case 'particleMastery':
             config.xpMultiplier = config.baseXpMultiplier * (1 + 0.20 * skill.currentLevel);
             break;
     }
-
-    // 5. Re-renderizar a UI da árvore de habilidades para refletir a mudança
-    // A UI será atualizada no próximo passo do plano, ao integrar a chamada.
 }
 
 // =============================================
-// RENDER
+// RENDERIZAÇÃO
 // =============================================
 function render() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     const player = config.players[0];
 
-    // Render particles
-    state.particles.forEach(p => {
-        p.trail.forEach((trail, i) => {
-            const alpha = i / p.trail.length;
-            ctx.fillStyle = p.color.replace(')', `, ${alpha})`).replace('hsl', 'hsla');
-            ctx.beginPath();
-            ctx.arc(trail.x, trail.y, trail.size * alpha, 0, Math.PI * 2);
-            ctx.fill();
-        });
-        ctx.fillStyle = p.color;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.fill();
-    });
-
-    // Render enemies
-    state.enemies.forEach(e => {
-        const enemyType = config.enemySystem.types[e.type];
-        const image = enemyType && imageCache[enemyType.imageUrl];
-
-        if (image && image.complete) {
-            ctx.drawImage(image, e.x - e.size, e.y - e.size, e.size * 2, e.size * 2);
-        } else {
-            ctx.fillStyle = e.color;
-            ctx.beginPath();
-            ctx.arc(e.x, e.y, e.size, 0, Math.PI * 2);
-            ctx.fill();
-            if (e.isElite) {
-                ctx.strokeStyle = 'gold';
-                ctx.lineWidth = 3;
-                ctx.stroke();
-            }
-            ctx.font = `${e.size * 0.8}px Arial`;
-            ctx.fillStyle = 'white';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(e.face, e.x, e.y);
-        }
-
-        if (e.health < e.maxHealth) {
-            const barWidth = e.size * 1.5;
-            const barHeight = 5;
-            const x = e.x - barWidth / 2;
-            const y = e.y - e.size - 15;
-            ctx.fillStyle = '#333';
-            ctx.fillRect(x, y, barWidth, barHeight);
-            const healthPercent = e.health / e.maxHealth;
-            ctx.fillStyle = healthPercent > 0.5 ? '#00F5A0' : healthPercent > 0.2 ? '#FFA500' : '#FF0000';
-            ctx.fillRect(x, y, barWidth * healthPercent, barHeight);
-        }
-    });
-
-    // Render projectiles and explosions
+    particle.renderParticles(ctx, state.particles);
+    enemy.renderEnemies(ctx, state.enemies);
     projectile.renderProjectiles(ctx, state.projectiles);
     explosion.renderExplosions(ctx, state.explosions);
 
-    // Render the player's damage aura
+    // Renderiza a aura de dano do jogador
     if (player.mode === 'attract') {
         const effectiveRadius = player.isPoweredUp ? player.radius * 1.5 : player.radius;
         const auraColor = player.isPoweredUp ? '255, 215, 0' : '142, 45, 226';
@@ -319,7 +276,7 @@ function render() {
         ctx.stroke();
     }
 
-    // Render player
+    // Renderiza o jogador
     ctx.fillStyle = player.color;
     ctx.beginPath();
     ctx.arc(player.x, player.y, player.size, 0, Math.PI * 2);
@@ -331,7 +288,7 @@ function render() {
 }
 
 // =============================================
-// GAME LOOP
+// LOOP PRINCIPAL E FÍSICA
 // =============================================
 function updatePhysics(deltaTime) {
     if (config.gamePaused) return;
@@ -339,25 +296,25 @@ function updatePhysics(deltaTime) {
 
     handlePowerUpTimer();
 
-    // Update aura pulse
+    // Atualiza a animação da aura
     const effectiveRadius = player.isPoweredUp ? player.radius * 1.5 : player.radius;
     let newAuraRadius = state.auraPulseRadius + 2;
     if (newAuraRadius > effectiveRadius) newAuraRadius = 0;
     state.setAuraPulseRadius(newAuraRadius);
 
-    // Update particles
-    const { newParticles, absorbedXp, newLastUpdateIndex, powerupCollected } = particle.updateParticles(state.particles, player, deltaTime, state.lastUpdateIndex);
-    state.setParticles(newParticles);
-    state.setLastUpdateIndex(newLastUpdateIndex);
+    // Atualiza as entidades do jogo
+    const particleUpdate = particle.updateParticles(state.particles, player, deltaTime, state.lastUpdateIndex);
+    state.setParticles(particleUpdate.newParticles);
+    state.setLastUpdateIndex(particleUpdate.newLastUpdateIndex);
 
-    if (powerupCollected) {
+    if (particleUpdate.powerupCollected) {
         player.isPoweredUp = true;
         player.powerUpTimer = 300;
         sound.playSound('levelUp');
     }
 
-    if (absorbedXp > 0) {
-        const finalXp = Math.round(absorbedXp * (config.xpMultiplier || 1));
+    if (particleUpdate.absorbedXp > 0) {
+        const finalXp = Math.round(particleUpdate.absorbedXp * (config.xpMultiplier || 1));
         config.xp += finalXp;
         updateQuest('absorb100', finalXp);
         checkLevelUp();
@@ -368,18 +325,15 @@ function updatePhysics(deltaTime) {
         state.setParticles(particle.autoRespawnParticles(state.particles, player));
     }
 
-    // Update projectiles and handle explosions
     const projectileUpdate = projectile.updateProjectiles(state.projectiles);
     state.setProjectiles(projectileUpdate.remainingProjectiles);
     if (projectileUpdate.newExplosions.length > 0) {
         state.setExplosions([...state.explosions, ...projectileUpdate.newExplosions]);
-        sound.playSound('enemyDefeat'); // Re-use explosion sound
+        sound.playSound('enemyDefeat');
     }
 
-    // Update explosions
     state.setExplosions(explosion.updateExplosions(state.explosions));
 
-    // Update enemies
     if (state.enemies.length > 0) {
         const enemyUpdate = enemy.updateEnemies(state.enemies, player, deltaTime, state.particles, state.projectiles);
         state.setEnemies(enemyUpdate.newEnemies);
@@ -391,18 +345,12 @@ function updatePhysics(deltaTime) {
             updateQuest('defeat20', 1);
             checkLevelUp();
         }
-        if (enemyUpdate.gameOver) {
-            config.gamePaused = true;
-            sound.playSound('gameOver');
-            audio.stopMusic();
-            ui.showGameOver({ level: config.level, wave: config.wave.number, particles: config.particlesAbsorbed, enemies: config.enemiesDestroyed });
-        }
     }
     updateWave();
 
-    // --- COLLISION DETECTION ---
+    // --- DETECÇÃO DE COLISÃO ---
 
-    // Player vs hostile particles (from boss)
+    // Jogador vs Partículas Hostis (do Chefe)
     let hostileParticles = state.particles;
     for (let i = hostileParticles.length - 1; i >= 0; i--) {
         const p = hostileParticles[i];
@@ -418,7 +366,7 @@ function updatePhysics(deltaTime) {
     }
     state.setParticles(hostileParticles);
 
-    // Player vs enemy projectiles
+    // Jogador vs Projéteis de Inimigos
     let currentProjectiles = state.projectiles;
     for (let i = currentProjectiles.length - 1; i >= 0; i--) {
         const proj = currentProjectiles[i];
@@ -427,7 +375,6 @@ function updatePhysics(deltaTime) {
         if (Math.sqrt(dx * dx + dy * dy) < player.size + proj.size) {
             player.health -= proj.damage;
             sound.playSound('hit');
-            // When a projectile hits the player, it might also explode
             if (proj.onDeath === 'explode') {
                 state.setExplosions([...state.explosions, { x: proj.x, y: proj.y, radius: proj.explosionRadius, damage: proj.damage, duration: 30, color: proj.color }]);
                 sound.playSound('enemyDefeat');
@@ -437,31 +384,28 @@ function updatePhysics(deltaTime) {
     }
     state.setProjectiles(currentProjectiles);
 
-    // Player vs explosions
+    // Jogador vs Explosões
     state.explosions.forEach(exp => {
         const dx = player.x - exp.x;
         const dy = player.y - exp.y;
         if (Math.sqrt(dx * dx + dy * dy) < exp.radius) {
-            player.health -= exp.damage * (deltaTime / 16.67); // Damage over time while inside
+            player.health -= exp.damage * (deltaTime / 16.67);
         }
     });
 
+    // --- VERIFICAÇÃO DE FIM DE JOGO ---
     if (player.health <= 0) {
         player.health = 0;
-        if (!config.gamePaused) { // Evita chamar a lógica de game over várias vezes
+        if (!config.gamePaused) {
             config.gamePaused = true;
             sound.playSound('gameOver');
             audio.stopMusic();
-            ui.showGameOver({
-                level: config.level,
-                wave: config.wave.number,
-                particles: config.particlesAbsorbed,
-                enemies: config.enemiesDestroyed
-            });
+            ui.showGameOver({ level: config.level, wave: config.wave.number, particles: config.particlesAbsorbed, enemies: config.enemiesDestroyed });
         }
     }
 }
 
+/** O loop principal do jogo, chamado a cada frame. */
 function gameLoop(timestamp) {
     if (!state.gameLoopRunning) return;
     requestAnimationFrame(gameLoop);
@@ -485,8 +429,9 @@ function gameLoop(timestamp) {
 }
 
 // =============================================
-// INITIALIZATION
+// INICIALIZAÇÃO
 // =============================================
+/** Pré-carrega as imagens dos inimigos para evitar pop-in. */
 function preloadImages() {
     for (const type of Object.values(config.enemySystem.types)) {
         if (type.imageUrl) {
@@ -497,14 +442,15 @@ function preloadImages() {
     }
 }
 
+/** Configura todos os event listeners para os controles do jogo. */
 function setupControls() {
     const player = config.players[0];
     const menu = document.getElementById('menu');
 
+    // Desbloqueia o áudio na primeira interação do usuário.
     const handleFirstInteraction = () => {
         sound.unlockAudio();
-        audio.playMusic('mainTheme'); // Start music on first interaction
-        // Remove the listeners after the first interaction
+        audio.playMusic('mainTheme');
         canvas.removeEventListener('mousemove', handleFirstInteraction);
         window.removeEventListener('keydown', handleFirstInteraction);
     };
@@ -562,19 +508,16 @@ function setupControls() {
                 });
                 break;
             case 'showSkills':
-                { // Use a block to scope these constants
+                {
                     const skillTreeMenu = document.getElementById('skill-tree');
                     toggleMenu(skillTreeMenu, true);
-
-                    // This function both renders and sets up the listeners.
                     const refreshUI = () => {
                         ui.showSkillTree(config.skills.tree, config.skillPoints, (skillKey) => {
-                            upgradeSkill(skillKey); // Perform the upgrade
-                            refreshUI(); // Immediately re-render the UI
+                            upgradeSkill(skillKey);
+                            refreshUI();
                         });
                     };
-
-                    refreshUI(); // Initial render
+                    refreshUI();
                 }
                 break;
             case 'showSkins':
@@ -611,6 +554,7 @@ function setupControls() {
     });
 }
 
+/** Função principal que inicializa o jogo. */
 function initGame() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
@@ -618,20 +562,19 @@ function initGame() {
     player.x = canvas.width / 2;
     player.y = canvas.height / 2;
 
-    // Store base values for skills
+    // Armazena os valores base do jogador para os upgrades de habilidades.
     if (player.baseRadius === undefined) {
         player.baseRadius = player.radius;
         player.baseAttractionDamage = player.attractionDamage;
         player.baseMaxHealth = player.maxHealth;
         config.baseXpMultiplier = 1;
-        config.xpMultiplier = 1; // Initialize the active multiplier
+        config.xpMultiplier = 1;
     }
 
     preloadImages();
     requestAnimationFrame(spawnBatch);
 
     sound.initSoundSystem();
-    // audio.playMusic('mainTheme'); // Moved to first user interaction
     ui.updateHealthBar(player.health, player.maxHealth);
     ui.updateXPBar(config.xp, config.level);
     updateStats();
@@ -642,6 +585,7 @@ function initGame() {
     requestAnimationFrame(gameLoop);
 }
 
+// Listeners de eventos globais.
 window.addEventListener('load', initGame);
 window.addEventListener('resize', () => {
     canvas.width = window.innerWidth;
