@@ -255,10 +255,6 @@ export function updateEnemies(enemies, player, deltaTime, particles, projectiles
         if (distToPlayer < (player.size + enemy.size) * 0.6) {
             const damage = (config.enemySystem.types[enemy.type].damage || 5) * (deltaTime / 16.67);
             player.health -= damage;
-            if (player.health <= 0) {
-                player.health = 0;
-                gameOver = true;
-            }
         }
 
         remainingEnemies.push(enemy);

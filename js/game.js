@@ -446,7 +446,20 @@ function updatePhysics(deltaTime) {
         }
     });
 
-    if (player.health <= 0) player.health = 0;
+    if (player.health <= 0) {
+        player.health = 0;
+        if (!config.gamePaused) { // Evita chamar a lógica de game over várias vezes
+            config.gamePaused = true;
+            sound.playSound('gameOver');
+            audio.stopMusic();
+            ui.showGameOver({
+                level: config.level,
+                wave: config.wave.number,
+                particles: config.particlesAbsorbed,
+                enemies: config.enemiesDestroyed
+            });
+        }
+    }
 }
 
 function gameLoop(timestamp) {
@@ -490,6 +503,7 @@ function setupControls() {
 
     const handleFirstInteraction = () => {
         sound.unlockAudio();
+        audio.playMusic('mainTheme'); // Start music on first interaction
         // Remove the listeners after the first interaction
         canvas.removeEventListener('mousemove', handleFirstInteraction);
         window.removeEventListener('keydown', handleFirstInteraction);
@@ -617,7 +631,7 @@ function initGame() {
     requestAnimationFrame(spawnBatch);
 
     sound.initSoundSystem();
-    audio.playMusic('mainTheme');
+    // audio.playMusic('mainTheme'); // Moved to first user interaction
     ui.updateHealthBar(player.health, player.maxHealth);
     ui.updateXPBar(config.xp, config.level);
     updateStats();
