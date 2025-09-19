@@ -134,7 +134,7 @@ export function spawnEnemy(config, currentEnemies, typeKey = null) {
  * @param {Array} projectiles - O array de projéteis.
  * @returns {object} Um objeto contendo o XP ganho e os novos arrays de entidades.
  */
-export function updateEnemies(enemies, player, deltaTime, particles, projectiles) {
+export function updateEnemies(config, enemies, player, deltaTime, particles, projectiles) {
     let xpFromDefeatedEnemies = 0;
     let remainingEnemies = [];
     let particlesFromExplosions = particles;
