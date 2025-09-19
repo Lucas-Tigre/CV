@@ -53,18 +53,18 @@ export const config = {
             id: 1,
             x: null,
             y: null,
-            mode: 'attract', // Modo inicial do jogador
+            mode: 'attract',
             color: '#4A00E0',
-            radius: 150, // Raio de atração/repulsão
-            size: 30, // Tamanho do jogador
+            radius: 150,
+            size: 30,
             face: "🐶", // TODO: CUSTOMIZAR - Emoji inicial do jogador.
             faceSize: 28,
-            health: 100, // Vida inicial
-            maxHealth: 100, // Vida máxima
+            health: 100,
+            maxHealth: 100,
             damage: 0.5, // Dano de colisão com inimigos.
             attractionDamage: 0.05, // Dano por segundo do vórtice de atração.
-            isPoweredUp: false, // Se o jogador está com power-up
-            powerUpTimer: 0, // Tempo restante do power-up
+            isPoweredUp: false,
+            powerUpTimer: 0,
         }
     ],
 
@@ -72,16 +72,16 @@ export const config = {
     // SISTEMA DE INIMIGOS
     // =============================================
     enemySystem: {
-        baseHealth: 5, // Vida base de um inimigo
-        baseSize: 20, // Tamanho base de um inimigo
-        eliteSizeMultiplier: 1.3, // Multiplicador de tamanho para elites
-        healthIncreasePerLevel: 0.3, // Aumento de vida por nível da onda
+        baseHealth: 5,
+        baseSize: 20,
+        eliteSizeMultiplier: 1.3,
+        healthIncreasePerLevel: 0.3,
         types: {
             fast: {
                 name: "Rápido",
-                chance: 0.55, // Chance de spawn
+                chance: 0.55,
                 speed: 3.5,
-                behavior: 'wander', // Comportamento: vagar
+                behavior: 'wander',
                 face: ["😠", "😡", "😤"],
                 color: '#FFDD00',
                 healthMultiplier: 0.8
@@ -90,29 +90,29 @@ export const config = {
                 name: "Caçador",
                 chance: 0.25,
                 speed: 2.0,
-                behavior: 'huntAndShoot', // Comportamento: caçar e atirar
+                behavior: 'huntAndShoot',
                 face: ["🎯", "🔫", "💥"],
                 color: '#FF9900',
-                huntRadius: 500, // Raio em que começa a caçar
-                preferredDistance: 250, // Distância que tenta manter do jogador
-                shootCooldown: 120, // Cooldown do tiro (em frames)
+                huntRadius: 500,
+                preferredDistance: 250,
+                shootCooldown: 120,
                 projectileType: 'normal'
             },
             cosmic: {
                 name: "Cósmico",
                 chance: 0.10,
                 speed: 4.5,
-                behavior: 'crossScreen', // Comportamento: cruzar a tela
+                behavior: 'crossScreen',
                 face: ["☄️", "🌠"],
                 color: '#00AAFF',
                 damage: 25,
-                ignoresAttraction: true // Ignora a atração do jogador
+                ignoresAttraction: true
             },
             shooter: {
                 name: "Atirador",
                 chance: 0.10,
                 speed: 0,
-                behavior: 'static', // Comportamento: estático
+                behavior: 'static',
                 face: ["🛰️", "📡"],
                 color: '#00FFFF',
                 healthMultiplier: 1.2,
@@ -121,9 +121,9 @@ export const config = {
             },
             boss: {
                 name: "Chefe",
-                chance: 0, // Apenas gerado manualmente
+                chance: 0, // Apenas spawnado manualmente.
                 speed: 2.5,
-                behavior: 'hunt', // Comportamento: caçar
+                behavior: 'hunt',
                 // TODO: CUSTOMIZAR - Adicione a URL da sua imagem para o chefe aqui.
                 imageUrl: null,
                 face: ["😈", "💀", "👹"],
@@ -134,7 +134,7 @@ export const config = {
             },
             finalBoss: {
                 name: "Chefe Final",
-                chance: 0, // Apenas gerado manualmente
+                chance: 0, // Apenas spawnado manualmente.
                 speed: 3.0,
                 behavior: 'hunt',
                 // TODO: CUSTOMIZAR - Adicione a URL da sua imagem para o chefe final aqui.
@@ -155,7 +155,7 @@ export const config = {
         tree: {
             attractRadius: {
                 name: "Raio de Atração",
-                cost: 2, // Custo em pontos de habilidade
+                cost: 2,
                 maxLevel: 5,
                 effect: "Aumenta o raio de atração em 20% por nível.",
                 currentLevel: 0
@@ -180,22 +180,22 @@ export const config = {
                 maxLevel: 3,
                 effect: "Partículas dão 20% mais XP por nível.",
                 currentLevel: 0,
-                requires: ["attractRadius:3"] // Requisito: Raio de Atração nível 3
+                requires: ["attractRadius:3"]
             }
         }
     },
 
     // =============================================
-    // ESTADO INICIAL DO JOGO (NÃO MODIFICAR)
+    // ESTADO INICIAL DO JOGO (não mexer)
     // =============================================
     xp: 0,
     level: 1,
     skillPoints: 0,
-    soundEnabled: true, // Som ligado/desligado
-    gamePaused: false, // Jogo pausado/ativo
-    particlesAbsorbed: 0, // Contagem de partículas absorvidas
-    enemiesDestroyed: 0, // Contagem de inimigos destruídos
-    gameTime: 0, // Tempo de jogo (em frames)
+    soundEnabled: true,
+    gamePaused: false,
+    particlesAbsorbed: 0,
+    enemiesDestroyed: 0,
+    gameTime: 0,
 
     // =============================================
     // OUTRAS CONFIGURAÇÕES
