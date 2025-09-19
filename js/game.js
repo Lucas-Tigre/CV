@@ -216,24 +216,24 @@ function upgradeSkill(key) {
         for (const req of skill.requires) {
             const [reqKey, reqLevel] = req.split(':');
             if (config.skills.tree[reqKey]?.currentLevel < parseInt(reqLevel, 10)) {
-                sound.showUnlockMessage(`Requisito não cumprido: ${config.skills.tree[reqKey].name} Nível ${reqLevel}`);
+                showUnlockMessage(`Requisito não cumprido: ${config.skills.tree[reqKey].name} Nível ${reqLevel}`);
                 return;
             }
         }
     }
 
     if (config.skillPoints < skill.cost) {
-        sound.showUnlockMessage("Pontos de habilidade insuficientes!");
+        showUnlockMessage("Pontos de habilidade insuficientes!");
         return;
     }
     if (skill.currentLevel >= skill.maxLevel) {
-        sound.showUnlockMessage("Nível máximo já alcançado!");
+        showUnlockMessage("Nível máximo já alcançado!");
         return;
     }
 
     config.skillPoints -= skill.cost;
     skill.currentLevel++;
-    sound.playSound('levelUp');
+    playSound('levelUp');
 
     switch (key) {
         case 'healthBoost':
@@ -504,7 +504,7 @@ function setupControls() {
                 ui.showGalaxyMap(config.galaxies.list, config.galaxies.unlocked, (key) => {
                     config.galaxies.current = key;
                     document.body.style.background = config.galaxies.list[key].background;
-                    sound.showUnlockMessage(`Galáxia ${config.galaxies.list[key].name} selecionada!`);
+                    showUnlockMessage(`Galáxia ${config.galaxies.list[key].name} selecionada!`);
                     toggleMenu(document.getElementById('galaxy-map'), false);
                 });
                 break;
@@ -526,7 +526,7 @@ function setupControls() {
                 ui.showSkinsModal(config.skins.available, config.skins.current, (id) => {
                     config.skins.current = id;
                     player.face = config.skins.available.find(s => s.id === id).emoji;
-                    sound.showUnlockMessage(`Skin selecionada!`);
+                    showUnlockMessage(`Skin selecionada!`);
                 });
                 break;
             case 'resetGame':

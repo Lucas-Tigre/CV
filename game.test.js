@@ -1,9 +1,16 @@
 import { config } from './js/config.js';
 import { spawnEnemy } from './js/enemy.js';
 import { checkLevelUp } from './js/utils.js';
+
 // Não podemos testar facilmente as funções do game.js diretamente porque elas não são exportadas
 // e dependem de um estado complexo.
 // Em vez disso, testaremos as funções puras que criamos.
+
+
+// Não podemos testar facilmente as funções do game.js diretamente porque elas não são exportadas
+// e dependem de um estado complexo.
+// Em vez disso, testaremos as funções puras que criamos.
+
 
 // Simula um canvas e outros elementos do DOM para o ambiente JSDOM.
 beforeAll(() => {
@@ -50,8 +57,13 @@ describe('Lógica Modular do Jogo', () => {
     let testConfig;
     beforeEach(() => {
         testConfig = JSON.parse(JSON.stringify(config));
+
+        // Simula o objeto 'wave' que normalmente é criado em restartGame() para que o teste não falhe.
+        config.wave = { number: 1 };
+
         // Simula o objeto 'wave' que normalmente é criado em restartGame().
         testConfig.wave = { number: 1 };
+
     });
 
     describe('Sistema de Inimigos', () => {
