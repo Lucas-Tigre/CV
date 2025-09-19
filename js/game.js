@@ -336,7 +336,7 @@ function updatePhysics(deltaTime) {
     state.setExplosions(explosion.updateExplosions(state.explosions));
 
     if (state.enemies.length > 0) {
-        const enemyUpdate = enemy.updateEnemies(state.enemies, player, deltaTime, state.particles, state.projectiles);
+        const enemyUpdate = enemy.updateEnemies(config, state.enemies, player, deltaTime, state.particles, state.projectiles);
         state.setEnemies(enemyUpdate.newEnemies);
         state.setParticles(enemyUpdate.newParticles);
         state.setProjectiles(enemyUpdate.newProjectiles);
