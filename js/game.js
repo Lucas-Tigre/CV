@@ -8,7 +8,7 @@ import * as particle from './particle.js';
 import * as enemy from './enemy.js';
 import * as projectile from './projectile.js';
 import * as explosion from './explosion.js';
-import * as sound from './utils.js';
+import { checkLevelUp as checkLevelUpLogic, showUnlockMessage, playSound, initSoundSystem, unlockAudio } from './utils.js';
 import * as audio from './audio.js';
 
 // =============================================
@@ -38,7 +38,7 @@ function toggleMenu(menuElement, show) {
 function triggerBossFight(level) {
     state.setEnemies([]);
     config.bossFightActive = true;
-    sound.showUnlockMessage(`UM CHEFE APARECEU!`);
+    showUnlockMessage(`UM CHEFE APARECEU!`);
     const bossType = level === 50 ? 'finalBoss' : 'boss';
     const musicTrack = level === 50 ? 'finalBossTheme' : 'bossBattle';
     audio.playMusic(musicTrack);
@@ -47,23 +47,24 @@ function triggerBossFight(level) {
 
 /** Verifica se o jogador tem XP suficiente para subir de nível. */
 function checkLevelUp() {
-    if (config.level >= 50) {
-        config.xp = config.level * 100;
-        if (state.enemies.length === 0 && !config.bossFightActive) {
-            triggerBossFight(50);
-        }
-        return;
+    const levelUpResult = checkLevelUpLogic(
+        config.level,
+        config.xp,
+        state.enemies.length,
+        config.bossFightActive
+    );
+
+    config.level = levelUpResult.newLevel;
+    config.xp = levelUpResult.newXp;
+
+    if (levelUpResult.leveledUp) {
+        config.skillPoints += levelUpResult.skillPointsGained;
+        showUnlockMessage(levelUpResult.message);
+        playSound('levelUp');
     }
-    const xpNeeded = config.level * 100;
-    if (config.xp >= xpNeeded) {
-        config.level++;
-        config.xp -= xpNeeded;
-        config.skillPoints++;
-        sound.showUnlockMessage(`Nível ${config.level} alcançado! +1 Ponto de Habilidade`);
-        sound.playSound('levelUp');
-        if (config.level % 10 === 0) {
-            triggerBossFight(config.level);
-        }
+
+    if (levelUpResult.bossToTrigger) {
+        triggerBossFight(levelUpResult.bossToTrigger);
     }
 }
 
@@ -76,7 +77,7 @@ function updateQuest(questId, amount = 1) {
             config.xp += quest.reward;
             config.quests.completed.push(quest.id);
             config.quests.active = config.quests.active.filter(q => q.id !== questId);
-            sound.showUnlockMessage(`Missão completa! +${quest.reward}XP`);
+            showUnlockMessage(`Missão completa! +${quest.reward}XP`);
             checkLevelUp();
         }
         ui.updateQuestUI(config.quests.active);
@@ -88,7 +89,7 @@ function updateWave() {
     if (config.bossFightActive) {
         if (state.enemies.length === 0) {
             config.bossFightActive = false;
-            sound.showUnlockMessage(`Chefe derrotado!`);
+            showUnlockMessage(`Chefe derrotado!`);
             audio.playMusic('mainTheme');
         }
         return;
@@ -99,7 +100,7 @@ function updateWave() {
         config.wave.enemiesToSpawn = 5 + Math.floor(config.wave.number * 1.5);
         config.wave.spawned = 0;
         config.wave.timer = 0;
-        sound.showUnlockMessage(`Onda ${config.wave.number} começando!`);
+        showUnlockMessage(`Onda ${config.wave.number} começando!`);
         updateQuest('wave5', 1);
     } else if (config.wave.spawned < config.wave.enemiesToSpawn && config.wave.timer > 90) {
         state.setEnemies(enemy.spawnEnemy(state.enemies));
@@ -215,24 +216,24 @@ function upgradeSkill(key) {
         for (const req of skill.requires) {
             const [reqKey, reqLevel] = req.split(':');
             if (config.skills.tree[reqKey]?.currentLevel < parseInt(reqLevel, 10)) {
-                sound.showUnlockMessage(`Requisito não cumprido: ${config.skills.tree[reqKey].name} Nível ${reqLevel}`);
+                showUnlockMessage(`Requisito não cumprido: ${config.skills.tree[reqKey].name} Nível ${reqLevel}`);
                 return;
             }
         }
     }
 
     if (config.skillPoints < skill.cost) {
-        sound.showUnlockMessage("Pontos de habilidade insuficientes!");
+        showUnlockMessage("Pontos de habilidade insuficientes!");
         return;
     }
     if (skill.currentLevel >= skill.maxLevel) {
-        sound.showUnlockMessage("Nível máximo já alcançado!");
+        showUnlockMessage("Nível máximo já alcançado!");
         return;
     }
 
     config.skillPoints -= skill.cost;
     skill.currentLevel++;
-    sound.playSound('levelUp');
+    playSound('levelUp');
 
     switch (key) {
         case 'healthBoost':
@@ -310,7 +311,7 @@ function updatePhysics(deltaTime) {
     if (particleUpdate.powerupCollected) {
         player.isPoweredUp = true;
         player.powerUpTimer = 300;
-        sound.playSound('levelUp');
+        playSound('levelUp');
     }
 
     if (particleUpdate.absorbedXp > 0) {
@@ -329,7 +330,7 @@ function updatePhysics(deltaTime) {
     state.setProjectiles(projectileUpdate.remainingProjectiles);
     if (projectileUpdate.newExplosions.length > 0) {
         state.setExplosions([...state.explosions, ...projectileUpdate.newExplosions]);
-        sound.playSound('enemyDefeat');
+        playSound('enemyDefeat');
     }
 
     state.setExplosions(explosion.updateExplosions(state.explosions));
@@ -359,7 +360,7 @@ function updatePhysics(deltaTime) {
             const dy = player.y - p.y;
             if (Math.sqrt(dx * dx + dy * dy) < player.size + p.size) {
                 player.health -= 5;
-                sound.playSound('hit');
+                playSound('hit');
                 hostileParticles.splice(i, 1);
             }
         }
@@ -374,10 +375,10 @@ function updatePhysics(deltaTime) {
         const dy = player.y - proj.y;
         if (Math.sqrt(dx * dx + dy * dy) < player.size + proj.size) {
             player.health -= proj.damage;
-            sound.playSound('hit');
+            playSound('hit');
             if (proj.onDeath === 'explode') {
                 state.setExplosions([...state.explosions, { x: proj.x, y: proj.y, radius: proj.explosionRadius, damage: proj.damage, duration: 30, color: proj.color }]);
-                sound.playSound('enemyDefeat');
+                playSound('enemyDefeat');
             }
             currentProjectiles.splice(i, 1);
         }
@@ -398,7 +399,7 @@ function updatePhysics(deltaTime) {
         player.health = 0;
         if (!config.gamePaused) {
             config.gamePaused = true;
-            sound.playSound('gameOver');
+            playSound('gameOver');
             audio.stopMusic();
             ui.showGameOver({ level: config.level, wave: config.wave.number, particles: config.particlesAbsorbed, enemies: config.enemiesDestroyed });
         }
@@ -449,7 +450,7 @@ function setupControls() {
 
     // Desbloqueia o áudio na primeira interação do usuário para contornar políticas de autoplay dos navegadores.
     const handleFirstInteraction = () => {
-        sound.unlockAudio();
+        unlockAudio();
         audio.playMusic('mainTheme');
         canvas.removeEventListener('mousemove', handleFirstInteraction);
         window.removeEventListener('keydown', handleFirstInteraction);
@@ -503,7 +504,7 @@ function setupControls() {
                 ui.showGalaxyMap(config.galaxies.list, config.galaxies.unlocked, (key) => {
                     config.galaxies.current = key;
                     document.body.style.background = config.galaxies.list[key].background;
-                    sound.showUnlockMessage(`Galáxia ${config.galaxies.list[key].name} selecionada!`);
+                    showUnlockMessage(`Galáxia ${config.galaxies.list[key].name} selecionada!`);
                     toggleMenu(document.getElementById('galaxy-map'), false);
                 });
                 break;
@@ -525,7 +526,7 @@ function setupControls() {
                 ui.showSkinsModal(config.skins.available, config.skins.current, (id) => {
                     config.skins.current = id;
                     player.face = config.skins.available.find(s => s.id === id).emoji;
-                    sound.showUnlockMessage(`Skin selecionada!`);
+                    showUnlockMessage(`Skin selecionada!`);
                 });
                 break;
             case 'resetGame':
@@ -574,7 +575,7 @@ function initGame() {
     preloadImages();
     requestAnimationFrame(spawnBatch);
 
-    sound.initSoundSystem();
+    initSoundSystem();
     ui.updateHealthBar(player.health, player.maxHealth);
     ui.updateXPBar(config.xp, config.level);
     updateStats();

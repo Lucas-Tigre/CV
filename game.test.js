@@ -1,5 +1,6 @@
 import { config } from './js/config.js';
 import { spawnEnemy } from './js/enemy.js';
+import { checkLevelUp } from './js/utils.js';
 
 // Não podemos testar facilmente as funções do game.js diretamente porque elas não são exportadas
 // e dependem de um estado complexo.
@@ -80,11 +81,54 @@ describe('Lógica Modular do Jogo', () => {
         });
     });
 
-    // Nota: Testar funções como checkLevelUp e updateQuest é difícil de forma isolada
-    // porque elas não são exportadas de game.js e modificam um estado global (config)
-    // que é difícil de gerenciar em um ambiente de teste sem uma refatoração maior.
-    // Uma abordagem melhor seria tornar essas funções puras, passando o estado de que precisam.
-    // Por enquanto, estamos focando nos módulos testáveis e isolados.
+    describe('Lógica Pura do Jogo', () => {
+        it('não deve subir de nível se o XP não for suficiente', () => {
+            const result = checkLevelUp(1, 50, 0, false);
+            expect(result.leveledUp).toBe(false);
+            expect(result.newLevel).toBe(1);
+            expect(result.skillPointsGained).toBe(0);
+        });
+
+        it('deve subir de nível quando o XP for suficiente', () => {
+            const result = checkLevelUp(1, 100, 0, false);
+            expect(result.leveledUp).toBe(true);
+            expect(result.newLevel).toBe(2);
+            expect(result.newXp).toBe(0);
+            expect(result.skillPointsGained).toBe(1);
+        });
+
+        it('deve lidar com o XP restante após subir de nível', () => {
+            const result = checkLevelUp(1, 150, 0, false);
+            expect(result.leveledUp).toBe(true);
+            expect(result.newLevel).toBe(2);
+            expect(result.newXp).toBe(50);
+        });
+
+        it('deve acionar uma luta de chefe no nível 10', () => {
+            const result = checkLevelUp(9, 900, 0, false);
+            expect(result.leveledUp).toBe(true);
+            expect(result.newLevel).toBe(10);
+            expect(result.bossToTrigger).toBe(10);
+        });
+
+        it('não deve acionar uma luta de chefe em outros níveis', () => {
+            const result = checkLevelUp(2, 200, 0, false);
+            expect(result.leveledUp).toBe(true);
+            expect(result.newLevel).toBe(3);
+            expect(result.bossToTrigger).toBeNull();
+        });
+
+        it('deve acionar o chefe final quando o nível 50 for alcançado e os inimigos forem eliminados', () => {
+            const result = checkLevelUp(50, 5000, 0, false);
+            expect(result.leveledUp).toBe(false); // Não pode passar do nível 50
+            expect(result.bossToTrigger).toBe(50);
+        });
+
+        it('NÃO deve acionar o chefe final se ainda houver inimigos presentes', () => {
+            const result = checkLevelUp(50, 5000, 5, false);
+            expect(result.bossToTrigger).toBeNull();
+        });
+    });
 
     describe('Configuração Inicial', () => {
         it('deve ter um limite de nível 50 em sua lógica (verificado pela leitura do código)', () => {

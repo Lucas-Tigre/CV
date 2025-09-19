@@ -68,3 +68,48 @@ export function unlockAudio() {
         sound.play().then(() => sound.pause()).catch(() => {});
     });
 }
+
+/**
+ * Verifica se o jogador tem XP suficiente para subir de nível e retorna o novo estado.
+ * Esta é uma função pura: ela não modifica o estado global, apenas calcula e retorna as mudanças.
+ * @param {number} level - O nível atual do jogador.
+ * @param {number} xp - A quantidade de XP atual do jogador.
+ * @param {number} enemiesCount - O número de inimigos atualmente na tela.
+ * @param {boolean} bossFightActive - Se uma luta de chefe está ativa.
+ * @returns {object} Um objeto contendo o novo estado e os eventos que ocorreram.
+ */
+export function checkLevelUp(level, xp, enemiesCount, bossFightActive) {
+    const output = {
+        newLevel: level,
+        newXp: xp,
+        skillPointsGained: 0,
+        leveledUp: false,
+        bossToTrigger: null,
+        message: null,
+    };
+
+    // Nível máximo atingido, verifica se o chefe final deve ser acionado.
+    if (level >= 50) {
+        output.newXp = level * 100; // Mantém a barra de XP cheia.
+        if (enemiesCount === 0 && !bossFightActive) {
+            output.bossToTrigger = 50;
+        }
+        return output;
+    }
+
+    const xpNeeded = level * 100;
+    if (xp >= xpNeeded) {
+        output.newLevel = level + 1;
+        output.newXp = xp - xpNeeded;
+        output.skillPointsGained = 1;
+        output.leveledUp = true;
+        output.message = `Nível ${output.newLevel} alcançado! +1 Ponto de Habilidade`;
+
+        // Aciona um chefe a cada 10 níveis.
+        if (output.newLevel % 10 === 0) {
+            output.bossToTrigger = output.newLevel;
+        }
+    }
+
+    return output;
+}
