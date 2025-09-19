@@ -1,8 +1,8 @@
 // =============================================
-// AUDIO MODULE FOR BACKGROUND MUSIC
+// MÓDULO DE ÁUDIO PARA MÚSICA DE FUNDO
 // =============================================
 
-// TODO: USER - Substitua estas URLs de placeholder pelos links dos seus arquivos de música.
+// TODO: USUÁRIO - Substitua estas URLs de placeholder pelos links dos seus arquivos de música.
 // Você pode usar links diretos para arquivos .mp3, .wav, .ogg, etc.
 // Exemplo: 'https://github.com/seu-usuario/seu-repo/raw/main/musica.mp3'
 const musicTracks = {
@@ -20,28 +20,28 @@ let currentTrack = null;
 let isFading = false;
 
 /**
- * Creates and configures an Audio object for a track.
- * @param {string} trackName - The key of the track in the musicTracks object.
- * @returns {Audio|null} - The configured Audio object or null if the track doesn't exist.
+ * Cria e configura um objeto de Áudio para uma faixa.
+ * @param {string} trackName - A chave da faixa no objeto musicTracks.
+ * @returns {Audio|null} - O objeto de Áudio configurado ou nulo se a faixa não existir.
  */
 function createAudioElement(trackName) {
     if (!musicTracks[trackName]) {
-        console.error(`Music track "${trackName}" not found.`);
+        console.error(`Faixa de música "${trackName}" não encontrada.`);
         return null;
     }
     const audio = new Audio(musicTracks[trackName]);
     audio.loop = true;
-    audio.volume = 0; // Start with volume 0 for fading in
+    audio.volume = 0; // Começa com volume 0 para o fade in
     return audio;
 }
 
 /**
- * Plays a music track, fading out the current track and fading in the new one.
- * @param {string} trackName - The name of the track to play.
+ * Toca uma faixa de música, fazendo fade out na faixa atual e fade in na nova.
+ * @param {string} trackName - O nome da faixa a ser tocada.
  */
 export function playMusic(trackName) {
     if (isFading || (currentTrack && currentTrack.trackName === trackName)) {
-        return; // Don't interrupt fading or restart the same track
+        return; // Não interrompe o fade ou reinicia a mesma faixa
     }
 
     const newAudio = createAudioElement(trackName);
@@ -49,14 +49,14 @@ export function playMusic(trackName) {
 
     isFading = true;
 
-    // Fade out the current track if it exists
+    // Faz fade out da faixa atual, se existir
     if (currentTrack && currentTrack.audio.volume > 0) {
         let fadeOutInterval = setInterval(() => {
             currentTrack.audio.volume = Math.max(0, currentTrack.audio.volume - 0.05);
             if (currentTrack.audio.volume === 0) {
                 clearInterval(fadeOutInterval);
                 currentTrack.audio.pause();
-                currentTrack.audio.src = ''; // Force unload
+                currentTrack.audio.src = ''; // Força o descarregamento do áudio
                 startFadeIn();
             }
         }, 100);
@@ -66,10 +66,10 @@ export function playMusic(trackName) {
 
     function startFadeIn() {
         currentTrack = { audio: newAudio, trackName: trackName };
-        currentTrack.audio.play().catch(e => console.error("Audio play failed:", e));
+        currentTrack.audio.play().catch(e => console.error("Falha ao tocar áudio:", e));
 
         let fadeInInterval = setInterval(() => {
-            currentTrack.audio.volume = Math.min(0.5, currentTrack.audio.volume + 0.05); // Max volume 0.5
+            currentTrack.audio.volume = Math.min(0.5, currentTrack.audio.volume + 0.05); // Volume máximo de 0.5
             if (currentTrack.audio.volume >= 0.5) {
                 clearInterval(fadeInInterval);
                 isFading = false;
@@ -79,7 +79,7 @@ export function playMusic(trackName) {
 }
 
 /**
- * Stops the currently playing music with a fade out.
+ * Para a música atualmente em execução com um efeito de fade out.
  */
 export function stopMusic() {
     if (!currentTrack || isFading) return;
