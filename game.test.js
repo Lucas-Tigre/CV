@@ -1,10 +1,10 @@
 import { config } from './js/config.js';
 import { spawnEnemy } from './js/enemy.js';
-// We can't easily test the new game.js functions directly because they are not exported
-// and they rely on a complex state.
-// We will test the pure functions we have created.
+// Não podemos testar facilmente as funções do game.js diretamente porque elas não são exportadas
+// e dependem de um estado complexo.
+// Em vez disso, testaremos as funções puras que criamos.
 
-// Mocking a canvas and other DOM elements for JSDOM
+// Simula um canvas e outros elementos do DOM para o ambiente JSDOM.
 beforeAll(() => {
     document.body.innerHTML = `
         <canvas id="canvas"></canvas>
@@ -43,18 +43,18 @@ beforeAll(() => {
     }
 });
 
-describe('Modular Game Logic', () => {
+describe('Lógica Modular do Jogo', () => {
 
-    // Create a deep copy of the config for each test to avoid side effects
+    // Cria uma cópia profunda da configuração para cada teste para evitar efeitos colaterais.
     let testConfig;
     beforeEach(() => {
         testConfig = JSON.parse(JSON.stringify(config));
-        // Jest doesn't re-import modules between tests, so we need to manually reset state if we were manipulating the original import.
-        // For this test, we pass the testConfig to functions that need it.
+        // Simula o objeto 'wave' que normalmente é criado em restartGame() para que o teste não falhe.
+        config.wave = { number: 1 };
     });
 
-    describe('Enemy System', () => {
-        it('should spawn a random enemy', () => {
+    describe('Sistema de Inimigos', () => {
+        it('deve gerar um inimigo aleatório', () => {
             const initialEnemies = [];
             const newEnemies = spawnEnemy(initialEnemies);
             expect(newEnemies.length).toBe(1);
@@ -62,7 +62,7 @@ describe('Modular Game Logic', () => {
             expect(newEnemies[0]).toHaveProperty('type');
         });
 
-        it('should spawn a specific boss enemy', () => {
+        it('deve gerar um inimigo chefe específico', () => {
             const initialEnemies = [];
             const newEnemies = spawnEnemy(initialEnemies, 'boss');
             expect(newEnemies.length).toBe(1);
@@ -70,7 +70,7 @@ describe('Modular Game Logic', () => {
             expect(newEnemies[0].health).toBe(200);
         });
 
-        it('should spawn a finalBoss enemy', () => {
+        it('deve gerar um inimigo chefe final', () => {
             const initialEnemies = [];
             const newEnemies = spawnEnemy(initialEnemies, 'finalBoss');
             expect(newEnemies.length).toBe(1);
@@ -79,24 +79,24 @@ describe('Modular Game Logic', () => {
         });
     });
 
-    // Note: Testing functions like checkLevelUp and updateQuest is difficult in isolation
-    // because they are not exported from game.js and they modify a global state (config)
-    // that is hard to manage in a test environment without further refactoring.
-    // A better approach would be to make these functions pure by passing the state they need.
-    // For now, we are focusing on the testable, isolated modules.
+    // Nota: Testar funções como checkLevelUp e updateQuest é difícil de forma isolada
+    // porque elas não são exportadas de game.js e modificam um estado global (config)
+    // que é difícil de gerenciar em um ambiente de teste sem uma refatoração maior.
+    // Uma abordagem melhor seria tornar essas funções puras, passando o estado de que precisam.
+    // Por enquanto, estamos focando nos módulos testáveis e isolados.
 
-    describe('Initial Configuration', () => {
-        it('should have a level cap of 50 in its logic (verified by reading the code)', () => {
-            // This is a conceptual test, as testing the hard cap would require running the game loop.
-            // We verify by knowing the implementation in js/game.js has `if (config.level >= 50)`.
+    describe('Configuração Inicial', () => {
+        it('deve ter um limite de nível 50 em sua lógica (verificado pela leitura do código)', () => {
+            // Este é um teste conceitual, pois testar o limite máximo exigiria a execução do loop do jogo.
+            // Verificamos sabendo que a implementação em js/game.js possui `if (config.level >= 50)`.
             expect(true).toBe(true);
         });
 
-        it('should not have a co-op mode flag', () => {
+        it('não deve ter uma flag de modo cooperativo', () => {
             expect(testConfig.coopMode).toBeUndefined();
         });
 
-        it('should only have one player in the configuration', () => {
+        it('deve ter apenas um jogador na configuração', () => {
             expect(testConfig.players.length).toBe(1);
         });
     });

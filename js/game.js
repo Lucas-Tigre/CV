@@ -34,7 +34,7 @@ function toggleMenu(menuElement, show) {
 // LÓGICA PRINCIPAL DO JOGO
 // =============================================
 
-/** Ativa uma batalha de chefe, limpando inimigos normais e tocando música de chefe. */
+/** Ativa uma batalha de chefe, limpando inimigos normais e tocando a música de chefe. */
 function triggerBossFight(level) {
     state.setEnemies([]);
     config.bossFightActive = true;
@@ -155,7 +155,7 @@ function restartGame() {
     document.getElementById('game-over-screen').style.display = 'none';
     const player = config.players[0];
 
-    // Reseta o estado do jogador para os valores base
+    // Reseta o estado do jogador para os valores base.
     player.health = player.baseMaxHealth;
     player.isPoweredUp = false;
     player.powerUpTimer = 0;
@@ -164,7 +164,7 @@ function restartGame() {
     player.maxHealth = player.baseMaxHealth;
     config.xpMultiplier = config.baseXpMultiplier;
 
-    // Reseta o estado do jogo
+    // Reseta o estado do jogo.
     config.gamePaused = false;
     config.bossFightActive = false;
     state.setParticles([]);
@@ -173,12 +173,12 @@ function restartGame() {
     state.setProjectiles([]);
     state.setExplosions([]);
 
-    // Reseta as habilidades
+    // Reseta as habilidades.
     for (const key in config.skills.tree) {
         config.skills.tree[key].currentLevel = 0;
     }
 
-    // Reseta progresso de nível, onda e missões
+    // Reseta o progresso de nível, onda e missões.
     Object.assign(config, {
         wave: { number: 1, enemiesToSpawn: 5, spawned: 0, timer: 0 },
         xp: 0,
@@ -193,7 +193,7 @@ function restartGame() {
         { id: 'wave5', target: 5, current: 1, reward: 200, title: "Alcançar onda 5" }
     ];
 
-    // Reinicia a música e o loop do jogo
+    // Reinicia a música e o loop do jogo.
     audio.playMusic('mainTheme');
     if (!state.gameLoopRunning) {
         state.setGameLoopRunning(true);
@@ -264,7 +264,7 @@ function render() {
     projectile.renderProjectiles(ctx, state.projectiles);
     explosion.renderExplosions(ctx, state.explosions);
 
-    // Renderiza a aura de dano do jogador
+    // Renderiza a aura de dano do jogador.
     if (player.mode === 'attract') {
         const effectiveRadius = player.isPoweredUp ? player.radius * 1.5 : player.radius;
         const auraColor = player.isPoweredUp ? '255, 215, 0' : '142, 45, 226';
@@ -276,7 +276,7 @@ function render() {
         ctx.stroke();
     }
 
-    // Renderiza o jogador
+    // Renderiza o jogador.
     ctx.fillStyle = player.color;
     ctx.beginPath();
     ctx.arc(player.x, player.y, player.size, 0, Math.PI * 2);
@@ -296,13 +296,13 @@ function updatePhysics(deltaTime) {
 
     handlePowerUpTimer();
 
-    // Atualiza a animação da aura
+    // Atualiza a animação da aura.
     const effectiveRadius = player.isPoweredUp ? player.radius * 1.5 : player.radius;
     let newAuraRadius = state.auraPulseRadius + 2;
     if (newAuraRadius > effectiveRadius) newAuraRadius = 0;
     state.setAuraPulseRadius(newAuraRadius);
 
-    // Atualiza as entidades do jogo
+    // Atualiza as entidades do jogo.
     const particleUpdate = particle.updateParticles(state.particles, player, deltaTime, state.lastUpdateIndex);
     state.setParticles(particleUpdate.newParticles);
     state.setLastUpdateIndex(particleUpdate.newLastUpdateIndex);
@@ -350,7 +350,7 @@ function updatePhysics(deltaTime) {
 
     // --- DETECÇÃO DE COLISÃO ---
 
-    // Jogador vs Partículas Hostis (do Chefe)
+    // Jogador vs Partículas Hostis (geradas pelo Chefe).
     let hostileParticles = state.particles;
     for (let i = hostileParticles.length - 1; i >= 0; i--) {
         const p = hostileParticles[i];
@@ -366,7 +366,7 @@ function updatePhysics(deltaTime) {
     }
     state.setParticles(hostileParticles);
 
-    // Jogador vs Projéteis de Inimigos
+    // Jogador vs Projéteis de Inimigos.
     let currentProjectiles = state.projectiles;
     for (let i = currentProjectiles.length - 1; i >= 0; i--) {
         const proj = currentProjectiles[i];
@@ -384,7 +384,7 @@ function updatePhysics(deltaTime) {
     }
     state.setProjectiles(currentProjectiles);
 
-    // Jogador vs Explosões
+    // Jogador vs Explosões.
     state.explosions.forEach(exp => {
         const dx = player.x - exp.x;
         const dy = player.y - exp.y;
@@ -447,7 +447,7 @@ function setupControls() {
     const player = config.players[0];
     const menu = document.getElementById('menu');
 
-    // Desbloqueia o áudio na primeira interação do usuário.
+    // Desbloqueia o áudio na primeira interação do usuário para contornar políticas de autoplay dos navegadores.
     const handleFirstInteraction = () => {
         sound.unlockAudio();
         audio.playMusic('mainTheme');
@@ -562,7 +562,7 @@ function initGame() {
     player.x = canvas.width / 2;
     player.y = canvas.height / 2;
 
-    // Armazena os valores base do jogador para os upgrades de habilidades.
+    // Armazena os valores base do jogador para serem usados nos upgrades de habilidades.
     if (player.baseRadius === undefined) {
         player.baseRadius = player.radius;
         player.baseAttractionDamage = player.attractionDamage;

@@ -43,7 +43,7 @@ export function initSoundSystem() {
         hit: 'assets/audio/hit.mp3',
         respawn: 'assets/audio/respawn.mp3',
         bossRoar: 'assets/audio/boss_roar.mp3',
-        // bigBang sound was removed from the game logic, so we can remove it here too.
+        // O som do bigBang foi removido da lógica do jogo, então podemos removê-lo daqui também.
     };
 
     for (const [key, url] of Object.entries(soundPaths)) {
