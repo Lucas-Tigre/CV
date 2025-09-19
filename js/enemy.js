@@ -69,7 +69,7 @@ export function spawnEnemy(currentEnemies, typeKey = null) {
         if (enemy.behavior === 'crossScreen') {
             const edge = Math.floor(Math.random() * 4);
             let targetX, targetY;
-            const padding = 100; // Gera o inimigo fora da tela.
+            const padding = 100; // Gera o inimigo fora da tela para uma entrada mais suave.
 
             switch (edge) {
                 case 0: // Topo
@@ -115,7 +115,7 @@ export function spawnEnemy(currentEnemies, typeKey = null) {
             enemy.preferredDistance = type.preferredDistance;
         }
         if (typeKey === 'boss' || typeKey === 'finalBoss') {
-            enemy.attackCooldown = Math.random() * 120 + 180; // Cooldown de 3-5 segundos.
+            enemy.attackCooldown = Math.random() * 120 + 180; // Cooldown do ataque do chefe (3 a 5 segundos).
         }
 
         newEnemies.push(enemy);
@@ -132,7 +132,7 @@ export function spawnEnemy(currentEnemies, typeKey = null) {
  * @param {number} deltaTime - O tempo desde o último frame.
  * @param {Array} particles - O array de partículas (para explosões de chefe).
  * @param {Array} projectiles - O array de projéteis.
- * @returns {object} Um objeto contendo o estado do jogo (gameOver), XP ganho e os novos arrays de entidades.
+ * @returns {object} Um objeto contendo o XP ganho e os novos arrays de entidades.
  */
 export function updateEnemies(enemies, player, deltaTime, particles, projectiles) {
     let xpFromDefeatedEnemies = 0;
@@ -154,7 +154,7 @@ export function updateEnemies(enemies, player, deltaTime, particles, projectiles
         const dy = player.y - enemy.y;
         const distSq = dx * dx + dy * dy;
 
-        // Lógica de Atração e Dano do Buraco Negro.
+        // Lógica de Atração e Dano do Vórtice do Jogador.
         const enemyType = config.enemySystem.types[enemy.type];
         const effectiveRadius = player.isPoweredUp ? player.radius * 1.5 : player.radius;
         if (player.mode === 'attract' && distSq < effectiveRadius * effectiveRadius && !enemyType.ignoresAttraction) {
@@ -164,8 +164,8 @@ export function updateEnemies(enemies, player, deltaTime, particles, projectiles
             enemy.speedY *= damping;
 
             const dist = Math.sqrt(distSq);
-            const radialForce = 0.5; // Puxada forte para dentro.
-            const tangentialForce = 0.25; // Puxada orbital mais fraca.
+            const radialForce = 0.5; // Força de puxada para o centro.
+            const tangentialForce = 0.25; // Força orbital (cria o efeito de vórtice).
             const radial_nx = dx / dist;
             const radial_ny = dy / dist;
             const tangential_nx = -radial_ny;
@@ -181,20 +181,20 @@ export function updateEnemies(enemies, player, deltaTime, particles, projectiles
             if (enemy.health <= 0) {
                 xpFromDefeatedEnemies += enemy.isElite ? 10 : 3;
                 config.enemiesDestroyed++;
-                return; // Pula o resto da lógica para este inimigo derrotado.
+                return; // Pula o resto da lógica para este inimigo, que já foi derrotado.
             }
         } else {
-             // Comportamento Normal dos Inimigos
+             // Comportamento Normal dos Inimigos (quando não estão sendo atraídos)
             switch (enemy.behavior) {
                 case 'huntAndShoot':
                     {
                         const dist = Math.sqrt(distSq);
                         if (dist > enemy.preferredDistance) {
-                            // Se afasta para manter distância.
+                            // Move-se em direção ao jogador.
                             enemy.speedX = (dx / dist) * enemy.baseSpeed;
                             enemy.speedY = (dy / dist) * enemy.baseSpeed;
                         } else if (dist < enemy.preferredDistance * 0.8) {
-                            // Se afasta se estiver muito perto.
+                            // Afasta-se se estiver muito perto.
                             enemy.speedX = -(dx / dist) * enemy.baseSpeed;
                             enemy.speedY = -(dy / dist) * enemy.baseSpeed;
                         } else {
@@ -203,7 +203,7 @@ export function updateEnemies(enemies, player, deltaTime, particles, projectiles
                             enemy.speedY *= 0.8;
                         }
 
-                        // Lógica de tiro
+                        // Lógica de tiro.
                         enemy.shootCooldown--;
                         if (enemy.shootCooldown <= 0) {
                             newProjectiles.push(projectile.createProjectile(enemy.x, enemy.y, player.x, player.y, enemy.projectileType));
@@ -233,12 +233,13 @@ export function updateEnemies(enemies, player, deltaTime, particles, projectiles
                            enemy.speedY = (dy / dist) * enemy.baseSpeed;
                         }
                     } else {
+                        // Vagueia se o jogador estiver fora do raio de caça.
                         enemy.speedX += (Math.random() - 0.5) * 0.5;
                         enemy.speedY += (Math.random() - 0.5) * 0.5;
                     }
                     break;
                 case 'crossScreen':
-                    // Não faz nada, deixa a velocidade inicial o carregar.
+                    // Não faz nada, a velocidade inicial já foi definida no spawn.
                     break;
                 default: // 'wander'
                     enemy.speedX += (Math.random() - 0.5) * 0.5;
@@ -249,10 +250,10 @@ export function updateEnemies(enemies, player, deltaTime, particles, projectiles
         // Atualização de Posição e Fricção
         enemy.x += enemy.speedX * (deltaTime / 16.67);
         enemy.y += enemy.speedY * (deltaTime / 16.67);
-        enemy.speedX *= 0.95; // Fricção
+        enemy.speedX *= 0.95; // Fricção para suavizar o movimento.
         enemy.speedY *= 0.95;
 
-        // Mantém o inimigo dentro da tela.
+        // Mantém o inimigo dentro dos limites da tela.
         enemy.x = Math.max(10, Math.min(window.innerWidth - 10, enemy.x));
         enemy.y = Math.max(10, Math.min(window.innerHeight - 10, enemy.y));
 
