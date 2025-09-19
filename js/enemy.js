@@ -1,14 +1,14 @@
-import { config } from './config.js';
 import * as particle from './particle.js';
 import * as projectile from './projectile.js';
 
 /**
  * Gera um novo inimigo e o adiciona ao array de inimigos.
+ * @param {object} config - O objeto de configuração do jogo.
  * @param {Array} currentEnemies - O array atual de inimigos.
  * @param {string|null} typeKey - O tipo específico de inimigo a ser gerado. Se nulo, um inimigo aleatório é gerado.
  * @returns {Array} O novo array de inimigos.
  */
-export function spawnEnemy(currentEnemies, typeKey = null) {
+export function spawnEnemy(config, currentEnemies, typeKey = null) {
     let newEnemies = [...currentEnemies];
     try {
         if (!typeKey) {
@@ -134,7 +134,7 @@ export function spawnEnemy(currentEnemies, typeKey = null) {
  * @param {Array} projectiles - O array de projéteis.
  * @returns {object} Um objeto contendo o XP ganho e os novos arrays de entidades.
  */
-export function updateEnemies(enemies, player, deltaTime, particles, projectiles) {
+export function updateEnemies(config, enemies, player, deltaTime, particles, projectiles) {
     let xpFromDefeatedEnemies = 0;
     let remainingEnemies = [];
     let particlesFromExplosions = particles;

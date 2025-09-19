@@ -42,7 +42,7 @@ function triggerBossFight(level) {
     const bossType = level === 50 ? 'finalBoss' : 'boss';
     const musicTrack = level === 50 ? 'finalBossTheme' : 'bossBattle';
     audio.playMusic(musicTrack);
-    state.setEnemies(enemy.spawnEnemy(state.enemies, bossType));
+    state.setEnemies(enemy.spawnEnemy(config, state.enemies, bossType));
 }
 
 /** Verifica se o jogador tem XP suficiente para subir de nível. */
@@ -103,7 +103,7 @@ function updateWave() {
         showUnlockMessage(`Onda ${config.wave.number} começando!`);
         updateQuest('wave5', 1);
     } else if (config.wave.spawned < config.wave.enemiesToSpawn && config.wave.timer > 90) {
-        state.setEnemies(enemy.spawnEnemy(state.enemies));
+        state.setEnemies(enemy.spawnEnemy(config, state.enemies));
         config.wave.spawned++;
         config.wave.timer = 0;
     }
@@ -336,7 +336,7 @@ function updatePhysics(deltaTime) {
     state.setExplosions(explosion.updateExplosions(state.explosions));
 
     if (state.enemies.length > 0) {
-        const enemyUpdate = enemy.updateEnemies(state.enemies, player, deltaTime, state.particles, state.projectiles);
+        const enemyUpdate = enemy.updateEnemies(config, state.enemies, player, deltaTime, state.particles, state.projectiles);
         state.setEnemies(enemyUpdate.newEnemies);
         state.setParticles(enemyUpdate.newParticles);
         state.setProjectiles(enemyUpdate.newProjectiles);
