@@ -1,5 +1,6 @@
 import { config } from './js/config.js';
 import { spawnEnemy } from './js/enemy.js';
+
 // Não podemos testar facilmente as funções do game.js diretamente porque elas não são exportadas
 // e dependem de um estado complexo.
 // Em vez disso, testaremos as funções puras que criamos.

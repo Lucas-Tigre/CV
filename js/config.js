@@ -121,7 +121,7 @@ export const config = {
             },
             boss: {
                 name: "Chefe",
-                chance: 0, // Apenas gerado manualmente
+                chance: 0, // Apenas gerado manually
                 speed: 2.5,
                 behavior: 'hunt', // Comportamento: caçar
                 // TODO: CUSTOMIZAR - Adicione a URL da sua imagem para o chefe aqui.
