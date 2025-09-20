@@ -196,6 +196,7 @@ export const config = {
     particlesAbsorbed: 0,
     enemiesDestroyed: 0,
     gameTime: 0,
+    wave: { number: 1, enemiesToSpawn: 5, spawned: 0, timer: 0 },
     
     // =============================================
     // OUTRAS CONFIGURAÇÕES
