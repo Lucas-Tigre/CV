@@ -11,6 +11,9 @@ import * as explosion from './explosion.js';
 import { checkLevelUp as checkLevelUpLogic, showUnlockMessage, playSound, initSoundSystem, unlockAudio } from './utils.js';
 import * as audio from './audio.js';
 
+// Armazena uma cópia profunda da configuração inicial de missões para garantir que o reset seja consistente.
+export const initialQuests = JSON.parse(JSON.stringify(config.quests));
+
 // =============================================
 // ELEMENTOS DO DOM E ASSETS
 // =============================================
@@ -152,7 +155,7 @@ function spawnBatch() {
 }
 
 /** Reinicia o jogo para o estado inicial, resetando progresso e habilidades. */
-function restartGame() {
+export function restartGame() {
     document.getElementById('game-over-screen').style.display = 'none';
     const player = config.players[0];
 
@@ -188,11 +191,7 @@ function restartGame() {
         enemiesDestroyed: 0,
         skillPoints: 0
     });
-    config.quests.active = [
-        { id: 'absorb100', target: 100, current: 0, reward: 50, title: "Absorver 100 partículas" },
-        { id: 'defeat20', target: 20, current: 0, reward: 100, title: "Derrotar 20 inimigos" },
-        { id: 'wave5', target: 5, current: 1, reward: 200, title: "Alcançar onda 5" }
-    ];
+    config.quests = JSON.parse(JSON.stringify(initialQuests));
 
     // Reinicia a música e o loop do jogo.
     audio.playMusic('mainTheme');
