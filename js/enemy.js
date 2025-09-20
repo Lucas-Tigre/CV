@@ -269,3 +269,41 @@ export function updateEnemies(enemies, player, deltaTime, particles, projectiles
 
     return { xpFromDefeatedEnemies, newEnemies: remainingEnemies, newParticles: particlesFromExplosions, newProjectiles };
 }
+
+/**
+ * Renderiza todos os inimigos no canvas.
+ * @param {CanvasRenderingContext2D} ctx - O contexto do canvas.
+ * @param {Array} enemies - O array de inimigos a ser renderizado.
+ */
+export function renderEnemies(ctx, enemies) {
+    enemies.forEach(enemy => {
+        // Desenha o corpo do inimigo
+        ctx.fillStyle = enemy.color;
+        ctx.beginPath();
+        ctx.arc(enemy.x, enemy.y, enemy.size, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Desenha a "cara" do inimigo (emoji)
+        ctx.font = `${enemy.size}px Arial`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(enemy.face, enemy.x, enemy.y);
+
+        // Desenha a barra de vida se a vida não estiver cheia
+        if (enemy.health < enemy.maxHealth) {
+            const healthBarWidth = enemy.size * 1.5;
+            const healthBarHeight = 5;
+            const healthBarX = enemy.x - healthBarWidth / 2;
+            const healthBarY = enemy.y - enemy.size - 10;
+
+            // Fundo da barra de vida
+            ctx.fillStyle = '#333';
+            ctx.fillRect(healthBarX, healthBarY, healthBarWidth, healthBarHeight);
+
+            // Vida atual
+            const healthPercentage = enemy.health / enemy.maxHealth;
+            ctx.fillStyle = 'red';
+            ctx.fillRect(healthBarX, healthBarY, healthBarWidth * healthPercentage, healthBarHeight);
+        }
+    });
+}
