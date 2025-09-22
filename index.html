@@ -8,6 +8,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
+
+    <!-- Ícone/Botão de Login no canto -->
+    <div id="login-trigger-container">
+        <button id="login-trigger-btn">👤 Login</button>
+    </div>
+
+    <!-- Conteúdo Principal da Página -->
     <div class="main-container">
         <header class="main-header">
             <h1>Universo de Partículas</h1>
@@ -15,34 +22,7 @@
         </header>
 
         <div class="content-wrapper">
-            <!-- Coluna da Esquerda: Login e Sobre -->
             <div class="left-column">
-                <section id="login-section" class="card">
-                    <h2>Entrar no Universo</h2>
-                    <form id="login-form">
-                        <div class="form-group">
-                            <label for="username">Nome de Usuário</label>
-                            <input type="text" id="username" name="username" required placeholder="Seu nome de Herói">
-                        </div>
-                        <div class="form-group">
-                            <label for="password">Senha</label>
-                            <input type="password" id="password" name="password" required placeholder="Senha (simulada)">
-                        </div>
-                        <button type="submit">Iniciar Jogo</button>
-                    </form>
-                </section>
-
-                <section id="about-team" class="card">
-                    <h2>Sobre a Equipe</h2>
-                    <p>
-                        <!-- TEXTO PLACEHOLDER -->
-                        Este jogo foi criado com paixão por uma equipe dedicada de desenvolvedores espaciais. Nossa missão é criar experiências divertidas e desafiadoras. Agradecemos por jogar!
-                    </p>
-                </section>
-            </div>
-
-            <!-- Coluna da Direita: Como Jogar -->
-            <div class="right-column">
                 <section id="how-to-play" class="card">
                     <h2>Como Jogar</h2>
                     <ul>
@@ -57,8 +37,42 @@
                     </p>
                 </section>
             </div>
+            <div class="right-column">
+                <section id="about-team" class="card">
+                    <h2>Sobre a Equipe</h2>
+                    <p>
+                        <!-- TEXTO PLACEHOLDER -->
+                        Este jogo foi criado com paixão por uma equipe dedicada de desenvolvedores espaciais. Nossa missão é criar experiências divertidas e desafiadoras. Agradecemos por jogar! Você pode editar este texto no arquivo index.html.
+                    </p>
+                </section>
+                <section id="start-game-section" class="card">
+                    <h2>Iniciar Aventura</h2>
+                    <p>Faça o login para habilitar o início do jogo.</p>
+                    <button id="start-game-btn" disabled>Iniciar Jogo</button>
+                </section>
+            </div>
         </div>
     </div>
+
+    <!-- Modal de Login (Escondido por padrão) -->
+    <div id="login-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <span class="close-modal-btn">&times;</span>
+            <h2>Login</h2>
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="username">Nome de Usuário</label>
+                    <input type="text" id="username" name="username" required placeholder="Seu nome de Herói">
+                </div>
+                <div class="form-group">
+                    <label for="password">Senha</label>
+                    <input type="password" id="password" name="password" required placeholder="Qualquer senha (simulado)">
+                </div>
+                <button type="submit">Entrar</button>
+            </form>
+        </div>
+    </div>
+
     <script src="js/login.js"></script>
 </body>
 </html>
