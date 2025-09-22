@@ -15,14 +15,14 @@ export function createProjectile(x, y, targetX, targetY, type = 'normal') {
     const projectileData = {
         speed: 5,
         size: 5,
-        color: '#FF00FF', // Magenta para projéteis normais
+        color: '#FF00FF', // Magenta para projéteis normais.
         damage: 10,
-        lifespan: 180, // 3 segundos
+        lifespan: 180, // Duração de 3 segundos a 60fps.
         onDeath: null
     };
 
     if (type === 'explosive') {
-        projectileData.color = '#FFA500'; // Laranja para explosivos
+        projectileData.color = '#FFA500'; // Laranja para explosivos.
         projectileData.onDeath = 'explode';
         projectileData.explosionRadius = 50;
     }
@@ -42,9 +42,9 @@ export function createProjectile(x, y, targetX, targetY, type = 'normal') {
 }
 
 /**
- * Atualiza a posição de todos os projéteis ativos.
+ * Atualiza a posição e o estado de todos os projéteis ativos.
  * @param {Array} projectiles - O array de projéteis para atualizar.
- * @returns {object} Um objeto contendo os projéteis restantes e novas explosões.
+ * @returns {object} Um objeto contendo os projéteis restantes e quaisquer novas explosões a serem criadas.
  */
 export function updateProjectiles(projectiles) {
     const remainingProjectiles = [];
@@ -60,14 +60,15 @@ export function updateProjectiles(projectiles) {
         if (p.lifespan > 0 && isOnScreen) {
             remainingProjectiles.push(p);
         } else {
-            // Projétil removido, verifica se há um evento de morte.
+            // Se o projétil saiu da tela ou seu tempo de vida acabou, ele é removido.
+            // Verifica se há um evento de "morte" a ser acionado.
             if (p.onDeath === 'explode') {
                 newExplosions.push({
                     x: p.x,
                     y: p.y,
                     radius: p.explosionRadius,
-                    damage: p.damage, // Dano da explosão pode ser o mesmo do projétil.
-                    duration: 30, // 0.5 segundos
+                    damage: p.damage, // O dano da explosão pode ser o mesmo do projétil.
+                    duration: 30,    // Duração de 0.5 segundos a 60fps.
                     color: p.color
                 });
             }

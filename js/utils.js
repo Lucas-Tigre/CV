@@ -1,5 +1,6 @@
 import { config } from './config.js';
 
+/** Toca um efeito sonoro pré-carregado. */
 export function playSound(soundName) {
     try {
         if (config.soundEnabled && config.soundEffects[soundName]) {
@@ -11,12 +12,14 @@ export function playSound(soundName) {
     }
 }
 
+/** Exibe uma mensagem de notificação animada na tela. */
 export function showUnlockMessage(message) {
     const el = document.createElement('div');
     el.className = 'unlock-message';
     el.textContent = message;
     document.body.appendChild(el);
 
+    // Animação de entrada e saída da mensagem.
     setTimeout(() => {
         el.style.opacity = '1';
         el.style.transform = 'translate(-50%, -50%) scale(1)';
@@ -34,6 +37,7 @@ export function showUnlockMessage(message) {
     }, 10);
 }
 
+/** Carrega todos os efeitos sonoros e as preferências de som do usuário. */
 export function initSoundSystem() {
     const soundPaths = {
         absorb: 'assets/audio/absorb.mp3',
@@ -43,7 +47,6 @@ export function initSoundSystem() {
         hit: 'assets/audio/hit.mp3',
         respawn: 'assets/audio/respawn.mp3',
         bossRoar: 'assets/audio/boss_roar.mp3',
-        // O som do bigBang foi removido da lógica do jogo, então podemos removê-lo daqui também.
     };
 
     for (const [key, url] of Object.entries(soundPaths)) {
@@ -53,6 +56,7 @@ export function initSoundSystem() {
         config.soundEffects[key].load();
     }
 
+    // Carrega a preferência de som do usuário (ligado/desligado) do armazenamento local.
     const savedSoundPref = localStorage.getItem('soundEnabled');
     if (savedSoundPref !== null) {
         config.soundEnabled = savedSoundPref === 'true';
@@ -60,23 +64,25 @@ export function initSoundSystem() {
 }
 
 let audioUnlocked = false;
+/** Desbloqueia a reprodução de áudio após a primeira interação do usuário com a página. */
 export function unlockAudio() {
     if (audioUnlocked) return;
     audioUnlocked = true;
 
+    // Tenta tocar e pausar cada som para "prepará-los" no navegador.
     Object.values(config.soundEffects).forEach(sound => {
         sound.play().then(() => sound.pause()).catch(() => {});
     });
 }
 
 /**
- * Verifica se o jogador tem XP suficiente para subir de nível e retorna o novo estado.
+ * Verifica se o jogador tem XP suficiente para subir de nível.
  * Esta é uma função pura: ela não modifica o estado global, apenas calcula e retorna as mudanças.
  * @param {number} level - O nível atual do jogador.
  * @param {number} xp - A quantidade de XP atual do jogador.
- * @param {number} enemiesCount - O número de inimigos atualmente na tela.
+ * @param {number} enemiesCount - O número de inimigos na tela.
  * @param {boolean} bossFightActive - Se uma luta de chefe está ativa.
- * @returns {object} Um objeto contendo o novo estado e os eventos que ocorreram.
+ * @returns {object} Um objeto contendo o novo estado e os eventos que ocorreram (level up, chefe).
  */
 export function checkLevelUp(level, xp, enemiesCount, bossFightActive) {
     const output = {
@@ -88,9 +94,9 @@ export function checkLevelUp(level, xp, enemiesCount, bossFightActive) {
         message: null,
     };
 
-    // Nível máximo atingido, verifica se o chefe final deve ser acionado.
+    // Se o nível máximo foi atingido, verifica se o chefe final deve ser acionado.
     if (level >= 50) {
-        output.newXp = level * 100; // Mantém a barra de XP cheia.
+        output.newXp = level * 100; // Mantém a barra de XP cheia no nível máximo.
         if (enemiesCount === 0 && !bossFightActive) {
             output.bossToTrigger = 50;
         }
@@ -105,7 +111,7 @@ export function checkLevelUp(level, xp, enemiesCount, bossFightActive) {
         output.leveledUp = true;
         output.message = `Nível ${output.newLevel} alcançado! +1 Ponto de Habilidade`;
 
-        // Aciona um chefe a cada 10 níveis.
+        // Aciona uma luta de chefe a cada 10 níveis.
         if (output.newLevel % 10 === 0) {
             output.bossToTrigger = output.newLevel;
         }

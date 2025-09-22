@@ -3,18 +3,18 @@ import { spawnEnemy } from './js/enemy.js';
 import { checkLevelUp } from './js/utils.js';
 import { restartGame, initialQuests } from './js/game.js';
 
-// As funções do game.js não são puras e dependem de um estado global e do DOM,
+// As funções em game.js não são puras e dependem de um estado global e do DOM,
 // o que torna o teste de unidade tradicional mais complexo.
 // A abordagem aqui é testar as funções de utilidade (lógica pura) e o comportamento
 // de alto nível que pode ser verificado através de efeitos colaterais no estado de configuração.
 
 describe('Lógica Modular do Jogo', () => {
 
-    // Cria uma cópia profunda da configuração para cada teste para evitar efeitos colaterais.
+    // Cria uma cópia profunda da configuração para cada teste, evitando efeitos colaterais entre eles.
     let testConfig;
     beforeEach(() => {
         testConfig = JSON.parse(JSON.stringify(config));
-        // Simula o objeto 'wave' que normalmente é criado em restartGame() para que o teste não falhe.
+        // Simula o objeto 'wave' que normalmente é criado em restartGame() para que os testes não falhem.
         config.wave = { number: 1 };
     });
 
@@ -44,7 +44,7 @@ describe('Lógica Modular do Jogo', () => {
         });
     });
 
-    describe('Lógica Pura do Jogo', () => {
+    describe('Lógica Pura do Jogo (Utils)', () => {
         it('não deve subir de nível se o XP não for suficiente', () => {
             const result = checkLevelUp(1, 50, 0, false);
             expect(result.leveledUp).toBe(false);
@@ -83,7 +83,7 @@ describe('Lógica Modular do Jogo', () => {
 
         it('deve acionar o chefe final quando o nível 50 for alcançado e os inimigos forem eliminados', () => {
             const result = checkLevelUp(50, 5000, 0, false);
-            expect(result.leveledUp).toBe(false); // Não pode passar do nível 50
+            expect(result.leveledUp).toBe(false); // Não pode passar do nível 50.
             expect(result.bossToTrigger).toBe(50);
         });
 
@@ -96,7 +96,7 @@ describe('Lógica Modular do Jogo', () => {
     describe('Configuração Inicial', () => {
         it('deve ter um limite de nível 50 em sua lógica (verificado pela leitura do código)', () => {
             // Este é um teste conceitual, pois testar o limite máximo exigiria a execução do loop do jogo.
-            // Verificamos sabendo que a implementação em js/game.js possui `if (config.level >= 50)`.
+            // A verificação é feita com base no conhecimento de que a implementação em `js/utils.js` contém `if (level >= 50)`.
             expect(true).toBe(true);
         });
 
@@ -111,23 +111,22 @@ describe('Lógica Modular do Jogo', () => {
 
     describe('Lógica de Reinicialização', () => {
         it('deve resetar as missões para o estado inicial definido em config.js', () => {
-            // Guarda o estado original para comparação
+            // Guarda o estado original para comparação.
             const originalQuestsState = JSON.parse(JSON.stringify(initialQuests));
 
-            // Simula a conclusão de uma missão durante o jogo
+            // Simula a conclusão de uma missão durante o jogo.
             config.quests.active.shift();
             config.quests.completed.push('absorb100');
 
-            // Garante que o estado foi modificado antes de reiniciar
+            // Garante que o estado foi modificado antes de reiniciar.
             expect(config.quests.active.length).not.toBe(originalQuestsState.active.length);
             expect(config.quests.completed.length).not.toBe(originalQuestsState.completed.length);
 
-            // Chama a função de reinicialização
-            // Como restartGame depende de `document`, precisamos garantir que o DOM está pronto.
-            // O `beforeAll` no topo do arquivo já cuida disso.
+            // Chama a função de reinicialização.
+            // A dependência do `document` é resolvida pelo `jest.setup.js`.
             restartGame();
 
-            // Verifica se o estado das missões foi restaurado para o original
+            // Verifica se o estado das missões foi restaurado para o original.
             expect(config.quests).toEqual(originalQuestsState);
         });
     });

@@ -11,11 +11,11 @@ import * as explosion from './explosion.js';
 import { checkLevelUp as checkLevelUpLogic, showUnlockMessage, playSound, initSoundSystem, unlockAudio } from './utils.js';
 import * as audio from './audio.js';
 
-// Armazena uma cópia profunda da configuração inicial de missões para garantir que o reset seja consistente.
+// Armazena uma cópia da configuração inicial de missões para garantir que o reset seja consistente.
 export const initialQuests = JSON.parse(JSON.stringify(config.quests));
 
 // =============================================
-// ELEMENTOS DO DOM E ASSETS
+// ELEMENTOS DO DOM E CACHE DE ASSETS
 // =============================================
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
@@ -29,15 +29,14 @@ function toggleMenu(menuElement, show) {
     if (menuElement) {
         menuElement.style.display = display;
     }
-    // Pausa o jogo quando qualquer menu é aberto.
-    config.gamePaused = show;
+    config.gamePaused = show; // Pausa o jogo sempre que um menu é aberto.
 }
 
 // =============================================
 // LÓGICA PRINCIPAL DO JOGO
 // =============================================
 
-/** Ativa uma batalha de chefe, limpando inimigos normais e tocando a música de chefe. */
+/** Ativa uma batalha de chefe, limpando inimigos normais e iniciando a música do chefe. */
 function triggerBossFight(level) {
     state.setEnemies([]);
     config.bossFightActive = true;
@@ -48,7 +47,7 @@ function triggerBossFight(level) {
     state.setEnemies(enemy.spawnEnemy(state.enemies, bossType));
 }
 
-/** Verifica se o jogador tem XP suficiente para subir de nível. */
+/** Verifica se o jogador tem XP suficiente para subir de nível e lida com a lógica de progressão. */
 function checkLevelUp() {
     const levelUpResult = checkLevelUpLogic(
         config.level,
@@ -71,7 +70,7 @@ function checkLevelUp() {
     }
 }
 
-/** Atualiza o progresso de uma missão ativa. */
+/** Atualiza o progresso de uma missão ativa com base em uma ação do jogador. */
 function updateQuest(questId, amount = 1) {
     const quest = config.quests.active.find(q => q.id === questId);
     if (quest) {
@@ -87,7 +86,7 @@ function updateQuest(questId, amount = 1) {
     }
 }
 
-/** Gerencia as ondas de inimigos, iniciando novas ondas quando necessário. */
+/** Gerencia as ondas de inimigos, iniciando novas ondas quando a anterior é derrotada. */
 function updateWave() {
     if (config.bossFightActive) {
         if (state.enemies.length === 0) {
@@ -112,7 +111,7 @@ function updateWave() {
     }
 }
 
-/** Atualiza o painel de estatísticas na tela. */
+/** Atualiza o painel de estatísticas na interface do usuário. */
 function updateStats() {
     const stats = {
         level: config.level,
@@ -124,7 +123,7 @@ function updateStats() {
     ui.updateStatsPanel(stats);
 }
 
-/** Gerencia o timer do power-up do jogador. */
+/** Gerencia o tempo de duração do power-up do jogador. */
 function handlePowerUpTimer() {
     const player = config.players[0];
     if (player.isPoweredUp && player.powerUpTimer > 0) {
@@ -154,12 +153,12 @@ function spawnBatch() {
     }
 }
 
-/** Reinicia o jogo para o estado inicial, resetando progresso e habilidades. */
+/** Reinicia o jogo para o estado inicial, restaurando o progresso e as habilidades. */
 export function restartGame() {
     document.getElementById('game-over-screen').style.display = 'none';
     const player = config.players[0];
 
-    // Reseta o estado do jogador para os valores base.
+    // Restaura o estado do jogador para os valores base.
     player.health = player.baseMaxHealth;
     player.isPoweredUp = false;
     player.powerUpTimer = 0;
@@ -168,7 +167,7 @@ export function restartGame() {
     player.maxHealth = player.baseMaxHealth;
     config.xpMultiplier = config.baseXpMultiplier;
 
-    // Reseta o estado do jogo.
+    // Restaura o estado do jogo.
     config.gamePaused = false;
     config.bossFightActive = false;
     state.setParticles([]);
@@ -177,12 +176,12 @@ export function restartGame() {
     state.setProjectiles([]);
     state.setExplosions([]);
 
-    // Reseta as habilidades.
+    // Restaura as habilidades.
     for (const key in config.skills.tree) {
         config.skills.tree[key].currentLevel = 0;
     }
 
-    // Reseta o progresso de nível, onda e missões.
+    // Restaura o progresso de nível, onda e missões.
     Object.assign(config, {
         wave: { number: 1, enemiesToSpawn: 5, spawned: 0, timer: 0 },
         xp: 0,
@@ -207,7 +206,7 @@ function upgradeSkill(key) {
     const player = config.players[0];
 
     if (!skill) {
-        console.error(`Tentativa de upgrade para skill inexistente: ${key}`);
+        console.error(`Tentativa de upgrade para habilidade inexistente: ${key}`);
         return;
     }
 
@@ -264,7 +263,7 @@ function render() {
     projectile.renderProjectiles(ctx, state.projectiles);
     explosion.renderExplosions(ctx, state.explosions);
 
-    // Renderiza a aura de dano do jogador.
+    // Renderiza a aura de dano do jogador quando o modo de atração está ativo.
     if (player.mode === 'attract') {
         const effectiveRadius = player.isPoweredUp ? player.radius * 1.5 : player.radius;
         const auraColor = player.isPoweredUp ? '255, 215, 0' : '142, 45, 226';
@@ -288,7 +287,7 @@ function render() {
 }
 
 // =============================================
-// LOOP PRINCIPAL E FÍSICA
+// LOOP PRINCIPAL E FÍSICA DO JOGO
 // =============================================
 function updatePhysics(deltaTime) {
     if (config.gamePaused) return;
@@ -296,13 +295,13 @@ function updatePhysics(deltaTime) {
 
     handlePowerUpTimer();
 
-    // Atualiza a animação da aura.
+    // Atualiza a animação da aura pulsante.
     const effectiveRadius = player.isPoweredUp ? player.radius * 1.5 : player.radius;
     let newAuraRadius = state.auraPulseRadius + 2;
     if (newAuraRadius > effectiveRadius) newAuraRadius = 0;
     state.setAuraPulseRadius(newAuraRadius);
 
-    // Atualiza as entidades do jogo.
+    // Atualiza todas as entidades do jogo.
     const particleUpdate = particle.updateParticles(state.particles, player, deltaTime, state.lastUpdateIndex);
     state.setParticles(particleUpdate.newParticles);
     state.setLastUpdateIndex(particleUpdate.newLastUpdateIndex);
@@ -350,7 +349,7 @@ function updatePhysics(deltaTime) {
 
     // --- DETECÇÃO DE COLISÃO ---
 
-    // Jogador vs Partículas Hostis (geradas pelo Chefe).
+    // Colisão: Jogador vs Partículas Hostis (geradas pelo Chefe).
     let hostileParticles = state.particles;
     for (let i = hostileParticles.length - 1; i >= 0; i--) {
         const p = hostileParticles[i];
@@ -366,7 +365,7 @@ function updatePhysics(deltaTime) {
     }
     state.setParticles(hostileParticles);
 
-    // Jogador vs Projéteis de Inimigos.
+    // Colisão: Jogador vs Projéteis de Inimigos.
     let currentProjectiles = state.projectiles;
     for (let i = currentProjectiles.length - 1; i >= 0; i--) {
         const proj = currentProjectiles[i];
@@ -384,7 +383,7 @@ function updatePhysics(deltaTime) {
     }
     state.setProjectiles(currentProjectiles);
 
-    // Jogador vs Explosões.
+    // Colisão: Jogador vs Explosões.
     state.explosions.forEach(exp => {
         const dx = player.x - exp.x;
         const dy = player.y - exp.y;
@@ -405,7 +404,7 @@ function updatePhysics(deltaTime) {
     }
 }
 
-/** O loop principal do jogo, chamado a cada frame. */
+/** O loop principal do jogo, que é chamado a cada frame pela `requestAnimationFrame`. */
 function gameLoop(timestamp) {
     if (!state.gameLoopRunning) return;
     requestAnimationFrame(gameLoop);
@@ -429,9 +428,10 @@ function gameLoop(timestamp) {
 }
 
 // =============================================
-// INICIALIZAÇÃO
+// INICIALIZAÇÃO E CONFIGURAÇÃO DE CONTROLES
 // =============================================
-/** Pré-carrega as imagens dos inimigos para evitar pop-in. */
+
+/** Pré-carrega as imagens dos inimigos para evitar que apareçam subitamente no jogo. */
 function preloadImages() {
     for (const type of Object.values(config.enemySystem.types)) {
         if (type.imageUrl) {
@@ -442,7 +442,7 @@ function preloadImages() {
     }
 }
 
-/** Configura todos os event listeners para os controles do jogo. */
+/** Configura todos os `event listeners` para os controles do jogo. */
 function setupControls() {
     const player = config.players[0];
     const menu = document.getElementById('menu');
@@ -554,7 +554,7 @@ function setupControls() {
     });
 }
 
-/** Função principal que inicializa o jogo. */
+/** Função principal que inicializa o jogo quando a página é carregada. */
 function initGame() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
@@ -585,7 +585,7 @@ function initGame() {
     requestAnimationFrame(gameLoop);
 }
 
-// Listeners de eventos globais.
+// Configura os listeners de eventos globais.
 window.addEventListener('load', initGame);
 window.addEventListener('resize', () => {
     canvas.width = window.innerWidth;
