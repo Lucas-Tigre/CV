@@ -1373,3 +1373,24 @@ body {
     transform: none;
     box-shadow: none;
 }
+
+.thematic-prompt {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    color: #aaa;
+    font-style: italic;
+}
+
+#password-criteria {
+    font-size: 0.8rem;
+    color: #888;
+    margin-top: 0.5rem;
+    line-height: 1.4;
+}
+
+.error-message {
+    color: #ff5555;
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+    min-height: 1.2rem;
+}
