@@ -2,16 +2,16 @@ export const config = {
     // =============================================
     // CONFIGURAÇÕES GERAIS DE JOGABILIDADE
     // =============================================
-    particleCount: 300,
-    mouseRadius: 150,
+    particleCount: 300, // Número total de partículas no mapa.
+    mouseRadius: 150,   // Raio de interação do mouse (não utilizado atualmente).
     particleRespawn: {
-        minParticles: 150,
-        respawnAmount: 50,
-        checkInterval: 30
+        minParticles: 150,     // Se o número de partículas cair abaixo disso, novas partículas são geradas.
+        respawnAmount: 50,     // Quantidade de partículas a serem geradas.
+        checkInterval: 30      // Intervalo (em frames) para verificar a necessidade de gerar novas partículas.
     },
 
     // =============================================
-    // GALÁXIAS (FUNDOS DE TELA)
+    // GALÁXIAS (APARÊNCIA E FUNDOS DE TELA)
     // =============================================
     galaxies: {
         unlocked: ['classic'],
@@ -22,8 +22,6 @@ export const config = {
                 description: "O universo original de partículas.",
                 unlockCondition: "Inicial",
                 particleColorRange: { h: [0, 360], s: [80, 90], l: [50, 70] },
-                // TODO: CUSTOMIZAR - Para usar sua imagem de fundo, mude a linha abaixo.
-                // Exemplo: background: "url('assets/images/sua_imagem_de_fundo.jpg')"
                 background: "url('assets/images/custom_background.jpg')"
             },
             neon: {
@@ -31,7 +29,6 @@ export const config = {
                 description: "Cores vibrantes e partículas brilhantes.",
                 unlockCondition: "Alcançar nível 5",
                 particleColorRange: { h: [280, 320], s: [100, 100], l: [60, 80] },
-                // TODO: CUSTOMIZAR - Para usar sua imagem de fundo, mude a linha abaixo.
                 background: 'radial-gradient(ellipse at bottom, #0f0c29 0%, #302b63 50%, #24243e 100%)'
             },
             fire: {
@@ -39,7 +36,6 @@ export const config = {
                 description: "Partículas flamejantes e inimigos furiosos.",
                 unlockCondition: "Derrotar 50 inimigos",
                 particleColorRange: { h: [10, 40], s: [80, 100], l: [50, 70] },
-                // TODO: CUSTOMIZAR - Para usar sua imagem de fundo, mude a linha abaixo.
                 background: 'radial-gradient(ellipse at bottom, #200122 0%, #6f0000 100%)'
             }
         }
@@ -57,12 +53,12 @@ export const config = {
             color: '#4A00E0',
             radius: 150,
             size: 30,
-            face: "🐶", // TODO: CUSTOMIZAR - Emoji inicial do jogador.
+            face: "🐶",
             faceSize: 28,
             health: 100,
             maxHealth: 100,
-            damage: 0.5, // Dano de colisão com inimigos.
-            attractionDamage: 0.05, // Dano por segundo do vórtice de atração.
+            damage: 0.5,             // Dano de colisão com inimigos (não implementado).
+            attractionDamage: 0.05,  // Dano por segundo do vórtice de atração.
             isPoweredUp: false,
             powerUpTimer: 0,
         }
@@ -121,10 +117,9 @@ export const config = {
             },
             boss: {
                 name: "Chefe",
-                chance: 0, // Apenas spawnado manualmente.
+                chance: 0, // Apenas gerado manualmente.
                 speed: 2.5,
                 behavior: 'hunt',
-                // TODO: CUSTOMIZAR - Adicione a URL da sua imagem para o chefe aqui.
                 imageUrl: null,
                 face: ["😈", "💀", "👹"],
                 color: '#FF8C00',
@@ -134,10 +129,9 @@ export const config = {
             },
             finalBoss: {
                 name: "Chefe Final",
-                chance: 0, // Apenas spawnado manually.
+                chance: 0, // Apenas gerado manualmente.
                 speed: 3.0,
                 behavior: 'hunt',
-                // TODO: CUSTOMIZAR - Adicione a URL da sua imagem para o chefe final aqui.
                 imageUrl: null,
                 face: ["🔥", "💥", "☄️"],
                 color: '#DC143C',
@@ -153,40 +147,40 @@ export const config = {
     // =============================================
     skills: {
         tree: {
-            attractRadius: { 
-                name: "Raio de Atração", 
-                cost: 2, 
-                maxLevel: 5, 
+            attractRadius: {
+                name: "Raio de Atração",
+                cost: 2,
+                maxLevel: 5,
                 effect: "Aumenta o raio de atração em 20% por nível.",
-                currentLevel: 0 
+                currentLevel: 0
             },
-            vortexPower: { 
-                name: "Poder do Vórtice", 
-                cost: 3, 
-                maxLevel: 3, 
+            vortexPower: {
+                name: "Poder do Vórtice",
+                cost: 3,
+                maxLevel: 3,
                 effect: "Aumenta o dano do vórtice em 30% por nível.",
-                currentLevel: 0 
+                currentLevel: 0
             },
-            healthBoost: { 
-                name: "Vitalidade", 
-                cost: 1, 
-                maxLevel: 10, 
+            healthBoost: {
+                name: "Vitalidade",
+                cost: 1,
+                maxLevel: 10,
                 effect: "Aumenta a saúde máxima em 10% por nível.",
-                currentLevel: 0 
+                currentLevel: 0
             },
-            particleMastery: { 
-                name: "Domínio de Partículas", 
-                cost: 4, 
-                maxLevel: 3, 
+            particleMastery: {
+                name: "Domínio de Partículas",
+                cost: 4,
+                maxLevel: 3,
                 effect: "Partículas dão 20% mais XP por nível.",
                 currentLevel: 0,
-                requires: ["attractRadius:3"] 
+                requires: ["attractRadius:3"]
             }
         }
     },
-    
+
     // =============================================
-    // ESTADO INICIAL DO JOGO (não mexer)
+    // ESTADO INICIAL DO JOGO
     // =============================================
     xp: 0,
     level: 1,
@@ -197,12 +191,12 @@ export const config = {
     enemiesDestroyed: 0,
     gameTime: 0,
     wave: { number: 1, enemiesToSpawn: 5, spawned: 0, timer: 0 },
-    
+
     // =============================================
     // OUTRAS CONFIGURAÇÕES
     // =============================================
     isMobile: /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent),
-    
+
     quests: {
         active: [
             { id: 'absorb100', target: 100, current: 0, reward: 50, title: "Absorver 100 partículas" },
@@ -211,8 +205,8 @@ export const config = {
         ],
         completed: []
     },
-    
-    soundEffects: {},
+
+    soundEffects: {}, // Cache para efeitos sonoros.
 
     story: {
         enabled: true,
@@ -245,7 +239,7 @@ export const config = {
             }
         ]
     },
-    
+
     npc: {
         active: true,
         currentDialog: 0,
@@ -270,7 +264,7 @@ export const config = {
         ],
         bossDialog: "🏆 PARABÉNS! Agora o verdadeiro desafio começa... 🐉"
     },
-    
+
     skins: {
         available: [
             { id: 'default', name: 'Viajante', emoji: '🐶', type: 'normal', unlocked: true },

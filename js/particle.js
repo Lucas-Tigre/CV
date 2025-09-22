@@ -1,18 +1,18 @@
 import { config } from './config.js';
 import { playSound } from './utils.js';
 
-// Um "pool" de objetos para reutilizar partículas em vez de criar e destruir constantemente.
+// Um "pool" (piscina) de objetos para reutilizar partículas em vez de criar e destruir constantemente.
 const particlePool = [];
 
 /**
- * Pega uma partícula do pool ou cria uma nova.
+ * Pega uma partícula do pool ou cria uma nova se o pool estiver vazio.
  * @param {object} player - O objeto do jogador, para evitar gerar partículas muito perto dele.
- * @param {number} [x] - Posição x inicial.
- * @param {number} [y] - Posição y inicial.
- * @returns {object} Uma partícula.
+ * @param {number} [x] - Posição x inicial opcional.
+ * @param {number} [y] - Posição y inicial opcional.
+ * @returns {object} Uma instância de partícula.
  */
 export function getParticle(player, x, y) {
-    const spawnPadding = 200;
+    const spawnPadding = 200; // Distância mínima do jogador para gerar uma nova partícula.
     let posX, posY;
     do {
         posX = x !== undefined ? x : Math.random() * window.innerWidth;
@@ -39,9 +39,9 @@ export function getParticle(player, x, y) {
 
 /**
  * Cria um novo objeto de partícula com propriedades aleatórias.
- * @param {number} x - Posição x.
- * @param {number} y - Posição y.
- * @returns {object} O objeto da nova partícula.
+ * @param {number} x - A posição x da partícula.
+ * @param {number} y - A posição y da partícula.
+ * @returns {object} O novo objeto de partícula.
  */
 export function createParticle(x, y) {
     let particleType;
@@ -49,10 +49,10 @@ export function createParticle(x, y) {
         particleType = { color: 'gold', size: 10, xp: 50, special: 'powerup' };
     } else {
         const types = [
-            { color: `hsl(${Math.random() * 60 + 180}, 80%, 60%)`, size: 3, xp: 2 },
-            { color: `hsl(${Math.random() * 60 + 60}, 80%, 60%)`, size: 5, xp: 5 },
-            { color: `hsl(${Math.random() * 60 + 300}, 80%, 60%)`, size: 2, xp: 7, special: 'speed' },
-            { color: 'white', size: 6, xp: 10, special: 'heal' }
+            { color: `hsl(${Math.random() * 60 + 180}, 80%, 60%)`, size: 3, xp: 2 }, // Padrão
+            { color: `hsl(${Math.random() * 60 + 60}, 80%, 60%)`, size: 5, xp: 5 },  // Maior
+            { color: `hsl(${Math.random() * 60 + 300}, 80%, 60%)`, size: 2, xp: 7, special: 'speed' }, // Rápida
+            { color: 'white', size: 6, xp: 10, special: 'heal' } // Cura (não implementado)
         ];
         particleType = Math.random() > 0.8 ? types[Math.floor(Math.random() * types.length)] : types[0];
     }
@@ -70,10 +70,10 @@ export function createParticle(x, y) {
 }
 
 /**
- * Cria a explosão de partículas de um chefe.
+ * Cria uma explosão de partículas hostis (ataque do chefe).
  * @param {number} x - Posição x da explosão.
  * @param {number} y - Posição y da explosão.
- * @param {Array} existingParticles - O array atual de partículas para adicionar as novas.
+ * @param {Array} existingParticles - O array de partículas existente para adicionar as novas.
  * @returns {Array} O novo array de partículas.
  */
 export function createParticleExplosion(x, y, existingParticles) {
@@ -98,7 +98,7 @@ export function createParticleExplosion(x, y, existingParticles) {
     return newParticles;
 }
 
-/** Gera novas partículas se a contagem atual estiver abaixo do mínimo. */
+/** Gera novas partículas se a contagem atual estiver abaixo de um limite mínimo. */
 export function autoRespawnParticles(currentParticles, player) {
     let newParticles = [...currentParticles];
     if (newParticles.length < config.particleRespawn.minParticles) {
@@ -114,18 +114,18 @@ export function autoRespawnParticles(currentParticles, player) {
 }
 
 /**
- * Atualiza o estado de todas as partículas.
- * @param {Array} currentParticles - O array de partículas.
+ * Atualiza o estado de todas as partículas (movimento, colisão, etc.).
+ * @param {Array} currentParticles - O array de partículas a ser atualizado.
  * @param {object} player - O objeto do jogador.
- * @param {number} deltaTime - O tempo desde o último frame.
- * @param {number} lastUpdateIndex - O índice da última partícula atualizada para otimização.
- * @returns {object} Um objeto com o novo estado das partículas e informações sobre o que aconteceu.
+ * @param {number} deltaTime - O tempo decorrido desde o último frame.
+ * @param {number} lastUpdateIndex - O índice da última partícula atualizada (para otimização).
+ * @returns {object} Um objeto contendo o novo estado das partículas e informações sobre eventos (XP, power-up).
  */
 export function updateParticles(currentParticles, player, deltaTime, lastUpdateIndex) {
     let newParticles = [...currentParticles];
     let absorbedXp = 0;
     let powerupCollected = false;
-    const updatesThisFrame = Math.min(100, newParticles.length);
+    const updatesThisFrame = Math.min(100, newParticles.length); // Limita o número de atualizações por frame.
     let newLastUpdateIndex = lastUpdateIndex;
 
     for (let i = 0; i < updatesThisFrame; i++) {
@@ -133,16 +133,16 @@ export function updateParticles(currentParticles, player, deltaTime, lastUpdateI
         const p = newParticles[idx];
         if (!p) continue;
 
-        // Lógica para partículas hostis (dos chefes)
+        // Lógica para partículas hostis (ataques de chefe).
         if (p.isHostile) {
             p.x += p.speedX;
             p.y += p.speedY;
             p.lifespan--;
             if (p.lifespan <= 0) {
                 newParticles.splice(idx, 1);
-                i--; // Ajusta o índice após remover um item.
+                i--; // Ajusta o índice do loop após remover um item.
             }
-            continue; // Partículas hostis não têm outra lógica.
+            continue; // Partículas hostis não seguem a lógica abaixo.
         }
 
         if (p.size > (p.targetSize || 3)) p.size -= 0.1;
@@ -155,11 +155,11 @@ export function updateParticles(currentParticles, player, deltaTime, lastUpdateI
 
         if (distSq < effectiveRadius * effectiveRadius) {
             const dist = Math.sqrt(distSq);
-            const suctionRadius = effectiveRadius * 0.2;
+            const suctionRadius = effectiveRadius * 0.2; // Raio de "sucção" imediata.
             const isVeryClose = dist < suctionRadius;
 
             if (player.mode === 'attract') {
-                p.speedX *= 0.9;
+                p.speedX *= 0.9; // Amortecimento do movimento.
                 p.speedY *= 0.9;
                 const radialForce = 0.6;
                 const tangentialForce = 0.3;
@@ -178,7 +178,7 @@ export function updateParticles(currentParticles, player, deltaTime, lastUpdateI
                     absorbedXp += p.xpValue || 1;
                     config.particlesAbsorbed++;
                     playSound('absorb');
-                    particlePool.push(newParticles.splice(idx, 1)[0]);
+                    particlePool.push(newParticles.splice(idx, 1)[0]); // Devolve a partícula ao pool.
                     i--;
                     continue;
                 }
@@ -193,9 +193,11 @@ export function updateParticles(currentParticles, player, deltaTime, lastUpdateI
         p.x += p.speedX * (deltaTime / 16.67);
         p.y += p.speedY * (deltaTime / 16.67);
 
+        // Colisão com as bordas da tela.
         if (p.x < 0 || p.x > window.innerWidth) p.speedX *= -0.8;
         if (p.y < 0 || p.y > window.innerHeight) p.speedY *= -0.8;
 
+        // Lógica do rastro da partícula.
         p.trail.push({ x: p.x, y: p.y, size: p.size });
         if (p.trail.length > 5) p.trail.shift();
     }
@@ -206,7 +208,7 @@ export function updateParticles(currentParticles, player, deltaTime, lastUpdateI
 }
 
 /**
- * Renderiza todas as partículas ativas no canvas.
+ * Renderiza todas as partículas ativas e seus rastros no canvas.
  * @param {CanvasRenderingContext2D} ctx - O contexto de renderização do canvas.
  * @param {Array} particles - O array de partículas a serem renderizadas.
  */

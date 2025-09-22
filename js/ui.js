@@ -1,7 +1,8 @@
 /**
- * Este módulo contém todas as funções que manipulam diretamente o DOM para atualizar a UI.
+ * Este módulo contém todas as funções que manipulam diretamente o DOM para atualizar a interface do usuário (UI).
  */
 
+/** Atualiza a barra de vida do jogador. */
 export function updateHealthBar(health, maxHealth) {
     const healthPercent = (health / maxHealth) * 100;
     const healthBar = document.getElementById('health-bar');
@@ -12,6 +13,7 @@ export function updateHealthBar(health, maxHealth) {
         healthPercent > 60 ? '#00F5A0' :
         healthPercent > 30 ? '#FFA500' : '#FF0000';
 
+    // Adiciona uma animação de pulsação quando a vida está baixa.
     if (healthPercent < 30) {
         healthBar.style.animation = 'pulse 1s infinite';
     } else {
@@ -19,6 +21,7 @@ export function updateHealthBar(health, maxHealth) {
     }
 }
 
+/** Atualiza a barra de experiência (XP) e o texto de nível. */
 export function updateXPBar(xp, level) {
     const xpNeeded = level * 100;
     const xpPercent = (xp / xpNeeded) * 100;
@@ -27,6 +30,7 @@ export function updateXPBar(xp, level) {
         `${xp}/${xpNeeded} XP (Nível ${level})`;
 }
 
+/** Atualiza o painel de estatísticas com os dados atuais do jogo. */
 export function updateStatsPanel(stats) {
     document.getElementById('stat-level').textContent = stats.level;
     document.getElementById('stat-xp').textContent = `${stats.xp}/${stats.level * 100}`;
@@ -35,9 +39,10 @@ export function updateStatsPanel(stats) {
     document.getElementById('stat-wave').textContent = stats.wave;
 }
 
+/** Renderiza a lista de missões ativas na tela. */
 export function updateQuestUI(activeQuests) {
     const container = document.getElementById('quests-container');
-    container.innerHTML = '';
+    container.innerHTML = ''; // Limpa as missões antigas antes de renderizar as novas.
 
     activeQuests.forEach(quest => {
         const progress = Math.min(100, (quest.current / quest.target) * 100);
@@ -54,15 +59,17 @@ export function updateQuestUI(activeQuests) {
     });
 }
 
+/** Exibe a tela de fim de jogo com as estatísticas finais. */
 export function showGameOver(stats) {
     document.getElementById('go-level').textContent = stats.level;
     document.getElementById('go-wave').textContent = stats.wave;
     document.getElementById('go-particles').textContent = stats.particlesAbsorbed;
     document.getElementById('go-enemies').textContent = stats.enemiesDestroyed;
-    createStars();
+    createStars(); // Cria o efeito de estrelas no fundo.
     document.getElementById('game-over-screen').style.display = 'flex';
 }
 
+/** Cria um fundo de estrelas animadas para a tela de fim de jogo. */
 function createStars() {
     const container = document.getElementById('game-over-stars');
     container.innerHTML = '';
@@ -78,6 +85,7 @@ function createStars() {
     }
 }
 
+/** Destaca o modo de interação ativo no menu. */
 export function highlightActiveMode(activeMode) {
     document.querySelectorAll('[data-action="setMode"]').forEach(item => {
         if (item.getAttribute('data-mode') === activeMode) {
@@ -88,14 +96,17 @@ export function highlightActiveMode(activeMode) {
     });
 }
 
+/** Atualiza o indicador de som (ligado/desligado) na interface. */
 export function toggleSoundUI(soundEnabled) {
     document.getElementById('sound-status').textContent = soundEnabled ? 'ON' : 'OFF';
 }
 
+/** Atualiza o contador de FPS (Frames Por Segundo) na tela. */
 export function updateFps(fps) {
     document.getElementById('fps-counter').textContent = `FPS: ${fps}`;
 }
 
+/** Exibe o mapa de galáxias e lida com a seleção. */
 export function showGalaxyMap(galaxies, unlockedGalaxies, onSelect) {
     const map = document.getElementById('galaxy-map');
     map.style.display = 'block';
@@ -114,6 +125,7 @@ export function showGalaxyMap(galaxies, unlockedGalaxies, onSelect) {
         `;
 
         if (isUnlocked) {
+            // Clona o nó para remover event listeners antigos antes de adicionar um novo.
             const newGalaxyEl = galaxyEl.cloneNode(true);
             galaxyEl.parentNode?.replaceChild(newGalaxyEl, galaxyEl);
             newGalaxyEl.addEventListener('click', () => {
@@ -125,6 +137,7 @@ export function showGalaxyMap(galaxies, unlockedGalaxies, onSelect) {
     }
 }
 
+/** Exibe a árvore de habilidades e lida com os upgrades. */
 export function showSkillTree(skills, skillPoints, onUpgrade) {
     const tree = document.getElementById('skill-tree');
     tree.style.display = 'block';
@@ -144,6 +157,7 @@ export function showSkillTree(skills, skillPoints, onUpgrade) {
         skillsList.appendChild(skillEl);
     }
 
+    // Adiciona os event listeners aos botões de upgrade.
     document.querySelectorAll('.upgrade-btn').forEach(btn => {
         const newBtn = btn.cloneNode(true);
         btn.parentNode.replaceChild(newBtn, btn);
@@ -154,6 +168,7 @@ export function showSkillTree(skills, skillPoints, onUpgrade) {
     });
 }
 
+/** Exibe o modal de skins e lida com a seleção. */
 export function showSkinsModal(skins, currentSkin, onSelect) {
     const modal = document.getElementById('skins-modal');
     modal.style.display = 'flex';

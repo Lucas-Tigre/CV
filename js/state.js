@@ -1,18 +1,24 @@
-// Este arquivo guarda o estado dinâmico do jogo.
+// Este arquivo centraliza e exporta o estado dinâmico do jogo,
+// como as posições de entidades, timers e flags de controle.
 
 export let particles = [];
 export let enemies = [];
 export let projectiles = [];
 export let explosions = [];
-export let lastUpdateIndex = 0;
-export let lastTime = 0;
+
+export let lastUpdateIndex = 0; // Índice para otimização do loop de partículas.
+export let lastTime = 0;        // Timestamp do último frame para cálculo do deltaTime.
 export let fps = 60;
 export let fpsLastChecked = 0;
 export let frameCount = 0;
 export let gameLoopRunning = false;
-export let auraPulseRadius = 0;
+export let auraPulseRadius = 0; // Raio atual da animação da aura do jogador.
 
-// Funções para modificar o estado a partir de outros módulos.
+// =============================================
+// FUNÇÕES SETTER
+// Permitem que outros módulos modifiquem o estado de forma controlada.
+// =============================================
+
 export function setParticles(newParticles) {
     particles = newParticles;
 }
