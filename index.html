@@ -3,24 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Universo de Partículas - Login</title>
+    <title>Universo de Partículas - Início</title>
     <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="login-container">
-        <h1>Universo de Partículas</h1>
-        <p class="subtitle">Faça o login para iniciar sua jornada</p>
-        <form id="login-form">
-            <div class="form-group">
-                <label for="username">Nome de Usuário</label>
-                <input type="text" id="username" name="username" required>
+    <div class="main-container">
+        <header class="main-header">
+            <h1>Universo de Partículas</h1>
+            <p class="subtitle">Uma aventura de sobrevivência cósmica</p>
+        </header>
+
+        <div class="content-wrapper">
+            <!-- Coluna da Esquerda: Login e Sobre -->
+            <div class="left-column">
+                <section id="login-section" class="card">
+                    <h2>Entrar no Universo</h2>
+                    <form id="login-form">
+                        <div class="form-group">
+                            <label for="username">Nome de Usuário</label>
+                            <input type="text" id="username" name="username" required placeholder="Seu nome de Herói">
+                        </div>
+                        <div class="form-group">
+                            <label for="password">Senha</label>
+                            <input type="password" id="password" name="password" required placeholder="Senha (simulada)">
+                        </div>
+                        <button type="submit">Iniciar Jogo</button>
+                    </form>
+                </section>
+
+                <section id="about-team" class="card">
+                    <h2>Sobre a Equipe</h2>
+                    <p>
+                        <!-- TEXTO PLACEHOLDER -->
+                        Este jogo foi criado com paixão por uma equipe dedicada de desenvolvedores espaciais. Nossa missão é criar experiências divertidas e desafiadoras. Agradecemos por jogar!
+                    </p>
+                </section>
             </div>
-            <div class="form-group">
-                <label for="password">Senha</label>
-                <input type="password" id="password" name="password" required>
+
+            <!-- Coluna da Direita: Como Jogar -->
+            <div class="right-column">
+                <section id="how-to-play" class="card">
+                    <h2>Como Jogar</h2>
+                    <ul>
+                        <li><strong>Mover:</strong> Seu personagem segue o cursor do mouse.</li>
+                        <li><strong>Atração (Segure '1' ou Clique Esquerdo):</strong> Atrai partículas e inimigos. Causa dano contínuo a inimigos próximos.</li>
+                        <li><strong>Repulsão (Segure '2' ou Clique Direito):</strong> Empurra partículas e inimigos para longe.</li>
+                        <li><strong>Vórtice (Segure '3'):</strong> Cria um vórtice orbital que puxa e danifica inimigos.</li>
+                        <li><strong>Menu (Pressione 'M'):</strong> Abre e fecha o menu de habilidades e opções.</li>
+                    </ul>
+                    <p class="goal">
+                        <strong>Objetivo:</strong> Absorva partículas para ganhar XP, subir de nível e fortalecer seu personagem para sobreviver o máximo possível!
+                    </p>
+                </section>
             </div>
-            <button type="submit">Entrar no Universo</button>
-        </form>
+        </div>
     </div>
     <script src="js/login.js"></script>
 </body>
