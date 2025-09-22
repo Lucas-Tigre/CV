@@ -565,7 +565,7 @@ function initGame() {
     // Armazena os valores base do jogador para serem usados nos upgrades de habilidades.
     if (player.baseRadius === undefined) {
         player.baseRadius = player.radius;
-        player.baseAttractionDamage = player.baseAttractionDamage;
+        player.baseAttractionDamage = player.attractionDamage;
         player.baseMaxHealth = player.maxHealth;
         config.baseXpMultiplier = 1;
         config.xpMultiplier = 1;
