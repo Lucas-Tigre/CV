@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 localStorage.setItem('username', username);
 
                 // Redireciona para a página do jogo.
-                window.location.href = 'index.html';
+                window.location.href = 'game.html';
             } else {
                 // Poderia adicionar um feedback de erro aqui.
                 alert('Por favor, insira um nome de usuário.');
