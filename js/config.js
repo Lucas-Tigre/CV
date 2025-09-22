@@ -185,7 +185,7 @@ export const config = {
     xp: 0,
     level: 1,
     skillPoints: 0,
-    soundEnabled: true,
+    soundEnabled: false,
     gamePaused: false,
     particlesAbsorbed: 0,
     enemiesDestroyed: 0,
