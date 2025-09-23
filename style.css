@@ -1395,6 +1395,57 @@ body {
     min-height: 1.2rem;
 }
 
+.login-extras {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 1rem;
+}
+
+.extra-link {
+    color: #aaa;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 0.2s;
+}
+
+.extra-link:hover {
+    color: #00F5A0;
+}
+
+.social-login {
+    margin-top: 1.5rem;
+    text-align: center;
+}
+
+.social-login p {
+    margin-bottom: 1rem;
+    color: #aaa;
+}
+
+.google-btn {
+    background-color: #4285F4;
+    color: white;
+    border: none;
+    padding: 0.8rem 1rem;
+    border-radius: 5px;
+    width: 100%;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.google-btn:hover {
+    background-color: #357ae8;
+}
+
+.google-btn .fa-google {
+    font-size: 1.2rem;
+}
+
 #galaxy-owner-display {
     position: fixed;
     top: 35px; /* Abaixo da barra de vida */
