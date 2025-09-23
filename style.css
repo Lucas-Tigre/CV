@@ -1185,20 +1185,20 @@ body {
     margin-bottom: 1.5rem;
 }
 
-/* Estilos do Formulário de Login */
-#login-form .form-group {
+/* Estilos dos Formulários de Autenticação */
+.auth-form .form-group {
     margin-bottom: 1.5rem;
     text-align: left;
 }
 
-#login-form label {
+.auth-form label {
     display: block;
     margin-bottom: 0.5rem;
     color: #ccc;
     font-weight: 300;
 }
 
-#login-form input {
+.auth-form input {
     width: 100%;
     padding: 0.8rem;
     background: rgba(255, 255, 255, 0.1);
@@ -1209,7 +1209,7 @@ body {
     box-sizing: border-box;
 }
 
-#login-form button {
+.auth-form button[type="submit"] {
     width: 100%;
     padding: 1rem;
     background: linear-gradient(to right, #4a00e0, #8e2de2);
@@ -1220,9 +1220,10 @@ body {
     font-weight: 700;
     cursor: pointer;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
+    margin-top: 1rem; /* Adicionado para espaçamento */
 }
 
-#login-form button:hover {
+.auth-form button[type="submit"]:hover {
     transform: translateY(-2px);
     box-shadow: 0 5px 15px rgba(74, 0, 224, 0.6);
 }
