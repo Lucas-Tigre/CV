@@ -1446,6 +1446,22 @@ body {
     font-size: 1.2rem;
 }
 
+.close-page-btn {
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    font-size: 2.5rem;
+    color: #aaa;
+    text-decoration: none;
+    z-index: 1001;
+    transition: all 0.2s;
+}
+
+.close-page-btn:hover {
+    color: white;
+    transform: scale(1.1);
+}
+
 #galaxy-owner-display {
     position: fixed;
     top: 35px; /* Abaixo da barra de vida */
