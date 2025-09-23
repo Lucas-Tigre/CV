@@ -77,7 +77,8 @@ export const config = {
                 name: "Rápido",
                 chance: 0.55,
                 speed: 3.5,
-                behavior: 'wander',
+                behavior: 'hunt', // Alterado de 'wander' para 'hunt'
+                huntRadius: 500,   // Adicionado raio de perseguição
                 face: ["😠", "😡", "😤"],
                 color: '#FFDD00',
                 healthMultiplier: 0.8
