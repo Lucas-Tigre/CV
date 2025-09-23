@@ -22,7 +22,7 @@ export const config = {
                 description: "O universo original de partículas.",
                 unlockCondition: "Inicial",
                 particleColorRange: { h: [0, 360], s: [80, 90], l: [50, 70] },
-                background: "url('assets/images/custom_background.jpg')"
+                background: "url('assets/images/MapaME.png')"
             },
             neon: {
                 name: "Neon",
