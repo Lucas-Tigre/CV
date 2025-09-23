@@ -580,6 +580,11 @@ function initGame() {
     updateStats();
     ui.updateQuestUI(config.quests.active);
     ui.toggleSoundUI(config.soundEnabled);
+
+    // Exibe o nome da galáxia do jogador.
+    const username = localStorage.getItem('username') || 'Viajante';
+    document.getElementById('galaxy-owner-display').textContent = `Galáxia de ${username}`;
+
     setupControls();
     state.setGameLoopRunning(true);
     requestAnimationFrame(gameLoop);

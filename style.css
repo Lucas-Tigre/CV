@@ -1394,3 +1394,16 @@ body {
     margin-top: 0.5rem;
     min-height: 1.2rem;
 }
+
+#galaxy-owner-display {
+    position: fixed;
+    top: 35px; /* Abaixo da barra de vida */
+    left: 50%;
+    transform: translateX(-50%);
+    color: #ccc;
+    font-size: 14px;
+    font-family: 'Orbitron', sans-serif;
+    text-shadow: 0 0 5px black;
+    z-index: 50;
+    pointer-events: none;
+}
