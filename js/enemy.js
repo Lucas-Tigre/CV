@@ -223,19 +223,20 @@ export function updateEnemies(enemies, player, deltaTime, particles, projectiles
                     }
                     break;
                 case 'crossScreen':
-                    // A velocidade inicial já foi definida no spawn.
+                    // A velocidade inicial já foi definida no spawn e não deve ser alterada.
                     break;
-                default: // 'wander'
+                default: // 'wander' e outros comportamentos futuros
                     enemy.speedX += (Math.random() - 0.5) * 0.5;
                     enemy.speedY += (Math.random() - 0.5) * 0.5;
+                    // Aplica fricção apenas para inimigos que não têm movimento constante.
+                    enemy.speedX *= 0.95;
+                    enemy.speedY *= 0.95;
             }
         }
 
-        // Atualização de posição e aplicação de fricção.
+        // Atualização de posição.
         enemy.x += enemy.speedX * (deltaTime / 16.67);
         enemy.y += enemy.speedY * (deltaTime / 16.67);
-        enemy.speedX *= 0.95; // Fricção para suavizar o movimento.
-        enemy.speedY *= 0.95;
 
         // Mantém o inimigo dentro dos limites da tela.
         enemy.x = Math.max(10, Math.min(window.innerWidth - 10, enemy.x));
