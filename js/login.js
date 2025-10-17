@@ -12,7 +12,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const showRegisterLink = document.getElementById('show-register-link');
     const showLoginLink = document.getElementById('show-login-link-from-register');
 
-    /** Mostra o formulário especificado dentro do modal. */
+    /**
+     * Exibe um formulário específico dentro do modal e esconde os outros.
+     * @param {HTMLElement} formToShow - O elemento do formulário a ser exibido.
+     */
     function showForm(formToShow) {
         [loginForm, registerForm].forEach(form => {
             if (form) form.style.display = 'none';
@@ -20,13 +23,17 @@ document.addEventListener('DOMContentLoaded', () => {
         if (formToShow) formToShow.style.display = 'block';
     }
 
-    /** Inicia o jogo escondendo o login e mostrando o contêiner do jogo. */
+    /**
+     * Inicia o jogo, salvando o nome de usuário, escondendo a tela de login
+     * e exibindo o contêiner do jogo.
+     * @param {string} username - O nome de usuário para salvar e exibir.
+     */
     function startGame(username) {
         localStorage.setItem('username', username);
         if (loginContainer) loginContainer.style.display = 'none';
         if (loginModal) loginModal.style.display = 'none';
         if (gameContainer) gameContainer.style.display = 'block';
-        // Simula o início do jogo (a lógica do game.js assumiria a partir daqui)
+        // A lógica do jogo (game.js) é iniciada automaticamente quando o script é carregado.
         console.log(`Jogo iniciado para o usuário: ${username}`);
     }
 
