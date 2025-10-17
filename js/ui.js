@@ -219,3 +219,20 @@ export function updateBigBangChargeBar(chargePercent) {
         container.classList.remove('bigbang-ready');
     }
 }
+
+/**
+ * Atualiza a visibilidade do indicador de Big Bang pronto.
+ * @param {number} chargePercent - A porcentagem atual de carga do Big Bang (0 a 100).
+ */
+export function updateBigBangIndicator(chargePercent) {
+    const indicator = document.getElementById('bigbang-indicator');
+    if (!indicator) return;
+
+    if (chargePercent >= 100) {
+        indicator.style.display = 'block';
+        indicator.classList.add('ready');
+    } else {
+        indicator.style.display = 'none';
+        indicator.classList.remove('ready');
+    }
+}
