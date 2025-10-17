@@ -159,6 +159,7 @@ export function restartGame() {
     const player = config.players[0];
 
     // Restaura o estado do jogador para os valores base.
+    player.mode = 'attract';
     player.health = player.baseMaxHealth;
     player.isPoweredUp = false;
     player.powerUpTimer = 0;
