@@ -22,6 +22,7 @@ export const config = {
                 description: "O universo original de partículas.",
                 unlockCondition: "Inicial",
                 particleColorRange: { h: [0, 360], s: [80, 90], l: [50, 70] },
+                // FUNDO 1: Imagem de fundo para a galáxia Clássico.
                 background: "url('assets/images/MapaME.png')"
             },
             neon: {
@@ -29,6 +30,7 @@ export const config = {
                 description: "Cores vibrantes e partículas brilhantes.",
                 unlockCondition: "Alcançar nível 5",
                 particleColorRange: { h: [280, 320], s: [100, 100], l: [60, 80] },
+                // FUNDO 2: Imagem de fundo para a galáxia Neon.
                 background: 'radial-gradient(ellipse at bottom, #0f0c29 0%, #302b63 50%, #24243e 100%)'
             },
             fire: {
@@ -36,6 +38,7 @@ export const config = {
                 description: "Partículas flamejantes e inimigos furiosos.",
                 unlockCondition: "Derrotar 50 inimigos",
                 particleColorRange: { h: [10, 40], s: [80, 100], l: [50, 70] },
+                // FUNDO 3: Imagem de fundo para a galáxia Inferno.
                 background: 'radial-gradient(ellipse at bottom, #200122 0%, #6f0000 100%)'
             }
         }
@@ -121,6 +124,7 @@ export const config = {
                 chance: 0, // Apenas gerado manualmente.
                 speed: 2.5,
                 behavior: 'hunt',
+                // IMAGEM_CHEFE_1: Substitua null pela URL da imagem do chefe.
                 imageUrl: null,
                 face: ["😈", "💀", "👹"],
                 color: '#FF8C00',
@@ -133,6 +137,7 @@ export const config = {
                 chance: 0, // Apenas gerado manualmente.
                 speed: 3.0,
                 behavior: 'hunt',
+                // IMAGEM_CHEFE_2: Substitua null pela URL da imagem do chefe final.
                 imageUrl: null,
                 face: ["🔥", "💥", "☄️"],
                 color: '#DC143C',
