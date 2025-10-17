@@ -73,25 +73,31 @@ document.addEventListener('DOMContentLoaded', () => {
         event.preventDefault();
         const username = usernameInput.value.trim();
         const password = passwordInput.value;
-        const validationErrors = validatePassword(password);
+        const correctPassword = '123'; // Senha simulada
 
-        if (username && validationErrors.length === 0) {
-            isLoggedIn = true;
+        errorElement.textContent = ''; // Limpa erros anteriores
+
+        if (!username) {
+            errorElement.textContent = 'Por favor, insira um nome de usuário.';
+            return;
+        }
+
+        if (password === correctPassword) {
             localStorage.setItem('username', username);
-            updateUIAfterLogin(username);
+            window.location.href = 'game.html'; // Redireciona para o jogo
         } else {
-            errorElement.textContent = !username ? 'Por favor, insira um nome de usuário.' : 'Senha inválida: ' + validationErrors.join(' ');
+            // A senha está incorreta, mas vamos verificar se ela ao menos passa na validação de formato
+            // para dar um feedback mais útil ao usuário, como no código original.
+            const validationErrors = validatePassword(password);
+            if (validationErrors.length > 0) {
+                 errorElement.textContent = 'Senha inválida: ' + validationErrors.join(' ');
+            } else {
+                errorElement.textContent = 'Senha incorreta.';
+            }
         }
     }
 
     // --- Event Listeners ---
-    if (mainLoginForm) {
-        const usernameInput = document.getElementById('main-login-username');
-        const passwordInput = document.getElementById('main-login-password');
-        const errorElement = document.getElementById('main-password-error');
-        mainLoginForm.addEventListener('submit', (e) => handleLogin(e, usernameInput, passwordInput, errorElement));
-    }
-
     if (loginForm) {
         const usernameInput = document.getElementById('login-username');
         const passwordInput = document.getElementById('login-password');
