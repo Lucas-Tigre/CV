@@ -193,3 +193,29 @@ export function showSkinsModal(skins, currentSkin, onSelect) {
         grid.appendChild(skinCard);
     });
 }
+
+/**
+ * Atualiza a barra de carga do Big Bang.
+ * @param {number} chargePercent - A porcentagem atual de carga do Big Bang (0 a 100).
+ */
+export function updateBigBangChargeBar(chargePercent) {
+    const container = document.getElementById('bigbang-charge-container');
+    if (!container) return;
+
+    const atomLeft = document.getElementById('atom-left');
+    const atomRight = document.getElementById('atom-right');
+    const bar = document.getElementById('bigbang-charge-bar');
+
+    // Calcula a posição dos átomos. Eles começam nas extremidades e se movem para o centro.
+    const position = (chargePercent / 100) * (bar.offsetWidth / 2);
+
+    atomLeft.style.transform = `translateX(${position}px)`;
+    atomRight.style.transform = `translateX(-${position}px)`;
+
+    // Quando a barra está cheia, adiciona um efeito para indicar que está pronto.
+    if (chargePercent >= 100) {
+        container.classList.add('bigbang-ready');
+    } else {
+        container.classList.remove('bigbang-ready');
+    }
+}

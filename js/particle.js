@@ -38,6 +38,26 @@ export function getParticle(player, x, y) {
 }
 
 /**
+ * Cria uma partícula especial de cura em uma posição específica.
+ * @param {number} x - A posição x onde a partícula será criada.
+ * @param {number} y - A posição y onde a partícula será criada.
+ * @returns {object} O objeto da partícula de cura.
+ */
+export function createHealParticle(x, y) {
+    return {
+        x, y,
+        size: 8,
+        color: 'lightgreen',
+        xpValue: 0, // Partículas de cura não dão XP.
+        special: 'heal',
+        healAmount: 10, // Quantidade de vida a ser recuperada.
+        speedX: (Math.random() - 0.5) * 2,
+        speedY: (Math.random() - 0.5) * 2,
+        trail: []
+    };
+}
+
+/**
  * Cria um novo objeto de partícula com propriedades aleatórias.
  * @param {number} x - A posição x da partícula.
  * @param {number} y - A posição y da partícula.
@@ -52,7 +72,6 @@ export function createParticle(x, y) {
             { color: `hsl(${Math.random() * 60 + 180}, 80%, 60%)`, size: 3, xp: 2 }, // Padrão
             { color: `hsl(${Math.random() * 60 + 60}, 80%, 60%)`, size: 5, xp: 5 },  // Maior
             { color: `hsl(${Math.random() * 60 + 300}, 80%, 60%)`, size: 2, xp: 7, special: 'speed' }, // Rápida
-            { color: 'white', size: 6, xp: 10, special: 'heal' } // Cura (não implementado)
         ];
         particleType = Math.random() > 0.8 ? types[Math.floor(Math.random() * types.length)] : types[0];
     }
@@ -125,6 +144,8 @@ export function updateParticles(currentParticles, player, deltaTime, lastUpdateI
     let newParticles = [...currentParticles];
     let absorbedXp = 0;
     let powerupCollected = false;
+    let healCollected = false;
+    let healAmount = 0;
     const updatesThisFrame = Math.min(100, newParticles.length); // Limita o número de atualizações por frame.
     let newLastUpdateIndex = lastUpdateIndex;
 
@@ -174,6 +195,9 @@ export function updateParticles(currentParticles, player, deltaTime, lastUpdateI
                 if (isVeryClose && dist < player.size * 0.8) {
                     if (p.special === 'powerup') {
                         powerupCollected = true;
+                    } else if (p.special === 'heal') {
+                        healCollected = true;
+                        healAmount = p.healAmount;
                     }
                     absorbedXp += p.xpValue || 1;
                     config.particlesAbsorbed++;
@@ -204,7 +228,7 @@ export function updateParticles(currentParticles, player, deltaTime, lastUpdateI
 
     newLastUpdateIndex = (newLastUpdateIndex + updatesThisFrame) % (newParticles.length || 1);
 
-    return { newParticles, absorbedXp, newLastUpdateIndex, powerupCollected };
+    return { newParticles, absorbedXp, newLastUpdateIndex, powerupCollected, healCollected, healAmount };
 }
 
 /**
@@ -221,9 +245,20 @@ export function renderParticles(ctx, particles) {
             ctx.arc(trail.x, trail.y, trail.size * alpha, 0, Math.PI * 2);
             ctx.fill();
         });
-        ctx.fillStyle = p.color;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.fill();
+        if (p.special === 'heal') {
+            // Desenha o retângulo vermelho de fundo.
+            ctx.fillStyle = 'red';
+            ctx.fillRect(p.x - p.size, p.y - p.size, p.size * 2, p.size * 2);
+
+            // Desenha a cruz branca no centro.
+            ctx.fillStyle = 'white';
+            ctx.fillRect(p.x - p.size / 2, p.y - p.size * 1.5, p.size, p.size * 3);
+            ctx.fillRect(p.x - p.size * 1.5, p.y - p.size / 2, p.size * 3, p.size);
+        } else {
+            ctx.fillStyle = p.color;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            ctx.fill();
+        }
     });
 }
