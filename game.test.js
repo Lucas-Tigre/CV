@@ -129,5 +129,17 @@ describe('Lógica Modular do Jogo', () => {
             // Verifica se o estado das missões foi restaurado para o original.
             expect(config.quests).toEqual(originalQuestsState);
         });
+
+        it('deve resetar o modo do jogador para "attract" ao reiniciar', () => {
+            // Define um modo diferente do padrão.
+            config.players[0].mode = 'vortex';
+            expect(config.players[0].mode).toBe('vortex');
+
+            // Reinicia o jogo.
+            restartGame();
+
+            // Verifica se o modo foi resetado para o padrão.
+            expect(config.players[0].mode).toBe('attract');
+        });
     });
 });
