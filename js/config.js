@@ -197,6 +197,8 @@ export const config = {
     enemiesDestroyed: 0,
     gameTime: 0,
     wave: { number: 1, enemiesToSpawn: 5, spawned: 0, timer: 0 },
+    bigBangCharge: 0,
+    bigBangChargeRate: 2, // Pontos de carga por inimigo derrotado.
 
     // =============================================
     // OUTRAS CONFIGURAÇÕES

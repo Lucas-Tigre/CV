@@ -172,6 +172,10 @@ export function updateEnemies(enemies, player, deltaTime, particles, projectiles
             if (enemy.health <= 0) {
                 xpFromDefeatedEnemies += enemy.isElite ? 10 : 3;
                 config.enemiesDestroyed++;
+                config.bigBangCharge = Math.min(100, config.bigBangCharge + config.bigBangChargeRate);
+                if (Math.random() < 0.05) { // 5% de chance de dropar cura.
+                    particlesFromExplosions.push(particle.createHealParticle(enemy.x, enemy.y));
+                }
                 return; // Pula o resto da lógica para este inimigo, que já foi derrotado.
             }
         } else {
@@ -238,9 +242,17 @@ export function updateEnemies(enemies, player, deltaTime, particles, projectiles
         enemy.x += enemy.speedX * (deltaTime / 16.67);
         enemy.y += enemy.speedY * (deltaTime / 16.67);
 
-        // Mantém o inimigo dentro dos limites da tela.
-        enemy.x = Math.max(10, Math.min(window.innerWidth - 10, enemy.x));
-        enemy.y = Math.max(10, Math.min(window.innerHeight - 10, enemy.y));
+        // Lógica para manter inimigos dentro da tela ou removê-los se saírem.
+        if (enemy.behavior === 'crossScreen') {
+            const padding = 200; // Distância extra para garantir que o inimigo saiu completamente.
+            if (enemy.x < -padding || enemy.x > window.innerWidth + padding || enemy.y < -padding || enemy.y > window.innerHeight + padding) {
+                return; // Remove o inimigo do jogo ao sair da tela.
+            }
+        } else {
+            // Mantém outros inimigos dentro dos limites da tela.
+            enemy.x = Math.max(10, Math.min(window.innerWidth - 10, enemy.x));
+            enemy.y = Math.max(10, Math.min(window.innerHeight - 10, enemy.y));
+        }
 
         // Lógica de colisão com o jogador.
         const distToPlayer = Math.sqrt(distSq);
