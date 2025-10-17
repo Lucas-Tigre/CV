@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const startGamePrompt = document.getElementById('start-game-prompt');
 
     // Formulários
+    const mainLoginForm = document.getElementById('main-login-form');
     const loginForm = document.getElementById('login-form');
     const registerForm = document.getElementById('register-form');
     const forgotPasswordForm = document.getElementById('forgot-password-form');
@@ -17,11 +18,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const showForgotPasswordLink = document.getElementById('show-forgot-password-link');
     const showLoginFromRegister = document.getElementById('show-login-link-from-register');
     const showLoginFromForgot = document.getElementById('show-login-link-from-forgot');
-
-    // Inputs e Erros
-    const loginUsernameInput = document.getElementById('login-username');
-    const loginPasswordInput = document.getElementById('login-password');
-    const passwordError = document.getElementById('password-error');
 
     // --- Estado da Aplicação ---
     let isLoggedIn = false;
@@ -47,7 +43,6 @@ document.addEventListener('DOMContentLoaded', () => {
     /** Fecha o modal de autenticação. */
     function closeModal() {
         if (loginModal) loginModal.style.display = 'none';
-        if (passwordError) passwordError.textContent = ''; // Limpa os erros ao fechar
     }
 
     /** Atualiza a UI principal após um login bem-sucedido. */
@@ -73,46 +68,46 @@ document.addEventListener('DOMContentLoaded', () => {
         return errors;
     }
 
-    // --- Event Listeners ---
+    /** Lida com a submissão de um formulário de login. */
+    function handleLogin(event, usernameInput, passwordInput, errorElement) {
+        event.preventDefault();
+        const username = usernameInput.value.trim();
+        const password = passwordInput.value;
+        const validationErrors = validatePassword(password);
 
-    // Abre o modal ao clicar no botão de login
-    if (loginTriggerBtn) loginTriggerBtn.addEventListener('click', openModal);
-
-    // Fecha o modal ao clicar no 'X'
-    if (closeModalBtn) closeModalBtn.addEventListener('click', closeModal);
-
-    // Fecha o modal ao clicar fora da área de conteúdo
-    if (loginModal) {
-        loginModal.addEventListener('click', (e) => {
-            if (e.target === loginModal) closeModal();
-        });
+        if (username && validationErrors.length === 0) {
+            isLoggedIn = true;
+            localStorage.setItem('username', username);
+            updateUIAfterLogin(username);
+        } else {
+            errorElement.textContent = !username ? 'Por favor, insira um nome de usuário.' : 'Senha inválida: ' + validationErrors.join(' ');
+        }
     }
 
-    // Navegação entre formulários
+    // --- Event Listeners ---
+    if (mainLoginForm) {
+        const usernameInput = document.getElementById('main-login-username');
+        const passwordInput = document.getElementById('main-login-password');
+        const errorElement = document.getElementById('main-password-error');
+        mainLoginForm.addEventListener('submit', (e) => handleLogin(e, usernameInput, passwordInput, errorElement));
+    }
+
+    if (loginForm) {
+        const usernameInput = document.getElementById('login-username');
+        const passwordInput = document.getElementById('login-password');
+        const errorElement = document.getElementById('password-error');
+        loginForm.addEventListener('submit', (e) => handleLogin(e, usernameInput, passwordInput, errorElement));
+    }
+
+    if (loginTriggerBtn) loginTriggerBtn.addEventListener('click', openModal);
+    if (closeModalBtn) closeModalBtn.addEventListener('click', closeModal);
+    if (loginModal) loginModal.addEventListener('click', (e) => { if (e.target === loginModal) closeModal(); });
+
     if (showRegisterLink) showRegisterLink.addEventListener('click', (e) => { e.preventDefault(); showForm(registerForm); });
     if (showForgotPasswordLink) showForgotPasswordLink.addEventListener('click', (e) => { e.preventDefault(); showForm(forgotPasswordForm); });
     if (showLoginFromRegister) showLoginFromRegister.addEventListener('click', (e) => { e.preventDefault(); showForm(loginForm); });
     if (showLoginFromForgot) showLoginFromForgot.addEventListener('click', (e) => { e.preventDefault(); showForm(loginForm); });
 
-    // Lógica de submissão do formulário de login
-    if (loginForm) {
-        loginForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const username = loginUsernameInput.value.trim();
-            const password = loginPasswordInput.value;
-            const validationErrors = validatePassword(password);
-
-            if (username && validationErrors.length === 0) {
-                isLoggedIn = true;
-                localStorage.setItem('username', username);
-                updateUIAfterLogin(username);
-            } else {
-                passwordError.textContent = !username ? 'Por favor, insira um nome de usuário.' : 'Senha inválida: ' + validationErrors.join(' ');
-            }
-        });
-    }
-
-    // Lógica (simulada) para os outros formulários
     if (registerForm) {
         registerForm.addEventListener('submit', (e) => {
             e.preventDefault();
@@ -128,7 +123,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Lógica do botão de iniciar o jogo
     if (startGameBtn) {
         startGameBtn.addEventListener('click', () => {
             if (isLoggedIn) window.location.href = 'game.html';
