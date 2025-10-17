@@ -89,7 +89,7 @@ function updateQuest(questId, amount = 1) {
 /** Gerencia as ondas de inimigos, iniciando novas ondas quando a anterior é derrotada. */
 function updateWave() {
     if (config.bossFightActive) {
-        if (state.getEnemies().length === 0) {
+        if (state.enemies.length === 0) {
             config.bossFightActive = false;
             showUnlockMessage(`Chefe derrotado!`);
             audio.playMusic('mainTheme');
@@ -98,7 +98,7 @@ function updateWave() {
     }
 
     // Se não há inimigos e todos os inimigos da onda já foram gerados, inicia a próxima onda.
-    if (state.getEnemies().length === 0 && config.wave.spawned >= config.wave.enemiesToSpawn) {
+    if (state.enemies.length === 0 && config.wave.spawned >= config.wave.enemiesToSpawn) {
         config.wave.number++;
         // Aumenta a dificuldade de forma mais acentuada
         config.wave.enemiesToSpawn = 5 + Math.floor(config.wave.number * 2.5);
@@ -111,7 +111,7 @@ function updateWave() {
     // Gera inimigos em intervalos regulares até atingir o total da onda.
     config.wave.timer++;
     if (config.wave.spawned < config.wave.enemiesToSpawn && config.wave.timer > 90) {
-        const newEnemies = enemy.spawnEnemy(state.getEnemies());
+        const newEnemies = enemy.spawnEnemy(state.enemies);
         state.setEnemies(newEnemies);
         config.wave.spawned++;
         config.wave.timer = 0;
@@ -340,8 +340,8 @@ function updatePhysics(deltaTime) {
 
     state.setExplosions(explosion.updateExplosions(state.explosions));
 
-    if (state.getEnemies().length > 0) {
-        const enemyUpdate = enemy.updateEnemies(state.getEnemies(), player, deltaTime, state.getParticles(), state.getProjectiles());
+    if (state.enemies.length > 0) {
+        const enemyUpdate = enemy.updateEnemies(state.enemies, player, deltaTime, state.particles, state.projectiles);
         state.setEnemies(enemyUpdate.newEnemies);
         state.setParticles(enemyUpdate.newParticles);
         state.setProjectiles(enemyUpdate.newProjectiles);
