@@ -1426,7 +1426,7 @@ body {
     right: 0;
 }
 
-#bigbang-ready-indicator {
+#bigbang-indicator {
     position: absolute;
     top: 50%;
     left: 50%;
@@ -1443,6 +1443,6 @@ body {
     opacity: 0;
 }
 
-.bigbang-ready #bigbang-ready-indicator {
+.bigbang-ready #bigbang-indicator {
     display: block;
 }

@@ -33,6 +33,45 @@ function toggleMenu(menuElement, show) {
 }
 
 // =============================================
+// LÓGICA DO MODO HISTÓRIA
+// =============================================
+function startStory() {
+    if (!config.story.enabled) return;
+    config.gamePaused = true;
+    document.getElementById('story-mode').style.display = 'flex';
+    displayScene(config.story.currentScene);
+}
+
+function displayScene(sceneIndex) {
+    const scene = config.story.scenes[sceneIndex];
+    if (!scene) return;
+    document.getElementById('story-npc').textContent = scene.npc;
+    document.getElementById('story-dialog-text').textContent = scene.text;
+    const storyContainer = document.getElementById('story-mode');
+    storyContainer.style.background = scene.background;
+    if (scene.shake) {
+        storyContainer.classList.add('camera-shake');
+    } else {
+        storyContainer.classList.remove('camera-shake');
+    }
+}
+
+function nextScene() {
+    config.story.currentScene++;
+    if (config.story.currentScene >= config.story.scenes.length) {
+        endStory();
+    } else {
+        displayScene(config.story.currentScene);
+    }
+}
+
+function endStory() {
+    document.getElementById('story-mode').style.display = 'none';
+    config.gamePaused = false;
+    config.story.enabled = false; // Garante que a história não seja exibida novamente.
+}
+
+// =============================================
 // LÓGICA PRINCIPAL DO JOGO
 // =============================================
 
@@ -624,6 +663,8 @@ function initGame() {
     document.getElementById('galaxy-owner-display').textContent = `Galáxia de ${username}`;
 
     setupControls();
+    document.getElementById('next-dialog-btn').addEventListener('click', nextScene);
+    startStory();
     state.setGameLoopRunning(true);
     requestAnimationFrame(gameLoop);
 }
