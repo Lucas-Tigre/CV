@@ -70,36 +70,6 @@ function checkLevelUp() {
     }
 }
 
-/** Ativa a habilidade Big Bang, causando dano em área e efeitos visuais. */
-function activateBigBang() {
-    if (config.bigBangCharge < 100) return;
-
-    // Lógica de dano
-    const enemies = state.getEnemies();
-    const remainingEnemies = [];
-    enemies.forEach(enemy => {
-        if (enemy.type === 'boss' || enemy.type === 'finalBoss') {
-            enemy.health -= enemy.maxHealth * 0.3; // 30% de dano em chefes
-            if (enemy.health > 0) {
-                remainingEnemies.push(enemy);
-            }
-        }
-    });
-    state.setEnemies(remainingEnemies);
-
-    // Efeitos visuais (simulados via DOM)
-    document.getElementById('supernova').style.animation = 'supernova-explosion 1s forwards';
-    document.getElementById('shockwave').style.animation = 'shockwave 1.5s forwards';
-    setTimeout(() => {
-        document.getElementById('supernova').style.animation = '';
-        document.getElementById('shockwave').style.animation = '';
-    }, 1500);
-
-    // Reseta a carga
-    config.bigBangCharge = 0;
-    playSound('explosion'); // Reutiliza um som existente
-}
-
 /** Atualiza o progresso de uma missão ativa com base em uma ação do jogador. */
 function updateQuest(questId, amount = 1) {
     const quest = config.quests.active.find(q => q.id === questId);
@@ -189,7 +159,6 @@ export function restartGame() {
     const player = config.players[0];
 
     // Restaura o estado do jogador para os valores base.
-    player.mode = 'attract';
     player.health = player.baseMaxHealth;
     player.isPoweredUp = false;
     player.powerUpTimer = 0;
@@ -343,11 +312,6 @@ function updatePhysics(deltaTime) {
         playSound('levelUp');
     }
 
-    if (particleUpdate.healCollected) {
-        player.health = Math.min(player.maxHealth, player.health + particleUpdate.healAmount);
-        playSound('levelUp'); // Reutiliza o som de level up para a cura.
-    }
-
     if (particleUpdate.absorbedXp > 0) {
         const finalXp = Math.round(particleUpdate.absorbedXp * (config.xpMultiplier || 1));
         config.xp += finalXp;
@@ -459,7 +423,6 @@ function gameLoop(timestamp) {
     }
     ui.updateHealthBar(config.players[0].health, config.players[0].maxHealth);
     ui.updateXPBar(config.xp, config.level);
-    ui.updateBigBangChargeBar(config.bigBangCharge);
     updateStats();
     render();
 }
@@ -507,7 +470,6 @@ function setupControls() {
             case '1': player.mode = 'attract'; break;
             case '2': player.mode = 'repel'; break;
             case '3': player.mode = 'vortex'; break;
-            case '4': activateBigBang(); break;
         }
         ui.highlightActiveMode(player.mode);
     });

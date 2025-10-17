@@ -1501,10 +1501,16 @@ body {
 
 .atom {
     position: absolute;
-    font-size: 20px;
+    /* font-size: 20px; */ /* Comente ou remova se estiver usando imagens */
     color: white;
     text-shadow: 0 0 10px #00F5A0;
     transition: all 0.2s ease-out;
+    width: 20px; /* Defina a largura da sua imagem */
+    height: 20px; /* Defina a altura da sua imagem */
+    /* background-image: url('caminho/para/sua/imagem.png'); */
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
 }
 
 #atom-left {
