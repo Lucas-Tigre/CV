@@ -2,19 +2,16 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Universo de Partículas - Início</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Universo de Partículas</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
 <body>
 
-    <div id="login-trigger-container">
-        <button id="login-trigger-btn">👤 Login</button>
-    </div>
-
-    <div class="main-container">
+    <!-- Tela de Início / Login -->
+    <div id="login-container" class="main-container">
         <header class="main-header">
             <h1>Universo de Partículas</h1>
             <p class="subtitle">Uma aventura de sobrevivência cósmica</p>
@@ -26,36 +23,26 @@
                     <h2>Como Jogar</h2>
                     <ul>
                         <li><strong>Mover:</strong> Seu personagem segue o cursor do mouse.</li>
-                        <li><strong>Atração (Segure '1' ou Clique Esquerdo):</strong> Atrai partículas e inimigos.</li>
-                        <li><strong>Repulsão (Segure '2' ou Clique Direito):</strong> Empurra partículas e inimigos.</li>
+                        <li><strong>Atração (Segure '1'):</strong> Atrai partículas e inimigos.</li>
+                        <li><strong>Repulsão (Segure '2'):</strong> Empurra partículas e inimigos.</li>
                         <li><strong>Vórtice (Segure '3'):</strong> Cria um vórtice orbital que danifica inimigos.</li>
                         <li><strong>Menu (Pressione 'M'):</strong> Abre o menu de habilidades e opções.</li>
                     </ul>
-                    <p class="goal">
-                        <strong>Objetivo:</strong> Absorva partículas para ganhar XP e sobreviver o máximo possível!
-                    </p>
                 </section>
             </div>
             <div class="right-column">
-                <section id="about-team" class="card">
-                    <h2>Sobre a Equipe</h2>
-                    <p>Este jogo foi criado com paixão por uma equipe dedicada de desenvolvedores espaciais. Nossa missão é criar experiências divertidas e desafiadoras. Agradecemos por jogar!</p>
-                </section>
                 <section id="start-game-section" class="card">
                     <h2>Iniciar Aventura</h2>
-                    <button id="start-game-btn" disabled>Iniciar Jogo</button>
-                    <p id="start-game-prompt" class="thematic-prompt">Para iniciar a descoberta do universo, faça sua identificação.</p>
+                    <button id="start-game-btn">Entrar ou Cadastrar</button>
                 </section>
             </div>
         </div>
     </div>
 
-    <!-- Modal de Login (Escondido por padrão) -->
+    <!-- Modal de Login -->
     <div id="login-modal" class="modal-overlay" style="display: none;">
         <div class="modal-content">
             <span class="close-modal-btn">&times;</span>
-
-            <!-- Formulário de Login (Visível por padrão dentro do modal) -->
             <form id="login-form" class="auth-form">
                 <h2>Login</h2>
                 <div class="form-group">
@@ -67,50 +54,33 @@
                     <input type="password" id="login-password" required placeholder="Senha simulada">
                     <div id="password-error" class="error-message"></div>
                 </div>
-                <button type="submit">Entrar</button>
+                <button type="submit">Entrar no Universo</button>
                 <div class="login-extras">
-                    <a href="#" id="show-forgot-password-link" class="extra-link">Esqueci a senha</a>
                     <a href="#" id="show-register-link" class="extra-link">Criar conta</a>
                 </div>
             </form>
-
-            <!-- Formulário de Cadastro (Escondido por padrão) -->
             <form id="register-form" class="auth-form" style="display: none;">
                 <h2>Criar Conta</h2>
-                <div class="form-group">
-                    <label for="register-username">Nome de Usuário</label>
-                    <input type="text" id="register-username" required>
-                </div>
-                <div class="form-group">
-                    <label for="register-email">Email</label>
-                    <input type="email" id="register-email" required>
-                </div>
-                <div class="form-group">
-                    <label for="register-password">Senha</label>
-                    <input type="password" id="register-password" required>
-                </div>
+                <!-- Campos de cadastro -->
                 <button type="submit">Criar Conta</button>
                 <div class="login-extras">
-                    <a href="#" id="show-login-link-from-register" class="extra-link">Já tem uma conta? Faça o login</a>
+                    <a href="#" id="show-login-link-from-register" class="extra-link">Já tem uma conta?</a>
                 </div>
             </form>
-
-            <!-- Formulário de Recuperação de Senha (Escondido por padrão) -->
-            <form id="forgot-password-form" class="auth-form" style="display: none;">
-                <h2>Recuperar Senha</h2>
-                <div class="form-group">
-                    <label for="recovery-email">Email</label>
-                    <input type="email" id="recovery-email" required placeholder="seuemail@exemplo.com">
-                </div>
-                <button type="submit">Enviar Link de Recuperação</button>
-                 <div class="login-extras">
-                    <a href="#" id="show-login-link-from-forgot" class="extra-link">Voltar para o Login</a>
-                </div>
-            </form>
-
         </div>
     </div>
 
+    <!-- Conteúdo do Jogo (Escondido por padrão) -->
+    <div id="game-container" style="display: none;">
+        <button id="menu-toggle">☰</button>
+        <div id="menu">
+            <!-- Conteúdo do menu -->
+        </div>
+        <canvas id="canvas"></canvas>
+        <!-- Outros elementos do jogo como painéis, etc. -->
+    </div>
+
+    <script type="module" src="js/game.js"></script>
     <script src="js/login.js"></script>
 </body>
 </html>
