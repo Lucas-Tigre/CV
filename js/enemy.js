@@ -242,26 +242,26 @@ export function updateEnemies(enemies, player, deltaTime, particles, projectiles
         enemy.x += enemy.speedX * (deltaTime / 16.67);
         enemy.y += enemy.speedY * (deltaTime / 16.67);
 
-        // Lógica para manter inimigos dentro da tela ou removê-los se saírem.
+        // Atualiza a posição e verifica os limites da tela
         if (enemy.behavior === 'crossScreen') {
-            const padding = 200; // Distância extra para garantir que o inimigo saiu completamente.
+            const padding = 200;
             if (enemy.x < -padding || enemy.x > window.innerWidth + padding || enemy.y < -padding || enemy.y > window.innerHeight + padding) {
-                return; // Remove o inimigo do jogo ao sair da tela.
+                // Inimigo está fora da tela, será removido
+            } else {
+                remainingEnemies.push(enemy);
             }
         } else {
-            // Mantém outros inimigos dentro dos limites da tela.
             enemy.x = Math.max(10, Math.min(window.innerWidth - 10, enemy.x));
             enemy.y = Math.max(10, Math.min(window.innerHeight - 10, enemy.y));
+            remainingEnemies.push(enemy);
         }
 
-        // Lógica de colisão com o jogador.
+        // Lógica de colisão com o jogador (movida para ser aplicada a todos os inimigos que ainda estão no jogo)
         const distToPlayer = Math.sqrt(distSq);
         if (distToPlayer < (player.size + enemy.size) * 0.6) {
             const damage = (config.enemySystem.types[enemy.type].damage || 5) * (deltaTime / 16.67);
             player.health -= damage;
         }
-
-        remainingEnemies.push(enemy);
     });
 
     return { xpFromDefeatedEnemies, newEnemies: remainingEnemies, newParticles: particlesFromExplosions, newProjectiles };
