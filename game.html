@@ -76,21 +76,83 @@
     <div id="game-container" style="display: none;">
         <button id="menu-toggle">☰</button>
         <div id="menu">
-            <!-- ... (conteúdo do menu como estava no game.html) ... -->
+            <h3>Menu do Jogo</h3>
+            <div class="menu-section">
+                <h4>Controles</h4>
+                <div class="menu-item" data-action="setMode" data-mode="attract">
+                    <span class="menu-icon">🧲</span>
+                    <span class="menu-text">Atração</span>
+                    <span class="menu-hotkey">(1)</span>
+                </div>
+                <div class="menu-item" data-action="setMode" data-mode="repel">
+                    <span class="menu-icon">💥</span>
+                    <span class="menu-text">Repulsão</span>
+                    <span class="menu-hotkey">(2)</span>
+                </div>
+                <div class="menu-item" data-action="setMode" data-mode="vortex">
+                    <span class="menu-icon">🌪️</span>
+                    <span class="menu-text">Vórtice</span>
+                    <span class="menu-hotkey">(3)</span>
+                </div>
+            </div>
+            <div class="menu-section">
+                <h4>Modos</h4>
+                <div class="menu-item" data-action="showGalaxies">
+                    <span class="menu-icon">🌌</span>
+                    <span class="menu-text">Galáxias</span>
+                </div>
+                <div class="menu-item" data-action="showSkills">
+                    <span class="menu-icon">🌟</span>
+                    <span class="menu-text">Habilidades</span>
+                </div>
+                <div class="menu-item" data-action="showSkins">
+                    <span class="menu-icon">🎭</span>
+                    <span class="menu-text">Skins</span>
+                </div>
+            </div>
+            <div class="menu-section">
+                <h4>Sistema</h4>
+                <div class="menu-item" data-action="resetGame">
+                    <span class="menu-icon">🔄</span>
+                    <span class="menu-text">Reiniciar Jogo</span>
+                </div>
+                <div class="menu-item" data-action="toggleSound">
+                    <span class="menu-icon">🔊</span>
+                    <span class="menu-text">Som</span>
+                    <span class="menu-status" id="sound-status">ON</span>
+                </div>
+            </div>
         </div>
         <canvas id="canvas"></canvas>
         <div id="health-bar-container"><div id="health-bar"></div></div>
         <div id="xp-bar-container"><div id="xp-bar"></div><div id="xp-text"></div></div>
-        <div id="stats-panel"></div>
-        <div id="quest-panel"></div>
-        <div id="fps-counter"></div>
+        <div id="stats-panel">
+            <div>Nível: <span id="stat-level">1</span></div>
+            <div>XP: <span id="stat-xp">0/100</span></div>
+            <div>Partículas: <span id="stat-particles">0</span></div>
+            <div>Inimigos: <span id="stat-enemies">0</span></div>
+            <div>Onda: <span id="stat-wave">1</span></div>
+        </div>
+        <div id="quest-panel"><h4>Missões</h4><div id="quests-container"></div></div>
+        <div id="fps-counter">FPS: 60</div>
         <div id="galaxy-owner-display"></div>
         <div id="bigbang-charge-container">
             <div id="atom-left" class="atom"></div>
             <div id="bigbang-charge-bar"><div id="bigbang-indicator">💥</div></div>
             <div id="atom-right" class="atom"></div>
         </div>
-        <div id="game-over-screen"></div>
+        <div id="game-over-screen" class="game-over-screen">
+            <div class="stars" id="game-over-stars"></div>
+            <h1 class="game-over-title">GAME OVER</h1>
+            <div class="game-over-stats">
+                <h2>Estatísticas da Partida</h2>
+                <p>Nível alcançado: <span id="go-level">1</span></p>
+                <p>Onda alcançada: <span id="go-wave">1</span></p>
+                <p>Partículas coletadas: <span id="go-particles">0</span></p>
+                <p>Inimigos derrotados: <span id="go-enemies">0</span></p>
+            </div>
+            <button class="restart-btn" id="restart-btn">Reiniciar Jogo</button>
+        </div>
         <div id="story-mode" class="story-container" style="display:none;">
             <div class="cutscene">
                 <div class="story-npc" id="story-npc"></div>

@@ -87,6 +87,34 @@ function updateQuest(questId, amount = 1) {
 }
 
 /** Gerencia as ondas de inimigos, iniciando novas ondas quando a anterior é derrotada. */
+function activateBigBang() {
+    if (config.bigBangCharge < 100) return;
+
+    // Lógica de dano
+    const enemies = state.getEnemies();
+    const remainingEnemies = enemies.filter(enemy => {
+        if (enemy.type === 'boss' || enemy.type === 'finalBoss') {
+            enemy.health -= enemy.maxHealth * 0.3; // 30% de dano em chefes
+            return enemy.health > 0; // Mantém o chefe se ele sobreviver
+        }
+        return false; // Remove inimigos normais
+    });
+    state.setEnemies(remainingEnemies);
+
+
+    // Efeitos visuais (simulados via DOM)
+    document.getElementById('supernova').style.animation = 'supernova-explosion 1s forwards';
+    document.getElementById('shockwave').style.animation = 'shockwave 1.5s forwards';
+    setTimeout(() => {
+        document.getElementById('supernova').style.animation = '';
+        document.getElementById('shockwave').style.animation = '';
+    }, 1500);
+
+    // Reseta a carga
+    config.bigBangCharge = 0;
+    playSound('explosion'); // Reutiliza um som existente
+}
+
 function updateWave() {
     if (config.bossFightActive) {
         if (state.enemies.length === 0) {
@@ -96,23 +124,16 @@ function updateWave() {
         }
         return;
     }
-
-    // Se não há inimigos e todos os inimigos da onda já foram gerados, inicia a próxima onda.
+    config.wave.timer++;
     if (state.enemies.length === 0 && config.wave.spawned >= config.wave.enemiesToSpawn) {
         config.wave.number++;
-        // Aumenta a dificuldade de forma mais acentuada
-        config.wave.enemiesToSpawn = 5 + Math.floor(config.wave.number * 2.5);
+        config.wave.enemiesToSpawn = 5 + Math.floor(config.wave.number * 1.5);
         config.wave.spawned = 0;
         config.wave.timer = 0;
         showUnlockMessage(`Onda ${config.wave.number} começando!`);
         updateQuest('wave5', 1);
-    }
-
-    // Gera inimigos em intervalos regulares até atingir o total da onda.
-    config.wave.timer++;
-    if (config.wave.spawned < config.wave.enemiesToSpawn && config.wave.timer > 90) {
-        const newEnemies = enemy.spawnEnemy(state.enemies);
-        state.setEnemies(newEnemies);
+    } else if (config.wave.spawned < config.wave.enemiesToSpawn && config.wave.timer > 90) {
+        state.setEnemies(enemy.spawnEnemy(state.enemies));
         config.wave.spawned++;
         config.wave.timer = 0;
     }
@@ -166,7 +187,6 @@ export function restartGame() {
     const player = config.players[0];
 
     // Restaura o estado do jogador para os valores base.
-    player.mode = 'attract';
     player.health = player.baseMaxHealth;
     player.isPoweredUp = false;
     player.powerUpTimer = 0;
@@ -349,7 +369,7 @@ function updatePhysics(deltaTime) {
 
         if (enemyUpdate.xpFromDefeatedEnemies > 0) {
             config.xp += enemyUpdate.xpFromDefeatedEnemies;
-            updateQuest('defeat20', enemyUpdate.xpFromDefeatedEnemies > 0 ? 1 : 0);
+            updateQuest('defeat20', 1);
             checkLevelUp();
         }
     }
@@ -431,6 +451,8 @@ function gameLoop(timestamp) {
     }
     ui.updateHealthBar(config.players[0].health, config.players[0].maxHealth);
     ui.updateXPBar(config.xp, config.level);
+    ui.updateBigBangChargeBar(config.bigBangCharge);
+    ui.updateBigBangIndicator(config.bigBangCharge);
     updateStats();
     render();
 }
@@ -478,6 +500,7 @@ function setupControls() {
             case '1': player.mode = 'attract'; break;
             case '2': player.mode = 'repel'; break;
             case '3': player.mode = 'vortex'; break;
+            case '4': activateBigBang(); break;
         }
         ui.highlightActiveMode(player.mode);
     });
