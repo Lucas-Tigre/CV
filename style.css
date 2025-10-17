@@ -361,6 +361,27 @@ canvas {
     transition: width 0.3s;
 }
 
+#bigbang-cooldown {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    height: 12px;
+    width: 200px;
+    background: rgba(0,0,0,0.7);
+    z-index: 50;
+    border-radius: 5px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+#bigbang-progress {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #FF00FF, #00FFFF);
+    transition: width 0.1s;
+}
+
 .enemy {
     position: absolute;
     border-radius: 50%;
@@ -377,6 +398,80 @@ canvas {
 
 .enemy-face {
     transform: scale(1.2);
+}
+
+#bigbang-btn {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 220px;
+    height: 65px;
+    border-radius: 30px;
+    background: linear-gradient(145deg, #8e2de2, #4a00e0);
+    border: none;
+    color: white;
+    font-size: 24px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 100;
+    box-shadow: 0 8px 25px rgba(142, 45, 226, 0.5),
+                0 0 0 2px rgba(255, 255, 255, 0.1),
+                inset 0 0 15px rgba(255, 255, 255, 0.2);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+    overflow: hidden;
+    display: none;
+}
+
+#bigbang-btn::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(
+        to bottom right,
+        rgba(255, 255, 255, 0.3) 0%,
+        rgba(255, 255, 255, 0) 60%
+    );
+    transform: rotate(30deg);
+    transition: all 0.3s;
+}
+
+#bigbang-btn:hover::before {
+    left: 100%;
+}
+
+#bigbang-btn:active {
+    transform: translateX(-50%) scale(0.95);
+    box-shadow: 0 4px 15px rgba(142, 45, 226, 0.5),
+                0 0 0 2px rgba(255, 255, 255, 0.1),
+                inset 0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+#bigbang-btn span {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#bigbang-btn .cooldown-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.3);
+    width: 0%;
+    border-radius: 30px;
+    transition: width 0.1s linear;
 }
 
 .unlock-message {
@@ -1380,69 +1475,4 @@ body {
     text-shadow: 0 0 5px black;
     z-index: 50;
     pointer-events: none;
-}
-
-#bigbang-charge-container {
-    position: fixed;
-    bottom: 30px; /* Acima da barra de XP */
-    left: 50%;
-    transform: translateX(-50%);
-    width: 300px;
-    height: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 50;
-}
-
-#bigbang-charge-bar {
-    width: 100%;
-    height: 5px;
-    background-color: rgba(0, 0, 0, 0.5);
-    border: 1px solid #8E2DE2;
-    border-radius: 5px;
-    position: relative;
-}
-
-.atom {
-    position: absolute;
-    /* font-size: 20px; */ /* Comente ou remova se estiver usando imagens */
-    color: white;
-    text-shadow: 0 0 10px #00F5A0;
-    transition: all 0.2s ease-out;
-    width: 20px; /* Defina a largura da sua imagem */
-    height: 20px; /* Defina a altura da sua imagem */
-    /* background-image: url('caminho/para/sua/imagem.png'); */
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
-}
-
-#atom-left {
-    left: 0;
-}
-
-#atom-right {
-    right: 0;
-}
-
-#bigbang-indicator {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 24px;
-    color: white;
-    text-shadow: 0 0 15px #ff00ff;
-    display: none; /* Começa escondido */
-    animation: pulse-ready 1.5s infinite;
-}
-
-.bigbang-ready #atom-left,
-.bigbang-ready #atom-right {
-    opacity: 0;
-}
-
-.bigbang-ready #bigbang-indicator {
-    display: block;
 }
