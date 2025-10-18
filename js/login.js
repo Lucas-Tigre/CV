@@ -1,137 +1,148 @@
-document.addEventListener('DOMContentLoaded', () => {
-    // --- Elementos do DOM ---
-    const loginTriggerBtn = document.getElementById('login-trigger-btn');
-    const loginModal = document.getElementById('login-modal');
-    const closeModalBtn = document.querySelector('.close-modal-btn');
-    const startGameBtn = document.getElementById('start-game-btn');
-    const startGamePrompt = document.getElementById('start-game-prompt');
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
-    // Formulários
-    const mainLoginForm = document.getElementById('main-login-form');
-    const loginForm = document.getElementById('login-form');
-    const registerForm = document.getElementById('register-form');
-    const forgotPasswordForm = document.getElementById('forgot-password-form');
-    const allForms = [loginForm, registerForm, forgotPasswordForm];
+document.addEventListener("DOMContentLoaded", () => {
 
-    // Links de Navegação do Modal
-    const showRegisterLink = document.getElementById('show-register-link');
-    const showForgotPasswordLink = document.getElementById('show-forgot-password-link');
-    const showLoginFromRegister = document.getElementById('show-login-link-from-register');
-    const showLoginFromForgot = document.getElementById('show-login-link-from-forgot');
+  // ATENÇÃO: Substitua pelas suas chaves do Supabase.
+  // É crucial que estas chaves NUNCA sejam expostas publicamente em um repositório.
+  // Considere o uso de variáveis de ambiente para maior segurança.
+  const SUPABASE_URL = "YOUR_SUPABASE_URL";
+  const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
 
-    // --- Estado da Aplicação ---
-    let isLoggedIn = false;
+  if (SUPABASE_URL === "YOUR_SUPABASE_URL" || SUPABASE_ANON_KEY === "YOUR_SUPABASE_ANON_KEY") {
+    const authContainer = document.querySelector('.container.auth');
+    if (authContainer) {
+      authContainer.innerHTML = `
+        <div style="color: #ef4444; text-align: center; padding: 2rem; border: 1px solid #ef4444; border-radius: 8px;">
+          <h2>Configuração Incompleta</h2>
+          <p>As chaves do Supabase não foram definidas. Por favor, configure as variáveis <code>SUPABASE_URL</code> e <code>SUPABASE_ANON_KEY</code> no arquivo <code>js/login.js</code> para habilitar a autenticação.</p>
+        </div>
+      `;
+    }
+    return;
+  }
 
-    // --- Funções ---
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    /** Mostra o formulário especificado e esconde os outros. */
-    function showForm(formToShow) {
-        allForms.forEach(form => {
-            if (form) form.style.display = 'none';
-        });
-        if (formToShow) formToShow.style.display = 'block';
+  // ===== ELEMENTOS =====
+  const tabs = document.querySelectorAll('.tab');
+  const panes = document.querySelectorAll('.pane');
+  const loginForm = document.getElementById('loginForm');
+  const registerForm = document.getElementById('registerForm');
+  const authMsg = document.getElementById('authMsg');
+  const googleLoginBtn = document.getElementById("googleLoginBtn");
+
+  const showMsg = (text, type = "success") => {
+    if (!authMsg) return;
+    authMsg.textContent = text;
+    authMsg.className = `msg ${type}`;
+  };
+  const clearMsg = () => showMsg("");
+
+  // ===== TROCA DE ABAS =====
+  tabs.forEach(btn => {
+    btn.addEventListener('click', () => {
+      tabs.forEach(b => b.classList.remove('active'));
+      panes.forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      const paneId = btn.dataset.tab;
+      const pane = document.getElementById(paneId);
+      if(pane) pane.classList.add('active');
+    });
+  });
+
+  // ===== LOGIN COM GOOGLE =====
+  googleLoginBtn?.addEventListener("click", async () => {
+    const { error } = await supabase.auth.signInWithOAuth({ provider: 'google' });
+    if (error) showMsg("Erro ao entrar com Google: " + error.message, "error");
+  });
+
+  // ===== CADASTRO =====
+  registerForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    clearMsg();
+
+    const nome = document.getElementById('regNome').value.trim();
+    const email = document.getElementById('regEmail').value.trim().toLowerCase();
+    const usuario = document.getElementById('regUsuario').value.trim().toLowerCase();
+    const senha = document.getElementById('regSenha').value;
+
+    if (senha.length < 6) {
+        showMsg("A senha deve ter pelo menos 6 caracteres.", "error");
+        return;
     }
 
-    /** Abre o modal de autenticação. */
-    function openModal() {
-        if (loginModal) {
-            loginModal.style.display = 'flex';
-            showForm(loginForm); // Sempre mostra o formulário de login ao abrir
+    try {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password: senha,
+        options: {
+          data: { full_name: nome, username: usuario }
         }
+      });
+
+      if (error) return showMsg("Erro ao cadastrar: " + error.message, "error");
+
+      showMsg("Conta criada! Verifique seu e-mail para confirmação.", "success");
+      registerForm.reset();
+      document.querySelector('.tab[data-tab="login-pane"]').click();
+    } catch {
+      showMsg("Erro inesperado ao cadastrar.", "error");
     }
+  });
 
-    /** Fecha o modal de autenticação. */
-    function closeModal() {
-        if (loginModal) loginModal.style.display = 'none';
+  // ===== LOGIN =====
+  loginForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    clearMsg();
+
+    const userOrEmail = document.getElementById('loginUser').value.trim().toLowerCase();
+    const pass = document.getElementById('loginPass').value;
+
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: userOrEmail,
+        password: pass
+      });
+
+      if (error) return showMsg("Erro ao entrar: " + error.message, "error");
+
+    } catch {
+      showMsg("Erro inesperado no login.", "error");
     }
+  });
 
-    /** Atualiza a UI principal após um login bem-sucedido. */
-    function updateUIAfterLogin(username) {
-        if (startGameBtn) startGameBtn.disabled = false;
-        if (loginTriggerBtn) {
-            loginTriggerBtn.textContent = `👤 ${username}`;
-            loginTriggerBtn.disabled = true;
-        }
-        if (startGamePrompt) {
-            startGamePrompt.textContent = 'Universo aguardando. Pressione Iniciar!';
-        }
-        closeModal();
+  // ===== ESTADO DE AUTENTICAÇÃO =====
+  supabase.auth.onAuthStateChange((_event, session) => {
+    if (session?.user) {
+        const username = session.user.user_metadata?.full_name || session.user.user_metadata?.username || session.user.email;
+        localStorage.setItem('username', username);
+
+        showMsg("Login bem-sucedido! Redirecionando...", "success");
+        setTimeout(() => {
+            window.location.href = 'game.html';
+        }, 1000);
+
     }
+  });
 
-    /** Valida a senha com base nos critérios definidos. */
-    function validatePassword(password) {
-        const errors = [];
-        if (password.length < 8) errors.push("Pelo menos 8 caracteres.");
-        if (!/[a-z]/.test(password)) errors.push("Pelo menos 1 letra minúscula.");
-        if (!/[A-Z]/.test(password)) errors.push("Pelo menos 1 letra maiúscula.");
-        if (!/[@$!%*?&]/.test(password)) errors.push("Pelo menos 1 símbolo (@$!%*?&).");
-        return errors;
+    // ===== LOGOUT (Lógica de exemplo se houvesse um botão de logout nesta página) =====
+    const logoutBtn = document.getElementById('logoutBtn');
+    logoutBtn?.addEventListener('click', async () => {
+        await supabase.auth.signOut();
+        localStorage.removeItem('username');
+        showMsg("Você saiu da conta.", "success");
+        setTimeout(() => {
+            window.location.href = 'index.html';
+        }, 1000);
+    });
+
+  // Checa se o usuário já tem uma sessão ativa ao carregar a página
+  supabase.auth.getSession().then(({ data: { session } }) => {
+    if (session) {
+      const username = session.user.user_metadata?.full_name || session.user.email;
+      localStorage.setItem('username', username);
+      window.location.href = 'game.html';
     }
+  });
 
-    /** Lida com a submissão de um formulário de login. */
-    function handleLogin(event, usernameInput, passwordInput, errorElement) {
-        event.preventDefault();
-        const username = usernameInput.value.trim();
-        const password = passwordInput.value;
-        const correctPassword = '123'; // Senha simulada
-
-        errorElement.textContent = ''; // Limpa erros anteriores
-
-        if (!username) {
-            errorElement.textContent = 'Por favor, insira um nome de usuário.';
-            return;
-        }
-
-        if (password === correctPassword) {
-            localStorage.setItem('username', username);
-            window.location.href = 'game.html'; // Redireciona para o jogo
-        } else {
-            // A senha está incorreta, mas vamos verificar se ela ao menos passa na validação de formato
-            // para dar um feedback mais útil ao usuário, como no código original.
-            const validationErrors = validatePassword(password);
-            if (validationErrors.length > 0) {
-                 errorElement.textContent = 'Senha inválida: ' + validationErrors.join(' ');
-            } else {
-                errorElement.textContent = 'Senha incorreta.';
-            }
-        }
-    }
-
-    // --- Event Listeners ---
-    if (loginForm) {
-        const usernameInput = document.getElementById('login-username');
-        const passwordInput = document.getElementById('login-password');
-        const errorElement = document.getElementById('password-error');
-        loginForm.addEventListener('submit', (e) => handleLogin(e, usernameInput, passwordInput, errorElement));
-    }
-
-    if (loginTriggerBtn) loginTriggerBtn.addEventListener('click', openModal);
-    if (closeModalBtn) closeModalBtn.addEventListener('click', closeModal);
-    if (loginModal) loginModal.addEventListener('click', (e) => { if (e.target === loginModal) closeModal(); });
-
-    if (showRegisterLink) showRegisterLink.addEventListener('click', (e) => { e.preventDefault(); showForm(registerForm); });
-    if (showForgotPasswordLink) showForgotPasswordLink.addEventListener('click', (e) => { e.preventDefault(); showForm(forgotPasswordForm); });
-    if (showLoginFromRegister) showLoginFromRegister.addEventListener('click', (e) => { e.preventDefault(); showForm(loginForm); });
-    if (showLoginFromForgot) showLoginFromForgot.addEventListener('click', (e) => { e.preventDefault(); showForm(loginForm); });
-
-    if (registerForm) {
-        registerForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            alert('Conta criada com sucesso! (Simulação). Agora faça o login.');
-            showForm(loginForm);
-        });
-    }
-    if (forgotPasswordForm) {
-        forgotPasswordForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            alert('Link de recuperação enviado para o seu email. (Simulação)');
-            closeModal();
-        });
-    }
-
-    if (startGameBtn) {
-        startGameBtn.addEventListener('click', () => {
-            if (isLoggedIn) window.location.href = 'game.html';
-        });
-    }
 });
