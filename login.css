@@ -189,3 +189,4 @@ input:focus {
 .hidden {
   display: none;
 }
+.pane.active { display: block; }
