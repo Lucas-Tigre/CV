@@ -2,24 +2,8 @@ import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 
 document.addEventListener("DOMContentLoaded", () => {
 
-  // ATENÇÃO: Substitua pelas suas chaves do Supabase.
-  // É crucial que estas chaves NUNCA sejam expostas publicamente em um repositório.
-  // Considere o uso de variáveis de ambiente para maior segurança.
-  const SUPABASE_URL = "YOUR_SUPABASE_URL";
-  const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
-
-  if (SUPABASE_URL === "YOUR_SUPABASE_URL" || SUPABASE_ANON_KEY === "YOUR_SUPABASE_ANON_KEY") {
-    const authContainer = document.querySelector('.container.auth');
-    if (authContainer) {
-      authContainer.innerHTML = `
-        <div style="color: #ef4444; text-align: center; padding: 2rem; border: 1px solid #ef4444; border-radius: 8px;">
-          <h2>Configuração Incompleta</h2>
-          <p>As chaves do Supabase não foram definidas. Por favor, configure as variáveis <code>SUPABASE_URL</code> e <code>SUPABASE_ANON_KEY</code> no arquivo <code>js/login.js</code> para habilitar a autenticação.</p>
-        </div>
-      `;
-    }
-    return;
-  }
+  const SUPABASE_URL = "https://koliolijmlzifxulyejz.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI-NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtvbGlvbGlqbWx6aWZ4dWx5ZWp6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgyOTEwNDAsImV4cCI6MjA3Mzg2NzA0MH0.s44jYbJDjZqjKwPBCdsJ5WZhmXI9xVggxMgH7IKFGYE";
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -44,7 +28,7 @@ document.addEventListener("DOMContentLoaded", () => {
       tabs.forEach(b => b.classList.remove('active'));
       panes.forEach(p => p.classList.remove('active'));
       btn.classList.add('active');
-      const paneId = btn.dataset.tab;
+      const paneId = btn.getAttribute('data-tab'); // Correção aqui
       const pane = document.getElementById(paneId);
       if(pane) pane.classList.add('active');
     });
