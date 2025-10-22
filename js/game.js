@@ -17,8 +17,7 @@ export const initialQuests = JSON.parse(JSON.stringify(config.quests));
 // =============================================
 // ELEMENTOS DO DOM E CACHE DE ASSETS
 // =============================================
-const canvas = document.getElementById("canvas");
-const ctx = canvas.getContext("2d");
+let canvas, ctx;
 const imageCache = {};
 
 // =============================================
@@ -588,6 +587,8 @@ function setupControls() {
 
 /** Função principal que inicializa o jogo quando a página é carregada. */
 function initGame() {
+    canvas = document.getElementById("canvas");
+    ctx = canvas.getContext("2d");
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
     const player = config.players[0];
