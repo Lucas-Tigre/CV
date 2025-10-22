@@ -349,7 +349,7 @@ function updatePhysics(deltaTime) {
     }
 
     if (particleUpdate.absorbedXp > 0) {
-        const finalXp = Math.round(particleUpdate.absorbedXp * (config.xpMultiplier || 1));
+        const finalXp = Math.round(particleUpdate.absorbedXp * (config.xpMultiplier || 1) * config.globalXpMultiplier);
         config.xp += finalXp;
         updateQuest('absorb100', finalXp);
         checkLevelUp();
@@ -376,7 +376,7 @@ function updatePhysics(deltaTime) {
         state.setProjectiles(enemyUpdate.newProjectiles);
 
         if (enemyUpdate.xpFromDefeatedEnemies > 0) {
-            config.xp += enemyUpdate.xpFromDefeatedEnemies;
+            config.xp += Math.round(enemyUpdate.xpFromDefeatedEnemies * config.globalXpMultiplier);
             updateQuest('defeat20', 1);
             checkLevelUp();
         }
