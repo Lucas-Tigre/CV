@@ -1,7 +1,8 @@
 import { config } from './js/config.js';
 import { spawnEnemy } from './js/enemy.js';
 import { checkLevelUp } from './js/utils.js';
-import { restartGame, initialQuests } from './js/game.js';
+import { restartGame, initialQuests, activateBigBang } from './js/game.js';
+import * as state from './js/state.js';
 
 // As funções em game.js não são puras e dependem de um estado global e do DOM,
 // o que torna o teste de unidade tradicional mais complexo.
@@ -140,6 +141,37 @@ describe('Lógica Modular do Jogo', () => {
 
             // Verifica se o modo foi resetado para o padrão.
             expect(config.players[0].mode).toBe('attract');
+        });
+    });
+
+    describe('Habilidade Big Bang', () => {
+        // Garante que o estado seja limpo após os testes deste bloco.
+        afterEach(() => {
+            state.setEnemies([]);
+        });
+
+        it('deve remover inimigos normais e danificar chefes quando ativada', () => {
+            // Define o estado inicial dos inimigos para o teste.
+            state.setEnemies([
+                { type: 'normal', health: 50, maxHealth: 50 },
+                { type: 'boss', health: 200, maxHealth: 200 },
+                { type: 'normal', health: 50, maxHealth: 50 }
+            ]);
+
+            // Define a carga do Big Bang como 100% para permitir a ativação.
+            config.bigBangCharge = 100;
+
+            // Chama a função a ser testada.
+            activateBigBang();
+
+            // Verifica se os inimigos normais foram removidos.
+            expect(state.enemies.length).toBe(1);
+            // Verifica se o inimigo restante é o chefe.
+            expect(state.enemies[0].type).toBe('boss');
+            // Verifica se a vida do chefe foi reduzida em 30%.
+            expect(state.enemies[0].health).toBe(140); // 200 - (200 * 0.3)
+            // Verifica se a carga do Big Bang foi resetada para 0.
+            expect(config.bigBangCharge).toBe(0);
         });
     });
 });

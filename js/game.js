@@ -87,11 +87,11 @@ function updateQuest(questId, amount = 1) {
 }
 
 /** Gerencia as ondas de inimigos, iniciando novas ondas quando a anterior é derrotada. */
-function activateBigBang() {
+export function activateBigBang() {
     if (config.bigBangCharge < 100) return;
 
     // Lógica de dano
-    const enemies = state.getEnemies();
+    const enemies = state.enemies;
     const remainingEnemies = enemies.filter(enemy => {
         if (enemy.type === 'boss' || enemy.type === 'finalBoss') {
             enemy.health -= enemy.maxHealth * 0.3; // 30% de dano em chefes
@@ -620,6 +620,10 @@ function initGame() {
     setupControls();
     state.setGameLoopRunning(true);
     requestAnimationFrame(gameLoop);
+
+    // Expor para verificação
+    window.config = config;
+    window.state = state;
 }
 
 // Configura os listeners de eventos globais.
