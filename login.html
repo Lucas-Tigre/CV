@@ -31,6 +31,7 @@
           <input id="loginPass" type="password" required placeholder="Sua senha cósmica">
         </div>
         <button class="btn full" type="submit">Entrar na Galáxia</button>
+        <a href="#" id="forgotPasswordLink" class="forgot-password">Esqueceu sua senha?</a>
       </form>
 
       <div class="divider">ou</div>
@@ -76,6 +77,22 @@
 
  <script type="module" src="js/login.js"></script>
  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- MODAL DE REDEFINIÇÃO DE SENHA -->
+  <div id="resetPasswordModal" class="modal-overlay hidden">
+    <div class="modal-content">
+      <span id="closeModal" class="close-modal-btn">&times;</span>
+      <h2>Redefinir Senha</h2>
+      <p>Digite seu e-mail para receber um link de redefinição de senha.</p>
+      <form id="resetPasswordForm" class="form">
+        <div class="field">
+          <label for="resetEmail">E-mail</label>
+          <input id="resetEmail" type="email" required placeholder="seu-email@universo.com">
+        </div>
+        <button class="btn full" type="submit">Enviar Link</button>
+      </form>
+    </div>
+  </div>
 
 </body>
 </html>
