@@ -204,7 +204,7 @@ export function updateBigBangChargeBar(chargePercent) {
 
     const atomLeft = document.getElementById('atom-left');
     const atomRight = document.getElementById('atom-right');
-    const bar = document.getElementById('bigbang-charge-bar');
+    const bar = document.getElementById('bigbang-charge-progress');
 
     // Calcula a posição dos átomos. Eles começam nas extremidades e se movem para o centro.
     const position = (chargePercent / 100) * (bar.offsetWidth / 2);

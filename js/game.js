@@ -17,7 +17,8 @@ export const initialQuests = JSON.parse(JSON.stringify(config.quests));
 // =============================================
 // ELEMENTOS DO DOM E CACHE DE ASSETS
 // =============================================
-let canvas, ctx;
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
 const imageCache = {};
 
 // =============================================
@@ -86,11 +87,11 @@ function updateQuest(questId, amount = 1) {
 }
 
 /** Gerencia as ondas de inimigos, iniciando novas ondas quando a anterior é derrotada. */
-export function activateBigBang() {
+function activateBigBang() {
     if (config.bigBangCharge < 100) return;
 
     // Lógica de dano
-    const enemies = state.enemies;
+    const enemies = state.getEnemies();
     const remainingEnemies = enemies.filter(enemy => {
         if (enemy.type === 'boss' || enemy.type === 'finalBoss') {
             enemy.health -= enemy.maxHealth * 0.3; // 30% de dano em chefes
@@ -587,8 +588,6 @@ function setupControls() {
 
 /** Função principal que inicializa o jogo quando a página é carregada. */
 function initGame() {
-    canvas = document.getElementById("canvas");
-    ctx = canvas.getContext("2d");
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
     const player = config.players[0];
