@@ -14,6 +14,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const registerForm = document.getElementById('registerForm');
   const authMsg = document.getElementById('authMsg');
   const googleLoginBtn = document.getElementById("googleLoginBtn");
+  const forgotPasswordLink = document.getElementById('forgotPasswordLink');
+  const resetPasswordModal = document.getElementById('resetPasswordModal');
+  const closeModal = document.getElementById('closeModal');
+  const resetPasswordForm = document.getElementById('resetPasswordForm');
 
   const showMsg = (text, type = "success") => {
     if (!authMsg) return;
@@ -139,4 +143,44 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  // ===== LÓGICA DO MODAL DE REDEFINIÇÃO DE SENHA =====
+  forgotPasswordLink?.addEventListener('click', (e) => {
+    e.preventDefault();
+    resetPasswordModal?.classList.remove('hidden');
+  });
+
+  closeModal?.addEventListener('click', () => {
+    resetPasswordModal?.classList.add('hidden');
+  });
+
+  resetPasswordModal?.addEventListener('click', (e) => {
+    if (e.target === resetPasswordModal) {
+      resetPasswordModal.classList.add('hidden');
+    }
+  });
+
+  resetPasswordForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    clearMsg();
+    const email = document.getElementById('resetEmail').value.trim().toLowerCase();
+
+    if (!email.includes('@')) {
+      return showMsg("Por favor, insira um e-mail válido.", "error");
+    }
+
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin, // URL para onde o usuário será redirecionado após redefinir a senha
+      });
+
+      if (error) {
+        return showMsg("Erro ao enviar e-mail de redefinição: " + error.message, "error");
+      }
+
+      showMsg("E-mail de redefinição enviado! Verifique sua caixa de entrada.", "success");
+      resetPasswordModal.classList.add('hidden');
+    } catch {
+      showMsg("Erro inesperado ao tentar redefinir a senha.", "error");
+    }
+  });
 });
