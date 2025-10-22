@@ -361,6 +361,59 @@ canvas {
     transition: width 0.3s;
 }
 
+#bigbang-charge-container {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 5px;
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.charge-bar-background {
+    width: 200px;
+    height: 12px;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 5px;
+    position: relative;
+    overflow: hidden; /* Garante que os átomos não saiam da área */
+}
+
+.charge-bar-progress {
+    height: 100%;
+    width: 0%; /* Começa com 0% */
+    background: linear-gradient(90deg, #FF00FF, #00FFFF);
+    transition: width 0.1s linear;
+    border-radius: 5px;
+}
+
+.atom {
+    font-size: 1.2rem;
+    transition: transform 0.1s linear;
+    color: #00FFFF; /* Cor inicial */
+}
+
+#bigbang-charge-container.bigbang-ready .atom {
+    display: none; /* Esconde os átomos quando a carga está completa */
+}
+
+.bigbang-ready-indicator {
+    display: none; /* Escondido por padrão */
+    font-size: 1.5rem;
+    color: gold;
+    animation: pulse-ready 1.5s infinite;
+}
+
+#bigbang-charge-container.bigbang-ready .bigbang-ready-indicator {
+    display: block; /* Mostra o indicador quando a carga está completa */
+}
+
 #bigbang-cooldown {
     position: fixed;
     bottom: 30px;
@@ -1475,4 +1528,23 @@ body {
     text-shadow: 0 0 5px black;
     z-index: 50;
     pointer-events: none;
+}
+
+#start-adventure-btn {
+    width: 100%;
+    padding: 1rem;
+    background: linear-gradient(to right, #00b09b, #96c93d);
+    border: none;
+    border-radius: 5px;
+    color: white;
+    font-size: 1.2rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 1rem;
+}
+
+#start-adventure-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 176, 155, 0.5);
 }
