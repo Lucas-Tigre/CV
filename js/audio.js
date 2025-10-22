@@ -4,13 +4,13 @@
 
 const musicTracks = {
     // Música que toca durante o jogo normal.
-    mainTheme: 'assets/audio/main_theme.mp3',
+    mainTheme: 'assets/audio/WordCLASSIC.mp3',
 
     // Música que toca durante as batalhas com chefes.
-    bossBattle: 'assets/audio/boss_battle.mp3',
+    bossBattle: 'assets/audio/10.40BFHT.mp3',
 
     // Música especial para a batalha com o chefe final.
-    finalBossTheme: 'assets/audio/final_boss_theme.mp3'
+    finalBossTheme: 'assets/audio/FinalBoss50.mp3'
 };
 
 let currentTrack = null;
