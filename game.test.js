@@ -2,6 +2,7 @@ import { config } from './js/config.js';
 import { spawnEnemy } from './js/enemy.js';
 import { checkLevelUp } from './js/utils.js';
 import { restartGame, initialQuests, activateBigBang } from './js/game.js';
+import { updateBigBangChargeBar } from './js/ui.js';
 import * as state from './js/state.js';
 
 // As funções em game.js não são puras e dependem de um estado global e do DOM,
@@ -172,6 +173,36 @@ describe('Lógica Modular do Jogo', () => {
             expect(state.enemies[0].health).toBe(140); // 200 - (200 * 0.3)
             // Verifica se a carga do Big Bang foi resetada para 0.
             expect(config.bigBangCharge).toBe(0);
+        });
+    });
+
+    describe('UI (Interface do Usuário)', () => {
+        it('deve calcular a posição correta dos átomos na barra de carregamento do Big Bang', () => {
+            // Simula a estrutura do DOM necessária para a função.
+            document.body.innerHTML = `
+                <div id="bigbang-charge-container">
+                    <div id="atom-left"></div>
+                    <div id="bigbang-charge-background" style="width: 200px;">
+                        <div id="bigbang-charge-progress"></div>
+                    </div>
+                    <div id="atom-right"></div>
+                </div>
+            `;
+
+            const atomLeft = document.getElementById('atom-left');
+            const atomRight = document.getElementById('atom-right');
+            const barBackground = document.getElementById('bigbang-charge-background');
+
+            // Simula a largura do elemento, pois o JSDOM não calcula o layout.
+            Object.defineProperty(barBackground, 'offsetWidth', { value: 200 });
+
+            // Chama a função com 50% de carga.
+            updateBigBangChargeBar(50);
+
+            // A largura do contêiner de fundo é 200px.
+            // A posição deve ser (50 / 100) * (200 / 2) = 50.
+            expect(atomLeft.style.transform).toBe('translateX(50px)');
+            expect(atomRight.style.transform).toBe('translateX(-50px)');
         });
     });
 });
