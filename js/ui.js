@@ -204,10 +204,17 @@ export function updateBigBangChargeBar(chargePercent) {
 
     const atomLeft = document.getElementById('atom-left');
     const atomRight = document.getElementById('atom-right');
-    const bar = document.getElementById('bigbang-charge-progress');
+    const barBackground = document.getElementById('bigbang-charge-background');
+    if (!atomLeft || !atomRight || !barBackground) return;
 
-    // Calcula a posição dos átomos. Eles começam nas extremidades e se movem para o centro.
-    const position = (chargePercent / 100) * (bar.offsetWidth / 2);
+    // A barra de progresso em si.
+    const progressBar = document.getElementById('bigbang-charge-progress');
+    if (progressBar) {
+        progressBar.style.width = `${chargePercent}%`;
+    }
+
+    // Calcula a posição dos átomos com base no contêiner de fundo, que tem largura fixa.
+    const position = (chargePercent / 100) * (barBackground.offsetWidth / 2);
 
     atomLeft.style.transform = `translateX(${position}px)`;
     atomRight.style.transform = `translateX(-${position}px)`;
