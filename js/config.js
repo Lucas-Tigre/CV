@@ -189,6 +189,7 @@ export const config = {
     // ESTADO INICIAL DO JOGO
     // =============================================
     xp: 0,
+    globalXpMultiplier: 2.5, // Multiplicador global para ganho de XP.
     level: 1,
     skillPoints: 0,
     soundEnabled: false,
