@@ -37,6 +37,8 @@ document.body.innerHTML = `
         <div id="skins-grid"></div>
         <button id="close-skins"></button>
     </div>
+    <div id="supernova" style="animation: none;"></div>
+    <div id="shockwave" style="animation: none;"></div>
 `;
 
 // Simula a função `getContext` do canvas, pois ela não existe no JSDOM.
