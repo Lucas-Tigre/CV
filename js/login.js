@@ -79,16 +79,26 @@ document.addEventListener("DOMContentLoaded", () => {
     e.preventDefault();
     clearMsg();
 
-    const userOrEmail = document.getElementById('loginUser').value.trim().toLowerCase();
+    const email = document.getElementById('loginUser').value.trim().toLowerCase();
     const pass = document.getElementById('loginPass').value;
+
+    // Validação de e-mail simples.
+    if (!email.includes('@')) {
+      return showMsg("Por favor, insira um e-mail válido.", "error");
+    }
 
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
-        email: userOrEmail,
+        email: email,
         password: pass
       });
 
-      if (error) return showMsg("Erro ao entrar: " + error.message, "error");
+      if (error) {
+        if (error.message.includes("Email not confirmed")) {
+          return showMsg("Seu e-mail ainda não foi confirmado. Por favor, verifique sua caixa de entrada.", "error");
+        }
+        return showMsg("Erro ao entrar: " + error.message, "error");
+      }
 
     } catch {
       showMsg("Erro inesperado no login.", "error");
