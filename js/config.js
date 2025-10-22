@@ -217,7 +217,7 @@ export const config = {
     soundEffects: {}, // Cache para efeitos sonoros.
 
     story: {
-        enabled: true,
+        enabled: false,
         currentScene: 0,
         scenes: [
             {
