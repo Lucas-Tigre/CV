@@ -146,16 +146,16 @@ document.addEventListener("DOMContentLoaded", () => {
   // ===== LÓGICA DO MODAL DE REDEFINIÇÃO DE SENHA =====
   forgotPasswordLink?.addEventListener('click', (e) => {
     e.preventDefault();
-    resetPasswordModal?.classList.remove('hidden');
+    resetPasswordModal?.classList.add('active');
   });
 
   closeModal?.addEventListener('click', () => {
-    resetPasswordModal?.classList.add('hidden');
+    resetPasswordModal?.classList.remove('active');
   });
 
   resetPasswordModal?.addEventListener('click', (e) => {
     if (e.target === resetPasswordModal) {
-      resetPasswordModal.classList.add('hidden');
+      resetPasswordModal.classList.remove('active');
     }
   });
 
@@ -178,7 +178,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       showMsg("E-mail de redefinição enviado! Verifique sua caixa de entrada.", "success");
-      resetPasswordModal.classList.add('hidden');
+      resetPasswordModal.classList.remove('active');
     } catch {
       showMsg("Erro inesperado ao tentar redefinir a senha.", "error");
     }
