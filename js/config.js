@@ -193,6 +193,7 @@ export const config = {
     skillPoints: 0,
     soundEnabled: false,
     gamePaused: false,
+    bossFightActive: false,
     particlesAbsorbed: 0,
     enemiesDestroyed: 0,
     gameTime: 0,
@@ -217,7 +218,7 @@ export const config = {
     soundEffects: {}, // Cache para efeitos sonoros.
 
     story: {
-        enabled: false,
+        enabled: true,
         currentScene: 0,
         scenes: [
             {

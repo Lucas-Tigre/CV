@@ -3,32 +3,50 @@
 // =============================================
 
 const musicTracks = {
-    // Música que toca durante o jogo normal.
     mainTheme: 'assets/audio/WordCLASSIC.mp3',
-
-    // Música que toca durante as batalhas com chefes.
     bossBattle: 'assets/audio/10.40BFHT.mp3',
-
-    // Música especial para a batalha com o chefe final.
     finalBossTheme: 'assets/audio/FinalBoss50.mp3'
 };
 
+const audioCache = {};
 let currentTrack = null;
 let isFading = false;
 
 /**
- * Cria e configura um elemento de áudio para uma faixa musical.
- * @param {string} trackName - A chave da faixa no objeto `musicTracks`.
- * @returns {Audio|null} O elemento de áudio configurado ou nulo se a faixa não for encontrada.
+ * Pré-carrega uma faixa de áudio e a armazena no cache.
+ * @param {string} trackName - O nome da faixa a ser pré-carregada.
  */
-function createAudioElement(trackName) {
+export function preloadMusic(trackName) {
+    if (!musicTracks[trackName] || audioCache[trackName]) {
+        return;
+    }
+    const audio = new Audio(musicTracks[trackName]);
+    audio.preload = 'auto';
+    audio.load();
+    audioCache[trackName] = audio;
+    console.log(`Pré-carregando música: ${trackName}`);
+}
+
+/**
+ * Obtém um elemento de áudio do cache ou o cria se não existir.
+ * @param {string} trackName - A chave da faixa no objeto `musicTracks`.
+ * @returns {Audio|null} O elemento de áudio configurado.
+ */
+function getAudioElement(trackName) {
+    if (audioCache[trackName]) {
+        const audio = audioCache[trackName];
+        audio.currentTime = 0; // Reinicia a música
+        return audio;
+    }
+
     if (!musicTracks[trackName]) {
         console.error(`Faixa de música "${trackName}" não encontrada.`);
         return null;
     }
+
     const audio = new Audio(musicTracks[trackName]);
     audio.loop = true;
-    audio.volume = 0; // Começa com volume 0 para o efeito de fade in.
+    audioCache[trackName] = audio;
     return audio;
 }
 
@@ -38,12 +56,13 @@ function createAudioElement(trackName) {
  */
 export function playMusic(trackName) {
     if (isFading || (currentTrack && currentTrack.trackName === trackName)) {
-        return; // Não interrompe o fade nem reinicia a mesma faixa.
+        return;
     }
 
-    const newAudio = createAudioElement(trackName);
+    const newAudio = getAudioElement(trackName);
     if (!newAudio) return;
 
+    newAudio.volume = 0; // Garante que o volume comece em 0 para o fade in.
     isFading = true;
 
     // Faz o fade out da faixa atual, se houver uma tocando.

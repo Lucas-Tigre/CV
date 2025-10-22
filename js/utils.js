@@ -94,27 +94,27 @@ export function checkLevelUp(level, xp, enemiesCount, bossFightActive) {
         message: null,
     };
 
-    // Se o nível máximo foi atingido, verifica se o chefe final deve ser acionado.
-    if (level >= 50) {
-        output.newXp = level * 100; // Mantém a barra de XP cheia no nível máximo.
-        if (enemiesCount === 0 && !bossFightActive) {
-            output.bossToTrigger = 50;
-        }
-        return output;
-    }
-
     const xpNeeded = level * 100;
-    if (xp >= xpNeeded) {
+
+    if (level < 50 && xp >= xpNeeded) {
         output.newLevel = level + 1;
         output.newXp = xp - xpNeeded;
         output.skillPointsGained = 1;
         output.leveledUp = true;
         output.message = `Nível ${output.newLevel} alcançado! +1 Ponto de Habilidade`;
 
-        // Aciona uma luta de chefe a cada 10 níveis.
+        // Aciona uma luta de chefe a cada 10 níveis, incluindo o chefe final no nível 50.
         if (output.newLevel % 10 === 0) {
             output.bossToTrigger = output.newLevel;
         }
+    } else if (level >= 50) {
+        // No nível máximo, a barra de XP permanece cheia.
+        output.newXp = xpNeeded;
+    }
+
+    // Lógica específica para o chefe final no nível 50.
+    if (level === 50 && enemiesCount === 0 && !bossFightActive) {
+        output.bossToTrigger = 50;
     }
 
     return output;

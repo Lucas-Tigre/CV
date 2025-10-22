@@ -9,7 +9,7 @@ import * as enemy from './enemy.js';
 import * as projectile from './projectile.js';
 import * as explosion from './explosion.js';
 import { checkLevelUp as checkLevelUpLogic, showUnlockMessage, playSound, initSoundSystem, unlockAudio } from './utils.js';
-import * as audio from './audio.js';
+import { playMusic, stopMusic, preloadMusic } from './audio.js';
 
 // Armazena uma cópia da configuração inicial de missões para garantir que o reset seja consistente.
 export const initialQuests = JSON.parse(JSON.stringify(config.quests));
@@ -43,7 +43,7 @@ function triggerBossFight(level) {
     showUnlockMessage(`UM CHEFE APARECEU!`);
     const bossType = level === 50 ? 'finalBoss' : 'boss';
     const musicTrack = level === 50 ? 'finalBossTheme' : 'bossBattle';
-    audio.playMusic(musicTrack);
+    playMusic(musicTrack);
     state.setEnemies(enemy.spawnEnemy(state.enemies, bossType));
 }
 
@@ -124,15 +124,22 @@ function updateWave() {
         }
         return;
     }
+
     config.wave.timer++;
+
+    // Condição para iniciar uma nova onda
     if (state.enemies.length === 0 && config.wave.spawned >= config.wave.enemiesToSpawn) {
+        console.log("Iniciando nova onda!");
         config.wave.number++;
         config.wave.enemiesToSpawn = 5 + Math.floor(config.wave.number * 1.5);
         config.wave.spawned = 0;
         config.wave.timer = 0;
         showUnlockMessage(`Onda ${config.wave.number} começando!`);
         updateQuest('wave5', 1);
-    } else if (config.wave.spawned < config.wave.enemiesToSpawn && config.wave.timer > 90) {
+    }
+    // Condição para gerar um novo inimigo na onda atual
+    else if (config.wave.spawned < config.wave.enemiesToSpawn && config.wave.timer > 90) {
+        console.log("Gerando novo inimigo.");
         state.setEnemies(enemy.spawnEnemy(state.enemies));
         config.wave.spawned++;
         config.wave.timer = 0;
@@ -222,7 +229,7 @@ export function restartGame() {
     config.quests = JSON.parse(JSON.stringify(initialQuests));
 
     // Reinicia a música e o loop do jogo.
-    audio.playMusic('mainTheme');
+    playMusic('mainTheme');
     if (!state.gameLoopRunning) {
         state.setGameLoopRunning(true);
         requestAnimationFrame(gameLoop);
@@ -427,7 +434,7 @@ function updatePhysics(deltaTime) {
         if (!config.gamePaused) {
             config.gamePaused = true;
             playSound('gameOver');
-            audio.stopMusic();
+            stopMusic();
             ui.showGameOver({ level: config.level, wave: config.wave.number, particles: config.particlesAbsorbed, enemies: config.enemiesDestroyed });
         }
     }
@@ -481,7 +488,7 @@ function setupControls() {
     // Desbloqueia o áudio na primeira interação do usuário para contornar políticas de autoplay dos navegadores.
     const handleFirstInteraction = () => {
         unlockAudio();
-        audio.playMusic('mainTheme');
+        playMusic('mainTheme');
         canvas.removeEventListener('mousemove', handleFirstInteraction);
         window.removeEventListener('keydown', handleFirstInteraction);
     };
@@ -607,6 +614,7 @@ function initGame() {
     requestAnimationFrame(spawnBatch);
 
     initSoundSystem();
+    preloadMusic('mainTheme');
     ui.updateHealthBar(player.health, player.maxHealth);
     ui.updateXPBar(config.xp, config.level);
     updateStats();
