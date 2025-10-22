@@ -620,10 +620,6 @@ function initGame() {
     setupControls();
     state.setGameLoopRunning(true);
     requestAnimationFrame(gameLoop);
-
-    // Expor para verificação
-    window.config = config;
-    window.state = state;
 }
 
 // Configura os listeners de eventos globais.
