@@ -61,3 +61,5 @@ if (canvas) {
 // Isso evita que os testes queiram ao tentar interagir com elementos de áudio.
 window.HTMLMediaElement.prototype.play = () => Promise.resolve();
 window.HTMLMediaElement.prototype.pause = () => {};
+
+// Mock para o módulo supabaseService será pego automaticamente do diretório __mocks__.

@@ -1422,6 +1422,57 @@ body {
     box-shadow: 0 5px 15px rgba(0, 176, 155, 0.5);
 }
 
+/* Estilos do Leaderboard Fixo */
+.leaderboard-container {
+    position: fixed;
+    top: 65px; /* Abaixo do botão de menu */
+    right: 15px;
+    width: 280px;
+    background: rgba(0, 0, 0, 0.85);
+    border-radius: 10px;
+    padding: 15px;
+    color: white;
+    z-index: 999; /* Abaixo do menu (1000) */
+    box-shadow: 0 0 20px rgba(74, 0, 224, 0.4);
+    border: 1px solid rgba(74, 0, 224, 0.2);
+    backdrop-filter: blur(4px);
+}
+
+.leaderboard-container h2 {
+    font-size: 1.2em;
+    color: #00F5A0;
+    margin-top: 0;
+    margin-bottom: 10px;
+    text-align: center;
+    border-bottom: 1px solid #4A00E0;
+    padding-bottom: 8px;
+}
+
+.leaderboard-container table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9em;
+}
+
+.leaderboard-container th, .leaderboard-container td {
+    padding: 6px;
+    text-align: left;
+}
+
+.leaderboard-container th {
+    color: #8E2DE2;
+}
+
+.leaderboard-container td:last-child {
+    text-align: right;
+    font-weight: bold;
+    color: #00F5A0;
+}
+
+.leaderboard-container tr:nth-child(even) {
+    background: rgba(74, 0, 224, 0.1);
+}
+
 #start-game-btn:disabled {
     background: #555;
     cursor: not-allowed;

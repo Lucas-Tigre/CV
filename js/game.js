@@ -349,7 +349,7 @@ function updatePhysics(deltaTime) {
     }
 
     if (particleUpdate.absorbedXp > 0) {
-        const finalXp = Math.round(particleUpdate.absorbedXp * (config.xpMultiplier || 1) * config.globalXpMultiplier);
+        const finalXp = Math.round(particleUpdate.absorbedXp * (config.xpMultiplier || 1));
         config.xp += finalXp;
         updateQuest('absorb100', finalXp);
         checkLevelUp();
@@ -376,7 +376,7 @@ function updatePhysics(deltaTime) {
         state.setProjectiles(enemyUpdate.newProjectiles);
 
         if (enemyUpdate.xpFromDefeatedEnemies > 0) {
-            config.xp += Math.round(enemyUpdate.xpFromDefeatedEnemies * config.globalXpMultiplier);
+            config.xp += enemyUpdate.xpFromDefeatedEnemies;
             updateQuest('defeat20', 1);
             checkLevelUp();
         }
@@ -620,6 +620,7 @@ function initGame() {
     updateStats();
     ui.updateQuestUI(config.quests.active);
     ui.toggleSoundUI(config.soundEnabled);
+    ui.displayLeaderboard();
 
     // Exibe o nome da galáxia do jogador.
     const username = localStorage.getItem('username') || 'Viajante';
