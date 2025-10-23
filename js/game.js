@@ -5,12 +5,6 @@ import { config } from './config.js';
 import * as state from './state.js';
 import * as ui from './ui.js';
 
-// Expor objetos globais apenas para fins de teste com Playwright
-if (typeof window !== 'undefined') {
-    window.config = config;
-    window.state = state;
-    window.updateWave = updateWave;
-}
 import { submitScore } from './supabaseService.js';
 import * as particle from './particle.js';
 import * as enemy from './enemy.js';
@@ -131,7 +125,7 @@ export function updateWave() {
             try {
                 audio.playMusic('mainTheme');
             } catch (e) {
-                console.log("Não foi possível tocar a música no ambiente de teste.");
+                // Silencia o erro no ambiente de teste
             }
         }
         return;
@@ -141,7 +135,6 @@ export function updateWave() {
 
     // Condição para iniciar uma nova onda
     if (state.enemies.length === 0 && config.wave.spawned >= config.wave.enemiesToSpawn) {
-        console.log("Iniciando nova onda!");
         config.wave.number++;
         config.wave.enemiesToSpawn = 5 + Math.floor(config.wave.number * 1.5);
         config.wave.spawned = 0;
@@ -151,7 +144,6 @@ export function updateWave() {
     }
     // Condição para gerar um novo inimigo na onda atual
     else if (config.wave.spawned < config.wave.enemiesToSpawn && config.wave.timer > 90) {
-        console.log("Gerando novo inimigo.");
         state.setEnemies(enemy.spawnEnemy(state.enemies));
         config.wave.spawned++;
         config.wave.timer = 0;
@@ -619,10 +611,8 @@ function setupControls() {
 
 /** Função principal que inicializa o jogo quando a página é carregada. */
 function initGame() {
-    console.log("[initGame] Iniciando a inicialização do jogo...");
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-    console.log(`[initGame] Canvas redimensionado para ${canvas.width}x${canvas.height}`);
     const player = config.players[0];
     player.x = canvas.width / 2;
     player.y = canvas.height / 2;
@@ -635,14 +625,11 @@ function initGame() {
         config.baseXpMultiplier = 1;
         config.xpMultiplier = 1;
     }
-    console.log("[initGame] Valores base do jogador configurados.");
 
     preloadImages();
-    console.log("[initGame] Pré-carregamento de imagens iniciado.");
     requestAnimationFrame(spawnBatch);
 
     initSoundSystem();
-    console.log("[initGame] Sistema de som inicializado.");
     preloadMusic('mainTheme');
     ui.updateHealthBar(player.health, player.maxHealth);
     ui.updateXPBar(config.xp, config.level);
@@ -654,17 +641,14 @@ function initGame() {
     // Exibe o nome da galáxia do jogador.
     const username = localStorage.getItem('username') || 'Viajante';
     document.getElementById('galaxy-owner-display').textContent = `Galáxia de ${username}`;
-    console.log(`[initGame] Nome de usuário '${username}' exibido.`);
 
     setupControls();
-    console.log("[initGame] Controles configurados.");
     state.setGameLoopRunning(true);
     requestAnimationFrame(gameLoop);
-    console.log("[initGame] Loop do jogo iniciado. Inicialização concluída.");
 }
 
 // Configura os listeners de eventos globais.
-window.addEventListener('load', initGame);
+window.addEventListener('DOMContentLoaded', initGame);
 window.addEventListener('resize', () => {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;

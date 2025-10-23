@@ -318,7 +318,7 @@ canvas {
     height: 25px;
     background: rgba(0,0,0,0.7);
     z-index: 50;
-    display: flex;
+    display: none; /* Começa oculto por padrão */
     align-items: center;
     padding: 0 15px;
     border-top: 1px solid rgba(74, 0, 224, 0.3);
@@ -367,7 +367,7 @@ canvas {
     left: 50%;
     transform: translateX(-50%);
     z-index: 50;
-    display: flex;
+    display: none;
     align-items: center;
     gap: 10px;
     padding: 5px;

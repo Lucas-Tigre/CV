@@ -1,8 +1,18 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from './supabaseConfig.js';
 
-// Cria o cliente Supabase uma única vez
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Cria o cliente Supabase apenas se as credenciais estiverem disponíveis.
+let supabase = null;
+if (SUPABASE_URL && SUPABASE_ANON_KEY) {
+    try {
+        supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    } catch (error) {
+        console.error("Falha ao inicializar o Supabase. Verifique suas credenciais.", error);
+    }
+} else {
+    console.warn("Credenciais do Supabase não encontradas. As funcionalidades do placar estão desativadas.");
+}
+
 
 /**
  * Envia a pontuação de um jogador para a tabela 'leaderboard'.
@@ -11,6 +21,8 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
  * @returns {Promise<object|null>} O resultado da inserção ou null em caso de erro.
  */
 export async function submitScore(username, score) {
+    if (!supabase) return null; // Não faz nada se o Supabase não foi inicializado
+
     if (!username || typeof score !== 'number') {
         console.error("Nome de usuário ou pontuação inválida.");
         return null;
@@ -39,6 +51,8 @@ export async function submitScore(username, score) {
  * @returns {Promise<Array<object>>} Uma lista com os melhores jogadores ou uma lista vazia em caso de erro.
  */
 export async function getLeaderboard() {
+    if (!supabase) return []; // Retorna uma lista vazia se o Supabase não foi inicializado
+
     try {
         const { data, error } = await supabase
             .from('leaderboard')
