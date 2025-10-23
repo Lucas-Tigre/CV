@@ -39,6 +39,16 @@ document.body.innerHTML = `
     </div>
     <div id="supernova" style="animation: none;"></div>
     <div id="shockwave" style="animation: none;"></div>
+    <!-- Elementos adicionados para evitar erros de inicialização -->
+    <div id="galaxy-owner-display"></div>
+    <div id="bigbang-charge-container">
+        <div id="atom-left"></div>
+        <div id="bigbang-charge-background">
+            <div id="bigbang-charge-progress"></div>
+        </div>
+        <div id="atom-right"></div>
+    </div>
+    <div id="bigbang-indicator"></div>
 `;
 
 // Simula a função `getContext` do canvas, pois ela não existe no JSDOM.
@@ -58,8 +68,9 @@ if (canvas) {
 }
 
 // Simula as funções de áudio, que não são implementadas no JSDOM.
-// Isso evita que os testes queiram ao tentar interagir com elementos de áudio.
 window.HTMLMediaElement.prototype.play = () => Promise.resolve();
 window.HTMLMediaElement.prototype.pause = () => {};
+// Adiciona o mock para a função 'load' para evitar avisos nos testes.
+window.HTMLMediaElement.prototype.load = () => {};
 
 // Mock para o módulo supabaseService será pego automaticamente do diretório __mocks__.
