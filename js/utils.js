@@ -40,13 +40,15 @@ export function showUnlockMessage(message) {
 /** Carrega todos os efeitos sonoros e as preferências de som do usuário. */
 export function initSoundSystem() {
     const soundPaths = {
-        absorb: 'assets/audio/absorb.mp3',
-        enemyDefeat: 'assets/audio/enemy_defeat.mp3',
-        levelUp: 'assets/audio/level_up.mp3',
-        gameOver: 'assets/audio/game_over.mp3',
-        hit: 'assets/audio/hit.mp3',
-        respawn: 'assets/audio/respawn.mp3',
-        bossRoar: 'assets/audio/boss_roar.mp3',
+        // NOTA: Os seguintes arquivos de áudio estão faltando. As chamadas foram comentadas para evitar erros 404.
+        // Para reativar os sons, adicione os arquivos .mp3 correspondentes na pasta 'assets/audio/'.
+        // absorb: 'assets/audio/absorb.mp3',
+        // enemyDefeat: 'assets/audio/enemy_defeat.mp3',
+        // levelUp: 'assets/audio/level_up.mp3',
+        // gameOver: 'assets/audio/game_over.mp3',
+        // hit: 'assets/audio/hit.mp3',
+        // respawn: 'assets/audio/respawn.mp3',
+        // bossRoar: 'assets/audio/boss_roar.mp3',
     };
 
     for (const [key, url] of Object.entries(soundPaths)) {
