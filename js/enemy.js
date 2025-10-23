@@ -40,9 +40,21 @@ export function spawnEnemy(currentEnemies, typeKey = null) {
             health *= type.healthMultiplier;
         }
 
+        // Calcula uma posição de surgimento segura, longe do jogador.
+        const player = config.players[0];
+        const safeSpawnRadius = (player.size || 30) * 5; // Garante que o inimigo surja a 5x o raio do jogador de distância.
+        let spawnX, spawnY;
+        do {
+            spawnX = Math.random() * window.innerWidth;
+            spawnY = Math.random() * window.innerHeight;
+        } while (
+            player.x && player.y &&
+            Math.sqrt(Math.pow(spawnX - player.x, 2) + Math.pow(spawnY - player.y, 2)) < safeSpawnRadius
+        );
+
         const enemy = {
-            x: Math.random() * window.innerWidth,
-            y: Math.random() * window.innerHeight,
+            x: spawnX,
+            y: spawnY,
             type: typeKey,
             health: health,
             maxHealth: health,
@@ -118,7 +130,6 @@ export function spawnEnemy(currentEnemies, typeKey = null) {
 
 /**
  * Atualiza a posição e o estado de todos os inimigos.
- * Esta versão foi refatorada para usar `filter` e garantir que a lógica de remoção seja mais robusta.
  * @param {Array} enemies - O array de inimigos para atualizar.
  * @param {object} player - O objeto do jogador.
  * @param {number} deltaTime - O tempo desde o último frame.
@@ -128,12 +139,11 @@ export function spawnEnemy(currentEnemies, typeKey = null) {
  */
 export function updateEnemies(enemies, player, deltaTime, particles, projectiles) {
     let xpFromDefeatedEnemies = 0;
-    let particlesFromExplosions = particles;
-    let newProjectiles = projectiles;
+    let particlesFromExplosions = [...particles];
+    let newProjectiles = [...projectiles];
 
-    // Primeiro, atualiza o estado de cada inimigo (movimento, dano, ataques).
+    // Atualiza o estado de cada inimigo (movimento, dano, ataques).
     enemies.forEach(enemy => {
-        // Lógica de ataque especial do chefe.
         if (enemy.attackCooldown !== undefined) {
             enemy.attackCooldown--;
             if (enemy.attackCooldown <= 0) {
@@ -159,7 +169,7 @@ export function updateEnemies(enemies, player, deltaTime, particles, projectiles
             const damage = player.isPoweredUp ? player.attractionDamage * 3 : player.attractionDamage;
             enemy.health -= damage;
         } else {
-            // Comportamento normal dos inimigos
+            // Comportamento normal
             switch (enemy.behavior) {
                 case 'huntAndShoot':
                     const dist = Math.sqrt(distSq);
@@ -173,19 +183,23 @@ export function updateEnemies(enemies, player, deltaTime, particles, projectiles
                         enemy.speedX *= 0.8;
                         enemy.speedY *= 0.8;
                     }
-                    enemy.shootCooldown--;
-                    if (enemy.shootCooldown <= 0) {
-                        newProjectiles.push(projectile.createProjectile(enemy.x, enemy.y, player.x, player.y, enemy.projectileType));
-                        enemy.shootCooldown = config.enemySystem.types[enemy.type].shootCooldown;
+                    if (enemy.shootCooldown) {
+                        enemy.shootCooldown--;
+                        if (enemy.shootCooldown <= 0) {
+                            newProjectiles.push(projectile.createProjectile(enemy.x, enemy.y, player.x, player.y, enemy.projectileType));
+                            enemy.shootCooldown = config.enemySystem.types[enemy.type].shootCooldown;
+                        }
                     }
                     break;
                 case 'static':
                     enemy.speedX *= 0.8;
                     enemy.speedY *= 0.8;
-                    enemy.shootCooldown--;
-                    if (enemy.shootCooldown <= 0) {
-                        newProjectiles.push(projectile.createProjectile(enemy.x, enemy.y, player.x, player.y, enemy.projectileType));
-                        enemy.shootCooldown = config.enemySystem.types[enemy.type].shootCooldown;
+                    if (enemy.shootCooldown) {
+                        enemy.shootCooldown--;
+                        if (enemy.shootCooldown <= 0) {
+                            newProjectiles.push(projectile.createProjectile(enemy.x, enemy.y, player.x, player.y, enemy.projectileType));
+                            enemy.shootCooldown = config.enemySystem.types[enemy.type].shootCooldown;
+                        }
                     }
                     break;
                 case 'hunt':
@@ -201,7 +215,7 @@ export function updateEnemies(enemies, player, deltaTime, particles, projectiles
                     }
                     break;
                 case 'crossScreen':
-                    break; // Velocidade já definida no spawn
+                    break;
                 default:
                     enemy.speedX += (Math.random() - 0.5) * 0.5;
                     enemy.speedY += (Math.random() - 0.5) * 0.5;
@@ -210,48 +224,40 @@ export function updateEnemies(enemies, player, deltaTime, particles, projectiles
             }
         }
 
-        // Atualização de posição.
         enemy.x += enemy.speedX * (deltaTime / 16.67);
         enemy.y += enemy.speedY * (deltaTime / 16.67);
 
-        // Colisão com o jogador
         if (distSq < Math.pow((player.size + enemy.size) * 0.6, 2)) {
             const damage = (enemyType.damage || 5) * (deltaTime / 16.67);
             player.health -= damage;
         }
     });
 
-    // Agora, filtramos a lista para manter apenas os inimigos "vivos" e dentro da tela.
     const remainingEnemies = enemies.filter(enemy => {
-        // Condição 1: O inimigo está vivo?
         if (enemy.health <= 0) {
             xpFromDefeatedEnemies += enemy.isElite ? 10 : 3;
             config.enemiesDestroyed++;
             config.bigBangCharge = Math.min(100, config.bigBangCharge + config.bigBangChargeRate);
-            if (Math.random() < 0.05) { // 5% de chance de dropar cura.
+            if (Math.random() < 0.05) {
                 particlesFromExplosions.push(particle.createHealParticle(enemy.x, enemy.y));
             }
-            return false; // REMOVER: Inimigo derrotado.
+            return false;
         }
-
-        // Condição 2: Se for 'crossScreen', ele saiu da tela?
         if (enemy.behavior === 'crossScreen') {
             const padding = 200;
             if (enemy.x < -padding || enemy.x > window.innerWidth + padding || enemy.y < -padding || enemy.y > window.innerHeight + padding) {
-                return false; // REMOVER: Saiu da tela.
+                return false; // Remove se estiver fora da tela
             }
         } else {
-            // Para outros inimigos, apenas os mantém dentro da tela.
             enemy.x = Math.max(10, Math.min(window.innerWidth - 10, enemy.x));
             enemy.y = Math.max(10, Math.min(window.innerHeight - 10, enemy.y));
         }
-
-        // Se passou por todas as verificações, o inimigo sobrevive.
-        return true;
+        return true; // Mantém o inimigo
     });
 
     return { xpFromDefeatedEnemies, newEnemies: remainingEnemies, newParticles: particlesFromExplosions, newProjectiles };
 }
+
 
 /**
  * Renderiza todos os inimigos no canvas.
