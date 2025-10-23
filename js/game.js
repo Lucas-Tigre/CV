@@ -4,6 +4,7 @@
 import { config } from './config.js';
 import * as state from './state.js';
 import * as ui from './ui.js';
+import { submitScore } from './supabaseService.js';
 import * as particle from './particle.js';
 import * as enemy from './enemy.js';
 import * as projectile from './projectile.js';
@@ -437,7 +438,17 @@ function updatePhysics(deltaTime) {
             config.gamePaused = true;
             playSound('gameOver');
             stopMusic();
-            ui.showGameOver({ level: config.level, wave: config.wave.number, particles: config.particlesAbsorbed, enemies: config.enemiesDestroyed });
+            const finalStats = {
+                level: config.level,
+                wave: config.wave.number,
+                particlesAbsorbed: config.particlesAbsorbed,
+                enemiesDestroyed: config.enemiesDestroyed
+            };
+            ui.showGameOver(finalStats);
+
+            // Envia a pontuação para o Supabase
+            const username = localStorage.getItem('username') || 'Anônimo';
+            submitScore(username, finalStats.particlesAbsorbed);
         }
     }
 }
@@ -622,6 +633,7 @@ function initGame() {
     updateStats();
     ui.updateQuestUI(config.quests.active);
     ui.toggleSoundUI(config.soundEnabled);
+    ui.displayLeaderboard();
 
     // Exibe o nome da galáxia do jogador.
     const username = localStorage.getItem('username') || 'Viajante';
