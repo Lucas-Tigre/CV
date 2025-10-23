@@ -143,6 +143,7 @@ export function autoRespawnParticles(currentParticles, player) {
 export function updateParticles(currentParticles, player, deltaTime, lastUpdateIndex) {
     let newParticles = [...currentParticles];
     let absorbedXp = 0;
+    let absorbedCount = 0;
     let powerupCollected = false;
     let healCollected = false;
     let healAmount = 0;
@@ -200,7 +201,7 @@ export function updateParticles(currentParticles, player, deltaTime, lastUpdateI
                         healAmount = p.healAmount;
                     }
                     absorbedXp += p.xpValue || 1;
-                    config.particlesAbsorbed++;
+                    absorbedCount++;
                     playSound('absorb');
                     particlePool.push(newParticles.splice(idx, 1)[0]); // Devolve a partícula ao pool.
                     i--;
@@ -228,7 +229,7 @@ export function updateParticles(currentParticles, player, deltaTime, lastUpdateI
 
     newLastUpdateIndex = (newLastUpdateIndex + updatesThisFrame) % (newParticles.length || 1);
 
-    return { newParticles, absorbedXp, newLastUpdateIndex, powerupCollected, healCollected, healAmount };
+    return { newParticles, absorbedXp, absorbedCount, newLastUpdateIndex, powerupCollected, healCollected, healAmount };
 }
 
 /**
