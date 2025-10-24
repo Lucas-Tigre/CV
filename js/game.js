@@ -378,9 +378,13 @@ function updatePhysics(deltaTime) {
     state.setExplosions(explosion.updateExplosions(state.explosions));
 
     if (state.enemies.length > 0) {
-        const enemyUpdate = enemy.updateEnemies(state.enemies, player, deltaTime, state.particles, state.projectiles);
+        const enemyUpdate = enemy.updateEnemies(state.enemies, player, deltaTime, state.projectiles);
         state.setEnemies(enemyUpdate.newEnemies);
-        state.setParticles(enemyUpdate.newParticles);
+
+        if (enemyUpdate.newlyCreatedParticles.length > 0) {
+            state.setParticles([...state.particles, ...enemyUpdate.newlyCreatedParticles]);
+        }
+
         state.setProjectiles(enemyUpdate.newProjectiles);
 
         if (enemyUpdate.xpFromDefeatedEnemies > 0) {
@@ -394,21 +398,9 @@ function updatePhysics(deltaTime) {
 
     // --- DETECÇÃO DE COLISÃO ---
 
-    // Colisão: Jogador vs Partículas Hostis (geradas pelo Chefe).
-    let hostileParticles = state.particles;
-    for (let i = hostileParticles.length - 1; i >= 0; i--) {
-        const p = hostileParticles[i];
-        if (p.isHostile) {
-            const dx = player.x - p.x;
-            const dy = player.y - p.y;
-            if (Math.sqrt(dx * dx + dy * dy) < player.size + p.size) {
-                player.health -= 5;
-                playSound('hit');
-                hostileParticles.splice(i, 1);
-            }
-        }
-    }
-    state.setParticles(hostileParticles);
+    // Colisão: Jogador vs Partículas Hostis. Esta lógica foi movida para particle.updateParticles.
+
+    // (O código antigo de colisão foi removido daqui para evitar processamento duplo e bugs)
 
     // Colisão: Jogador vs Projéteis de Inimigos.
     let currentProjectiles = state.projectiles;

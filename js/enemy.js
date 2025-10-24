@@ -125,18 +125,18 @@ export function spawnEnemy(currentEnemies, typeKey = null) {
  * @param {Array} projectiles - O array de projéteis.
  * @returns {object} Um objeto contendo o XP ganho e os novos arrays de entidades.
  */
-export function updateEnemies(enemies, player, deltaTime, particles, projectiles) {
+export function updateEnemies(enemies, player, deltaTime, projectiles) {
     let xpFromDefeatedEnemies = 0;
     let remainingEnemies = [];
-    let particlesFromExplosions = particles;
-    let newProjectiles = projectiles;
+    let newlyCreatedParticles = [];
+    let newProjectiles = [...projectiles];
 
     enemies.forEach(enemy => {
         // Lógica de ataque especial do chefe.
         if (enemy.attackCooldown !== undefined) {
             enemy.attackCooldown--;
             if (enemy.attackCooldown <= 0) {
-                particlesFromExplosions = particle.createParticleExplosion(enemy.x, enemy.y, particlesFromExplosions);
+                newlyCreatedParticles.push(...particle.createParticleExplosion(enemy.x, enemy.y, []));
                 enemy.attackCooldown = Math.random() * 120 + 180; // Reinicia o cooldown.
             }
         }
@@ -174,7 +174,7 @@ export function updateEnemies(enemies, player, deltaTime, particles, projectiles
                 config.enemiesDestroyed++;
                 config.bigBangCharge = Math.min(100, config.bigBangCharge + config.bigBangChargeRate);
                 if (Math.random() < 0.05) { // 5% de chance de dropar cura.
-                    particlesFromExplosions.push(particle.createHealParticle(enemy.x, enemy.y));
+                    newlyCreatedParticles.push(particle.createHealParticle(enemy.x, enemy.y));
                 }
                 return; // Pula o resto da lógica para este inimigo, que já foi derrotado.
             }
@@ -264,7 +264,7 @@ export function updateEnemies(enemies, player, deltaTime, particles, projectiles
         }
     });
 
-    return { xpFromDefeatedEnemies, newEnemies: remainingEnemies, newParticles: particlesFromExplosions, newProjectiles };
+    return { xpFromDefeatedEnemies, newEnemies: remainingEnemies, newlyCreatedParticles, newProjectiles };
 }
 
 /**
