@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Universo de Partículas - Início</title>
+    <title>Universo de Partículas</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
-<body>
+<body class="login-page">
 
     <div class="main-container">
         <header class="main-header">
@@ -16,35 +16,88 @@
             <p class="subtitle">Uma aventura de sobrevivência cósmica</p>
         </header>
 
-        <div class="content-wrapper">
-            <div class="left-column">
-                <section id="how-to-play" class="card">
-                    <h2>Como Jogar</h2>
-                    <ul>
-                        <li><strong>Mover:</strong> Seu personagem segue o cursor do mouse.</li>
-                        <li><strong>Atração (Segure '1' ou Clique Esquerdo):</strong> Atrai partículas e inimigos.</li>
-                        <li><strong>Repulsão (Segure '2' ou Clique Direito):</strong> Empurra partículas e inimigos.</li>
-                        <li><strong>Vórtice (Segure '3'):</strong> Cria um vórtice orbital que danifica inimigos.</li>
-                        <li><strong>Menu (Pressione 'M'):</strong> Abre o menu de habilidades e opções.</li>
-                    </ul>
-                    <p class="goal">
-                        <strong>Objetivo:</strong> Absorva partículas para ganhar XP e sobreviver o máximo possível!
-                    </p>
-                </section>
+        <div class="container auth">
+            <div class="tabs">
+              <button class="tab active" data-tab="login-pane">Login</button>
+              <button class="tab" data-tab="register-pane">Cadastro</button>
             </div>
-            <div class="right-column">
-                <section id="about-team" class="card">
-                    <h2>Sobre a Equipe</h2>
-                    <p>Este jogo foi criado com paixão por uma equipe dedicada de desenvolvedores espaciais. Nossa missão é criar experiências divertidas e desafiadoras. Agradecemos por jogar!</p>
-                </section>
-                <section id="start-game-section" class="card">
-                    <h2>Iniciar Aventura</h2>
-                    <button id="start-adventure-btn" onclick="window.location.href='login.html'">Jogar Agora</button>
-                    <p id="start-game-prompt" class="thematic-prompt">Clique em "Jogar Agora" para entrar ou criar sua conta.</p>
-                </section>
+
+            <!-- PANE DE LOGIN -->
+            <div id="login-pane" class="pane active">
+              <form id="loginForm" class="form">
+                <div class="field">
+                  <label for="loginUser">Usuário ou E-mail</label>
+                  <input id="loginUser" required placeholder="cosmonauta@universo.com">
+                </div>
+                <div class="field">
+                  <label for="loginPass">Senha</label>
+                  <input id="loginPass" type="password" required placeholder="Sua senha cósmica">
+                </div>
+
+              <button class="btn full" type="submit">Entrar na Galáxia</button>
+                <a href="#" id="forgotPasswordLink" class="forgot-password">Esqueceu sua senha?</a>
+              </form>
+
+              <div class="divider">ou</div>
+
+              <!-- BOTÃO LOGIN COM GOOGLE -->
+              <button id="googleLoginBtn" class="btn full google-btn">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+                     alt="Google logo" width="20">
+                <span>Entrar com Google</span>
+              </button>
             </div>
+
+            <!-- PANE DE CADASTRO -->
+            <div id="register-pane" class="pane">
+              <form id="registerForm" class="form">
+                <div class="field">
+                  <label for="regNome">Nome da sua Galáxia</label>
+                  <input id="regNome" required>
+                </div>
+                <div class="field">
+                  <label for="regEmail">E-mail</label>
+                  <input id="regEmail" type="email" required>
+                </div>
+                <div class="field">
+                  <label for="regUsuario">Seu nome capitão</label>
+                  <input id="regUsuario" required>
+                </div>
+                <div class="field">
+                  <label for="regSenha">Senha</label>
+                  <input id="regSenha" type="password" required>
+                </div>
+                <button class="btn full" type="submit">Criar Conta Estelar</button>
+              </form>
+            </div>
+
+            <div id="authMsg" class="msg"></div>
         </div>
     </div>
+
+    <div id="privateArea" class="hidden center private">
+        <p id="welcomeUser"></p>
+        <button id="logoutBtn" class="btn">Sair</button>
+    </div>
+
+    <script type="module" src="js/login.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+      <!-- MODAL DE REDEFINIÇÃO DE SENHA -->
+      <div id="resetPasswordModal" class="modal-overlay hidden">
+        <div class="modal-content">
+          <span id="closeModal" class="close-modal-btn">&times;</span>
+          <h2>Redefinir Senha</h2>
+          <p>Digite seu e-mail para receber um link de redefinição de senha.</p>
+          <form id="resetPasswordForm" class="form">
+            <div class="field">
+              <label for="resetEmail">E-mail</label>
+              <input id="resetEmail" type="email" required placeholder="seu-email@universo.com">
+            </div>
+            <button class="btn full" type="submit">Enviar Link</button>
+          </form>
+        </div>
+      </div>
 
 </body>
 </html>

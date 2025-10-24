@@ -138,7 +138,7 @@ function updateWave() {
         updateQuest('wave5', 1);
     }
     // Condição para gerar um novo inimigo na onda atual
-    else if (config.wave.spawned < config.wave.enemiesToSpawn && config.wave.timer > 90) {
+    if (config.wave.spawned < config.wave.enemiesToSpawn && config.wave.timer > 90) {
         console.log("Gerando novo inimigo.");
         state.setEnemies(enemy.spawnEnemy(state.enemies));
         config.wave.spawned++;
