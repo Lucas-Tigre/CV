@@ -120,7 +120,7 @@ function updateWave() {
         if (state.enemies.length === 0) {
             config.bossFightActive = false;
             showUnlockMessage(`Chefe derrotado!`);
-            audio.playMusic('mainTheme');
+            playMusic('mainTheme');
         }
         return;
     }

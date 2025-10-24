@@ -5,6 +5,7 @@ import { restartGame, initialQuests, activateBigBang } from './js/game.js';
 import { updateBigBangChargeBar } from './js/ui.js';
 import * as state from './js/state.js';
 
+
 // As funções em game.js não são puras e dependem de um estado global e do DOM,
 // o que torna o teste de unidade tradicional mais complexo.
 // A abordagem aqui é testar as funções de utilidade (lógica pura) e o comportamento
@@ -205,4 +206,5 @@ describe('Lógica Modular do Jogo', () => {
             expect(atomRight.style.transform).toBe('translateX(-50px)');
         });
     });
+
 });
