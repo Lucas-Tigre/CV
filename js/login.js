@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Inicializa o Supabase apenas se as credenciais forem válidas
   let supabase = null;
-  if (SUPABASE_URL && SUPABASE_ANON_KEY && !SUPABASE_URL.includes("SUA_URL_DO_SUPABASE_AQUI")) {
+  if (SUPABASE_URL && SUPABASE_ANON_KEY && !SUPABASE_URL.includes("https://koliolijmlzifxulyejz.supabase.co")) {
       supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   } else {
       console.warn("Credenciais do Supabase não configuradas. A autenticação está desativada.");
