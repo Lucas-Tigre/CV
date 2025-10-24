@@ -40,6 +40,8 @@
 
               <div class="divider">ou</div>
 
+              <button id="guestModeBtn" class="btn full" type="button">Jogar como Convidado</button>
+
               <!-- BOTÃO LOGIN COM GOOGLE -->
               <button id="googleLoginBtn" class="btn full google-btn">
                 <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
@@ -99,5 +101,16 @@
         </div>
       </div>
 
+      <!-- MODAL DE CONFIRMAÇÃO DO MODO CONVIDADO -->
+      <div id="guestModeModal" class="modal-overlay hidden">
+        <div class="modal-content">
+          <h2>Atenção</h2>
+          <p>Jogando como convidado, seu progresso não será salvo. Deseja continuar?</p>
+          <div class="modal-actions" style="display: flex; justify-content: space-between; margin-top: 20px;">
+            <button id="guestCancelBtn" class="btn" style="background-color: #555;">Cancelar</button>
+            <button id="guestConfirmBtn" class="btn">Continuar Mesmo Assim</button>
+          </div>
+        </div>
+      </div>
 </body>
 </html>

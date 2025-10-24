@@ -28,6 +28,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const resetPasswordModal = document.getElementById('resetPasswordModal');
   const closeModal = document.getElementById('closeModal');
   const resetPasswordForm = document.getElementById('resetPasswordForm');
+  const guestModeBtn = document.getElementById('guestModeBtn');
+  const guestModeModal = document.getElementById('guestModeModal');
+  const guestConfirmBtn = document.getElementById('guestConfirmBtn');
+  const guestCancelBtn = document.getElementById('guestCancelBtn');
 
   const showMsg = (text, type = "success") => {
     if (!authMsg) return;
@@ -156,16 +160,16 @@ document.addEventListener("DOMContentLoaded", () => {
   // ===== LÓGICA DO MODAL DE REDEFINIÇÃO DE SENHA =====
   forgotPasswordLink?.addEventListener('click', (e) => {
     e.preventDefault();
-    resetPasswordModal?.classList.add('active');
+    resetPasswordModal?.classList.remove('hidden');
   });
 
   closeModal?.addEventListener('click', () => {
-    resetPasswordModal?.classList.remove('active');
+    resetPasswordModal?.classList.add('hidden');
   });
 
   resetPasswordModal?.addEventListener('click', (e) => {
     if (e.target === resetPasswordModal) {
-      resetPasswordModal.classList.remove('active');
+      resetPasswordModal.classList.add('hidden');
     }
   });
 
@@ -192,5 +196,21 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch {
       showMsg("Erro inesperado ao tentar redefinir a senha.", "error");
     }
+  });
+
+  // ===== LÓGICA DO MODO CONVIDADO =====
+  guestModeBtn?.addEventListener('click', () => {
+    guestModeModal?.classList.remove('hidden');
+  });
+
+  guestCancelBtn?.addEventListener('click', () => {
+    guestModeModal?.classList.add('hidden');
+  });
+
+  guestConfirmBtn?.addEventListener('click', () => {
+    // Define um nome de usuário genérico para o modo convidado
+    localStorage.setItem('username', 'Convidado');
+    // Redireciona para a página do jogo
+    window.location.href = 'game.html';
   });
 });
