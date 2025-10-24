@@ -160,6 +160,15 @@ export function updateParticles(currentParticles, player, deltaTime, lastUpdateI
             p.x += p.speedX;
             p.y += p.speedY;
             p.lifespan--;
+
+            const dx = player.x - p.x;
+            const dy = player.y - p.y;
+            if (Math.sqrt(dx * dx + dy * dy) < player.size + p.size) {
+                player.health -= 5;
+                playSound('hit');
+                p.lifespan = 0; // Marca para remoção.
+            }
+
             if (p.lifespan <= 0) {
                 newParticles.splice(idx, 1);
                 i--; // Ajusta o índice do loop após remover um item.
