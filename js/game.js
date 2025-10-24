@@ -4,14 +4,6 @@
 import { config } from './config.js';
 import * as state from './state.js';
 import * as ui from './ui.js';
-
-// Expor objetos globais apenas para fins de teste com Playwright
-if (typeof window !== 'undefined') {
-    window.config = config;
-    window.state = state;
-    window.updateWave = updateWave;
-}
-import { submitScore } from './supabaseService.js';
 import * as particle from './particle.js';
 import * as enemy from './enemy.js';
 import * as projectile from './projectile.js';
@@ -79,7 +71,7 @@ function checkLevelUp() {
 }
 
 /** Atualiza o progresso de uma missão ativa com base em uma ação do jogador. */
-export function updateQuest(questId, amount = 1) {
+function updateQuest(questId, amount = 1) {
     const quest = config.quests.active.find(q => q.id === questId);
     if (quest) {
         quest.current += amount;
@@ -123,16 +115,12 @@ export function activateBigBang() {
     playSound('explosion'); // Reutiliza um som existente
 }
 
-export function updateWave() {
+function updateWave() {
     if (config.bossFightActive) {
         if (state.enemies.length === 0) {
             config.bossFightActive = false;
             showUnlockMessage(`Chefe derrotado!`);
-            try {
-                audio.playMusic('mainTheme');
-            } catch (e) {
-                console.log("Não foi possível tocar a música no ambiente de teste.");
-            }
+            audio.playMusic('mainTheme');
         }
         return;
     }
@@ -363,8 +351,6 @@ function updatePhysics(deltaTime) {
     if (particleUpdate.absorbedXp > 0) {
         const finalXp = Math.round(particleUpdate.absorbedXp * (config.xpMultiplier || 1));
         config.xp += finalXp;
-        // Adiciona o número de partículas absorvidas à contagem total.
-        config.particlesAbsorbed += particleUpdate.absorbedCount;
         updateQuest('absorb100', finalXp);
         checkLevelUp();
     }
@@ -449,17 +435,7 @@ function updatePhysics(deltaTime) {
             config.gamePaused = true;
             playSound('gameOver');
             stopMusic();
-            const finalStats = {
-                level: config.level,
-                wave: config.wave.number,
-                particlesAbsorbed: config.particlesAbsorbed,
-                enemiesDestroyed: config.enemiesDestroyed
-            };
-            ui.showGameOver(finalStats);
-
-            // Envia a pontuação para o Supabase
-            const username = localStorage.getItem('username') || 'Anônimo';
-            submitScore(username, finalStats.particlesAbsorbed);
+            ui.showGameOver({ level: config.level, wave: config.wave.number, particles: config.particlesAbsorbed, enemies: config.enemiesDestroyed });
         }
     }
 }
@@ -619,10 +595,8 @@ function setupControls() {
 
 /** Função principal que inicializa o jogo quando a página é carregada. */
 function initGame() {
-    console.log("[initGame] Iniciando a inicialização do jogo...");
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-    console.log(`[initGame] Canvas redimensionado para ${canvas.width}x${canvas.height}`);
     const player = config.players[0];
     player.x = canvas.width / 2;
     player.y = canvas.height / 2;
@@ -635,32 +609,26 @@ function initGame() {
         config.baseXpMultiplier = 1;
         config.xpMultiplier = 1;
     }
-    console.log("[initGame] Valores base do jogador configurados.");
 
     preloadImages();
-    console.log("[initGame] Pré-carregamento de imagens iniciado.");
     requestAnimationFrame(spawnBatch);
 
     initSoundSystem();
-    console.log("[initGame] Sistema de som inicializado.");
     preloadMusic('mainTheme');
     ui.updateHealthBar(player.health, player.maxHealth);
     ui.updateXPBar(config.xp, config.level);
+    ui.updateBigBangChargeBar(config.bigBangCharge); // Garante que a barra comece oculta
     updateStats();
     ui.updateQuestUI(config.quests.active);
     ui.toggleSoundUI(config.soundEnabled);
-    ui.displayLeaderboard();
 
     // Exibe o nome da galáxia do jogador.
     const username = localStorage.getItem('username') || 'Viajante';
     document.getElementById('galaxy-owner-display').textContent = `Galáxia de ${username}`;
-    console.log(`[initGame] Nome de usuário '${username}' exibido.`);
 
     setupControls();
-    console.log("[initGame] Controles configurados.");
     state.setGameLoopRunning(true);
     requestAnimationFrame(gameLoop);
-    console.log("[initGame] Loop do jogo iniciado. Inicialização concluída.");
 }
 
 // Configura os listeners de eventos globais.

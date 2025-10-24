@@ -248,6 +248,13 @@ export function updateBigBangChargeBar(chargePercent) {
     const container = document.getElementById('bigbang-charge-container');
     if (!container) return;
 
+    // Controla a visibilidade usando a classe CSS .visible
+    if (chargePercent > 0) {
+        container.classList.add('visible');
+    } else {
+        container.classList.remove('visible');
+    }
+
     const atomLeft = document.getElementById('atom-left');
     const atomRight = document.getElementById('atom-right');
     const barBackground = document.getElementById('bigbang-charge-background');
