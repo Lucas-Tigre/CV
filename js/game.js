@@ -170,16 +170,19 @@ function handlePowerUpTimer() {
 }
 
 /** Gera um lote inicial de partículas de forma assíncrona para não travar o jogo. */
+/** Gera um lote inicial de partículas de forma assíncrona para não travar o jogo. */
 function spawnBatch() {
     const player = config.players[0];
     const particlesToSpawn = config.particleCount;
     const batchSize = 25;
-    const currentParticles = state.particles;
+    // CRÍTICO: Usa o operador de propagação (...) para criar uma CÓPIA do array.
+    // Isso evita que mutações em outras partes do código afetem a geração de partículas.
+    const currentParticles = [...state.particles];
     for (let i = 0; i < batchSize; i++) {
         if (currentParticles.length < particlesToSpawn) {
             currentParticles.push(particle.getParticle(player));
         } else {
-            return;
+            return; // Atingiu o limite, para a geração.
         }
     }
     state.setParticles(currentParticles);
@@ -349,8 +352,13 @@ function updatePhysics(deltaTime) {
     }
 
     if (particleUpdate.absorbedXp > 0) {
-        const finalXp = Math.round(particleUpdate.absorbedXp * (config.xpMultiplier || 1));
+        const finalXp = Math.round(particleUpdate.absorbedXp * (config.xpMultiplier || 1) * config.globalXpMultiplier);
         config.xp += finalXp;
+        // Atualiza a contagem de partículas absorvidas para o placar.
+        if (particleUpdate.absorbedCount > 0) {
+            config.particlesAbsorbed += particleUpdate.absorbedCount;
+            console.log(`DEBUG: Absorveu ${particleUpdate.absorbedCount} partículas. Total agora: ${config.particlesAbsorbed}`);
+        }
         updateQuest('absorb100', finalXp);
         checkLevelUp();
     }
@@ -376,7 +384,8 @@ function updatePhysics(deltaTime) {
         state.setProjectiles(enemyUpdate.newProjectiles);
 
         if (enemyUpdate.xpFromDefeatedEnemies > 0) {
-            config.xp += enemyUpdate.xpFromDefeatedEnemies;
+            const finalXp = Math.round(enemyUpdate.xpFromDefeatedEnemies * config.globalXpMultiplier);
+            config.xp += finalXp;
             updateQuest('defeat20', 1);
             checkLevelUp();
         }
@@ -637,3 +646,5 @@ window.addEventListener('resize', () => {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 });
+
+// O estado não é mais exposto globalmente para segurança.
