@@ -20,19 +20,23 @@ export let auraPulseRadius = 0; // Raio atual da animação da aura do jogador.
 // =============================================
 
 export function setParticles(newParticles) {
-    particles = newParticles;
+    particles.length = 0;
+    particles.push(...newParticles);
 }
 
 export function setEnemies(newEnemies) {
-    enemies = newEnemies;
+    enemies.length = 0;
+    enemies.push(...newEnemies);
 }
 
 export function setProjectiles(newProjectiles) {
-    projectiles = newProjectiles;
+    projectiles.length = 0;
+    projectiles.push(...newProjectiles);
 }
 
 export function setExplosions(newExplosions) {
-    explosions = newExplosions;
+    explosions.length = 0;
+    explosions.push(...newExplosions);
 }
 
 export function setGameLoopRunning(value) {

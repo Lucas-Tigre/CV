@@ -4,8 +4,6 @@
 import { config } from './config.js';
 import * as state from './state.js';
 import * as ui from './ui.js';
-
-import { submitScore } from './supabaseService.js';
 import * as particle from './particle.js';
 import * as enemy from './enemy.js';
 import * as projectile from './projectile.js';
@@ -73,7 +71,7 @@ function checkLevelUp() {
 }
 
 /** Atualiza o progresso de uma missão ativa com base em uma ação do jogador. */
-export function updateQuest(questId, amount = 1) {
+function updateQuest(questId, amount = 1) {
     const quest = config.quests.active.find(q => q.id === questId);
     if (quest) {
         quest.current += amount;
@@ -117,16 +115,12 @@ export function activateBigBang() {
     playSound('explosion'); // Reutiliza um som existente
 }
 
-export function updateWave() {
+function updateWave() {
     if (config.bossFightActive) {
         if (state.enemies.length === 0) {
             config.bossFightActive = false;
             showUnlockMessage(`Chefe derrotado!`);
-            try {
-                audio.playMusic('mainTheme');
-            } catch (e) {
-                // Silencia o erro no ambiente de teste
-            }
+            audio.playMusic('mainTheme');
         }
         return;
     }
@@ -135,6 +129,7 @@ export function updateWave() {
 
     // Condição para iniciar uma nova onda
     if (state.enemies.length === 0 && config.wave.spawned >= config.wave.enemiesToSpawn) {
+        console.log("Iniciando nova onda!");
         config.wave.number++;
         config.wave.enemiesToSpawn = 5 + Math.floor(config.wave.number * 1.5);
         config.wave.spawned = 0;
@@ -144,6 +139,7 @@ export function updateWave() {
     }
     // Condição para gerar um novo inimigo na onda atual
     else if (config.wave.spawned < config.wave.enemiesToSpawn && config.wave.timer > 90) {
+        console.log("Gerando novo inimigo.");
         state.setEnemies(enemy.spawnEnemy(state.enemies));
         config.wave.spawned++;
         config.wave.timer = 0;
@@ -355,8 +351,6 @@ function updatePhysics(deltaTime) {
     if (particleUpdate.absorbedXp > 0) {
         const finalXp = Math.round(particleUpdate.absorbedXp * (config.xpMultiplier || 1));
         config.xp += finalXp;
-        // Adiciona o número de partículas absorvidas à contagem total.
-        config.particlesAbsorbed += particleUpdate.absorbedCount;
         updateQuest('absorb100', finalXp);
         checkLevelUp();
     }
@@ -441,17 +435,7 @@ function updatePhysics(deltaTime) {
             config.gamePaused = true;
             playSound('gameOver');
             stopMusic();
-            const finalStats = {
-                level: config.level,
-                wave: config.wave.number,
-                particlesAbsorbed: config.particlesAbsorbed,
-                enemiesDestroyed: config.enemiesDestroyed
-            };
-            ui.showGameOver(finalStats);
-
-            // Envia a pontuação para o Supabase
-            const username = localStorage.getItem('username') || 'Anônimo';
-            submitScore(username, finalStats.particlesAbsorbed);
+            ui.showGameOver({ level: config.level, wave: config.wave.number, particles: config.particlesAbsorbed, enemies: config.enemiesDestroyed });
         }
     }
 }
@@ -633,10 +617,10 @@ function initGame() {
     preloadMusic('mainTheme');
     ui.updateHealthBar(player.health, player.maxHealth);
     ui.updateXPBar(config.xp, config.level);
+    ui.updateBigBangChargeBar(config.bigBangCharge); // Garante que a barra comece oculta
     updateStats();
     ui.updateQuestUI(config.quests.active);
     ui.toggleSoundUI(config.soundEnabled);
-    ui.displayLeaderboard();
 
     // Exibe o nome da galáxia do jogador.
     const username = localStorage.getItem('username') || 'Viajante';
@@ -648,7 +632,7 @@ function initGame() {
 }
 
 // Configura os listeners de eventos globais.
-window.addEventListener('DOMContentLoaded', initGame);
+window.addEventListener('load', initGame);
 window.addEventListener('resize', () => {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;

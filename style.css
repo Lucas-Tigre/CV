@@ -367,13 +367,21 @@ canvas {
     left: 50%;
     transform: translateX(-50%);
     z-index: 50;
-    display: none;
+    display: flex; /* A barra agora é sempre flex, mas controlada por visibility/opacity */
     align-items: center;
     gap: 10px;
     padding: 5px;
     background: rgba(0, 0, 0, 0.7);
     border-radius: 15px;
     border: 1px solid rgba(255, 255, 255, 0.1);
+    visibility: hidden; /* Começa oculta */
+    opacity: 0;
+    transition: opacity 0.3s, visibility 0.3s;
+}
+
+#bigbang-charge-container.visible {
+    visibility: visible; /* A classe .visible a torna visível */
+    opacity: 1;
 }
 
 .charge-bar-background {
