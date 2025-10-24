@@ -462,10 +462,17 @@ function gameLoop(timestamp) {
         state.setFps(newFps, timestamp, 0);
         ui.updateFps(newFps);
     }
-    const physicsSteps = Math.min(Math.floor(deltaTime / (1000 / 60)), 3);
-    for (let i = 0; i < physicsSteps; i++) {
-        updatePhysics(1000 / 60);
+
+    // Atualiza o acumulador de tempo.
+    state.setAccumulator(state.accumulator + deltaTime);
+
+    // Executa a física em passos de tempo fixos.
+    const fixedDeltaTime = 1000 / 60;
+    while (state.accumulator >= fixedDeltaTime) {
+        updatePhysics(fixedDeltaTime);
+        state.setAccumulator(state.accumulator - fixedDeltaTime);
     }
+
     ui.updateHealthBar(config.players[0].health, config.players[0].maxHealth);
     ui.updateXPBar(config.xp, config.level);
     ui.updateBigBangChargeBar(config.bigBangCharge);

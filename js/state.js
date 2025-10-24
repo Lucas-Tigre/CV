@@ -13,6 +13,7 @@ export let fpsLastChecked = 0;
 export let frameCount = 0;
 export let gameLoopRunning = false;
 export let auraPulseRadius = 0; // Raio atual da animação da aura do jogador.
+export let accumulator = 0;     // Acumulador de tempo para a física do jogo.
 
 // =============================================
 // FUNÇÕES SETTER
@@ -63,4 +64,8 @@ export function setLastUpdateIndex(index) {
 
 export function setAuraPulseRadius(radius) {
     auraPulseRadius = radius;
+}
+
+export function setAccumulator(value) {
+    accumulator = value;
 }
