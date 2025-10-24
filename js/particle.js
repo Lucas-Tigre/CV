@@ -247,8 +247,8 @@ export function renderParticles(ctx, particles) {
             ctx.fill();
         });
         if (p.special === 'heal') {
-            // Desenha o retângulo vermelho de fundo.
-            ctx.fillStyle = 'red';
+            // Desenha o retângulo de fundo usando a cor da partícula ('lightgreen').
+            ctx.fillStyle = p.color;
             ctx.fillRect(p.x - p.size, p.y - p.size, p.size * 2, p.size * 2);
 
             // Desenha a cruz branca no centro.

@@ -40,6 +40,7 @@ export const config = {
                 particleColorRange: { h: [10, 40], s: [80, 100], l: [50, 70] },
                 // FUNDO 3: Imagem de fundo para a galáxia Inferno.
                 background: "url('assets/images/MapaMe.png')"
+            },
         }
     },
 
