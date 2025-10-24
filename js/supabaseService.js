@@ -3,7 +3,7 @@ import { SUPABASE_URL, SUPABASE_ANON_KEY } from './supabaseConfig.js';
 
 // Cria o cliente Supabase apenas se as credenciais estiverem disponíveis e não forem placeholders.
 let supabase = null;
-if (SUPABASE_URL && SUPABASE_ANON_KEY && !SUPABASE_URL.includes("SUA_URL_DO_SUPABASE_AQUI")) {
+if (SUPABASE_URL && SUPABASE_ANON_KEY && !SUPABASE_URL.includes("https://koliolijmlzifxulyejz.supabase.co")) {
     try {
         supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     } catch (error) {
