@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Inicializa o Supabase apenas se as credenciais forem válidas
   let supabase = null;
-  if (SUPABASE_URL && SUPABASE_ANON_KEY && !SUPABASE_URL.includes("https://koliolijmlzifxulyejz.supabase.co")) {
+  if (SUPABASE_URL && SUPABASE_ANON_KEY && SUPABASE_URL !== "SUA_URL_DO_SUPABASE_AQUI" && SUPABASE_ANON_KEY !== "SUA_CHAVE_ANON_AQUI") {
       supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   } else {
       console.warn("Credenciais do Supabase não configuradas. A autenticação está desativada.");
@@ -13,7 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
       document.getElementById('loginForm')?.remove();
       document.getElementById('registerForm')?.remove();
       document.getElementById('googleLoginBtn')?.remove();
-      document.getElementById('auth-container').innerHTML += '<p class="msg error">A autenticação não está configurada corretamente.</p>';
+      document.querySelector('.container.auth').innerHTML += '<p class="msg error">A autenticação não está configurada corretamente.</p>';
       return; // Impede a execução do resto do script
   }
 

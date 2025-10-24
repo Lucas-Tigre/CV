@@ -1607,3 +1607,262 @@ body {
     transform: translateY(-2px);
     box-shadow: 0 5px 15px rgba(0, 176, 155, 0.5);
 }
+.login-page :root {
+.login-page   --primary-color: #64ffda;
+.login-page   --background-dark: #0a192f;
+.login-page   --background-light: #112240;
+.login-page   --text-color: #ccd6f6;
+.login-page   --text-muted: #8892b0;
+.login-page   --danger-color: #ef4444;
+.login-page }
+
+.login-page * {
+.login-page   box-sizing: border-box;
+.login-page   margin: 0;
+.login-page   padding: 0;
+.login-page }
+
+.login-page body {
+.login-page   font-family: 'Orbitron', sans-serif;
+.login-page   background-color: var(--background-dark);
+.login-page   color: var(--text-color);
+.login-page   display: flex;
+.login-page   justify-content: center;
+.login-page   align-items: center;
+.login-page   min-height: 100vh;
+.login-page   background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+.login-page }
+
+.login-page .container.auth {
+.login-page   width: 100%;
+.login-page   max-width: 450px;
+.login-page   padding: 2rem;
+.login-page   background-color: var(--background-light);
+.login-page   border-radius: 10px;
+.login-page   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+.login-page   border: 1px solid rgba(100, 255, 218, 0.1);
+.login-page }
+
+.login-page .game-header {
+.login-page   text-align: center;
+.login-page   margin-bottom: 2rem;
+.login-page }
+
+.login-page .game-header h1 {
+.login-page   color: var(--primary-color);
+.login-page   font-size: 2rem;
+.login-page   margin-bottom: 0.5rem;
+.login-page }
+
+.login-page .game-header p {
+.login-page   color: var(--text-muted);
+.login-page }
+
+.login-page .tabs {
+.login-page   display: flex;
+.login-page   margin-bottom: 1.5rem;
+.login-page   border-radius: 8px;
+.login-page   overflow: hidden;
+.login-page   border: 1px solid rgba(100, 255, 218, 0.2);
+.login-page }
+
+.login-page .tab {
+.login-page   flex: 1;
+.login-page   padding: 1rem;
+.login-page   background: transparent;
+.login-page   border: none;
+.login-page   color: var(--text-muted);
+.login-page   font-family: 'Orbitron', sans-serif;
+.login-page   font-size: 1rem;
+.login-page   cursor: pointer;
+.login-page   transition: background-color 0.3s, color 0.3s;
+.login-page }
+
+.login-page .tab.active {
+.login-page   background-color: var(--primary-color);
+.login-page   color: var(--background-dark);
+.login-page   font-weight: 700;
+.login-page }
+
+.login-page .pane {
+.login-page   display: none;
+.login-page }
+
+.login-page .pane.active {
+.login-page   display: block;
+.login-page }
+
+.login-page .form {
+.login-page   display: flex;
+.login-page   flex-direction: column;
+.login-page   gap: 1.5rem;
+.login-page }
+
+.login-page .field {
+.login-page   display: flex;
+.login-page   flex-direction: column;
+.login-page   gap: 0.5rem;
+.login-page }
+
+.login-page label {
+.login-page   font-weight: 600;
+.login-page   color: var(--text-muted);
+.login-page }
+
+.login-page input {
+.login-page   background-color: var(--background-dark);
+.login-page   color: var(--text-color);
+.login-page   border: 1px solid rgba(100, 255, 218, 0.2);
+.login-page   border-radius: 5px;
+.login-page   padding: 0.8rem 1rem;
+.login-page   font-family: 'Roboto', sans-serif;
+.login-page   font-size: 1rem;
+.login-page   outline: none;
+.login-page   transition: border-color 0.3s, box-shadow 0.3s;
+.login-page }
+
+.login-page input:focus {
+.login-page   border-color: var(--primary-color);
+.login-page   box-shadow: 0 0 0 3px rgba(100, 255, 218, 0.2);
+.login-page }
+
+.login-page .btn {
+.login-page   display: flex;
+.login-page   justify-content: center;
+.login-page   align-items: center;
+.login-page   gap: 0.5rem;
+.login-page   padding: 0.8rem 1rem;
+.login-page   border: none;
+.login-page   border-radius: 5px;
+.login-page   cursor: pointer;
+.login-page   font-family: 'Orbitron', sans-serif;
+.login-page   font-weight: 700;
+.login-page   font-size: 1rem;
+.login-page   transition: filter 0.3s;
+.login-page }
+
+.login-page .btn.full {
+.login-page   width: 100%;
+.login-page   background-color: var(--primary-color);
+.login-page   color: var(--background-dark);
+.login-page }
+
+.login-page .btn:hover {
+.login-page   filter: brightness(1.1);
+.login-page }
+
+.login-page .divider {
+.login-page   text-align: center;
+.login-page   margin: 1.5rem 0;
+.login-page   color: var(--text-muted);
+.login-page   position: relative;
+.login-page }
+.login-page .divider::before, .divider::after {
+.login-page     content: '';
+.login-page     display: block;
+.login-page     width: 40%;
+.login-page     height: 1px;
+.login-page     background-color: rgba(100, 255, 218, 0.2);
+.login-page     position: absolute;
+.login-page     top: 50%;
+.login-page }
+.login-page .divider::before { left: 0; }
+.login-page .divider::after { right: 0; }
+
+
+.login-page .google-btn {
+.login-page   background-color: #fff;
+.login-page   color: #333;
+.login-page   border: 1px solid #ccc;
+.login-page }
+
+.login-page .google-btn:hover {
+.login-page     background-color: #f7f7f7;
+.login-page }
+
+.login-page .msg {
+.login-page   margin-top: 1.5rem;
+.login-page   text-align: center;
+.login-page   min-height: 1.5rem;
+.login-page   font-weight: 600;
+.login-page }
+
+.login-page .msg.error {
+.login-page   color: var(--danger-color);
+.login-page }
+
+.login-page .msg.success {
+.login-page   color: var(--primary-color);
+.login-page }
+
+.login-page .hidden {
+.login-page   display: none;
+.login-page }
+.login-page .pane.active { display: block; }
+
+.login-page .forgot-password {
+.login-page   text-align: right;
+.login-page   margin-top: 0.5rem;
+.login-page   font-size: 0.9rem;
+.login-page   color: var(--text-muted);
+.login-page   text-decoration: none;
+.login-page   transition: color 0.3s;
+.login-page }
+
+.login-page .forgot-password:hover {
+.login-page   color: var(--primary-color);
+.login-page }
+
+.login-page /* Estilos do Modal */
+.login-page .modal-overlay {
+.login-page   display: none; /* Oculto por padrão */
+.login-page   position: fixed;
+.login-page   top: 0;
+.login-page   left: 0;
+.login-page   width: 100%;
+.login-page   height: 100%;
+.login-page   background-color: rgba(10, 25, 47, 0.8);
+.login-page   justify-content: center;
+.login-page   align-items: center;
+.login-page   z-index: 1000;
+.login-page   backdrop-filter: blur(5px);
+.login-page }
+
+.login-page .modal-overlay.active {
+.login-page   display: flex; /* Exibido quando a classe 'active' é adicionada */
+.login-page }
+
+.login-page .modal-content {
+.login-page   background-color: var(--background-light);
+.login-page   padding: 2rem;
+.login-page   border-radius: 10px;
+.login-page   width: 90%;
+.login-page   max-width: 450px;
+.login-page   position: relative;
+.login-page   border: 1px solid rgba(100, 255, 218, 0.1);
+.login-page   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+.login-page }
+
+.login-page .close-modal-btn {
+.login-page   position: absolute;
+.login-page   top: 10px;
+.login-page   right: 15px;
+.login-page   font-size: 1.5rem;
+.login-page   color: var(--text-muted);
+.login-page   cursor: pointer;
+.login-page   transition: color 0.3s;
+.login-page }
+
+.login-page .close-modal-btn:hover {
+.login-page   color: var(--primary-color);
+.login-page }
+
+.login-page .modal-content h2 {
+.login-page   color: var(--primary-color);
+.login-page   margin-bottom: 1rem;
+.login-page }
+
+.login-page .modal-content p {
+.login-page   color: var(--text-muted);
+.login-page   margin-bottom: 1.5rem;
+.login-page }
