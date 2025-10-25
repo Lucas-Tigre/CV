@@ -162,7 +162,7 @@ if (supabase) {
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: window.location.origin,
     });
-    if (error) return showMsg("Erro ao enviar e-mail: " + error.message, "error");
+    if (error) return showMsg("Erro ao enviar e--mail: " + error.message, "error");
     showMsg("E-mail de redefinição enviado!", "success");
     resetPasswordModal.classList.remove('active');
   });
