@@ -1,12 +1,12 @@
-import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm?v=2";
 
 // Tenta inicializar o Supabase, mas não trava se falhar
 let supabase;
 try {
-  const SUPABASE_URL = "https://koliolijmlzifxulyejz.supabase.co"; 
-  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtvbGlvbGlqbWx6aWZ4dWx5ZWp6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgyOTEwNDAsImV4cCI6MjA3Mzg2NzA0MH0.s44jYbJDjZqjKwPBCdsJ5WZhmXI9xVggxMgH7IKFGYE"; // Substitua com sua chave
+  const SUPABASE_URL = "https://koliolijmlzifxulyejz.supabase.co"; // Substitua com sua URL
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtvbGlvbGlqbWx6aWZ4dWx5ZWp6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE2ODQxNzI2ODEsImV4cCI6MTk5OTc0ODY4MX0.3SnId2t0-8T638D9-c_27-i2oN5kTWau6F09a_1_v2o"; // Substitua com sua chave
 
-  if (!SUPABASE_URL.includes('https://koliolijmlzifxulyejz.supabase.co') && !SUPABASE_ANON_KEY.includes('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtvbGlvbGlqbWx6aWZ4dWx5ZWp6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgyOTEwNDAsImV4cCI6MjA3Mzg2NzA0MH0.s44jYbJDjZqjKwPBCdsJ5WZhmXI9xVggxMgH7IKFGYE')) {
+  if (!SUPABASE_URL.includes('xxx') && !SUPABASE_ANON_KEY.includes('xxx')) {
     supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   }
 } catch (error) {
