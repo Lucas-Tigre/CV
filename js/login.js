@@ -1,3 +1,4 @@
+ bugfix-login-spawn-scoreboard
 import { supabase } from './supabaseService.js';
 
 // ===== ELEMENTOS =====
@@ -50,6 +51,25 @@ closeModal?.addEventListener('click', () => {
 resetPasswordModal?.addEventListener('click', (e) => {
   if (e.target === resetPasswordModal) {
     resetPasswordModal.classList.remove('active');
+
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from './supabaseConfig.js';
+
+document.addEventListener("DOMContentLoaded", () => {
+
+  // Inicializa o Supabase apenas se as credenciais forem válidas
+  let supabase = null;
+  if (SUPABASE_URL && SUPABASE_ANON_KEY && SUPABASE_URL !== "https://koliolijmlzifxulyejz.supabase.co" && SUPABASE_ANON_KEY !== "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtvbGlvbGlqbWx6aWZ4dWx5ZWp6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgyOTEwNDAsImV4cCI6MjA3Mzg2NzA0MH0.s44jYbJDjZqjKwPBCdsJ5WZhmXI9xVggxMgH7IKFGYE") {
+      supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  } else {
+      console.warn("Credenciais do Supabase não configuradas. A autenticação está desativada.");
+      // Opcional: Desabilitar os formulários se o Supabase não estiver configurado
+      document.getElementById('loginForm')?.remove();
+      document.getElementById('registerForm')?.remove();
+      document.getElementById('googleLoginBtn')?.remove();
+      document.querySelector('.container.auth').innerHTML += '<p class="msg error">A autenticação não está configurada corretamente.</p>';
+      return; // Impede a execução do resto do script
+ main
   }
 });
 
