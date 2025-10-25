@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <title>Universo de Partículas - Login</title>
+  <link rel="stylesheet" href="login.css">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <div class="container auth">
+    <header class="game-header">
+      <h1>Universo de Partículas</h1>
+      <p>Autenticação para continuar sua jornada.</p>
+    </header>
+
+    <div class="tabs">
+      <button class="tab active" data-tab="login-pane">Login</button>
+      <button class="tab" data-tab="register-pane">Cadastro</button>
+    </div>
+
+    <!-- PANE DE LOGIN -->
+    <div id="login-pane" class="pane active">
+      <form id="loginForm" class="form">
+        <div class="field">
+          <label for="loginUser">Usuário ou E-mail</label>
+          <input id="loginUser" required placeholder="cosmonauta@universo.com">
+        </div>
+        <div class="field">
+          <label for="loginPass">Senha</label>
+          <input id="loginPass" type="password" required placeholder="Sua senha cósmica">
+        </div>
+
+      <button class="btn full" type="submit">Entrar na Galáxia</button>
+        <a href="#" id="forgotPasswordLink" class="forgot-password">Esqueceu sua senha?</a>
+      </form>
+
+      <div class="divider">ou</div>
+
+      <button id="guestModeBtn" class="btn full" type="button">Jogar como Convidado</button>
+
+      <!-- BOTÃO LOGIN COM GOOGLE -->
+      <button id="googleLoginBtn" class="btn full google-btn">
+        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+             alt="Google logo" width="20">
+        <span>Entrar com Google</span>
+      </button>
+    </div>
+
+    <!-- PANE DE CADASTRO -->
+    <div id="register-pane" class="pane">
+      <form id="registerForm" class="form">
+        <div class="field">
+          <label for="regNome">Nome da sua Galáxia</label>
+          <input id="regNome" required>
+        </div>
+        <div class="field">
+          <label for="regEmail">E-mail</label>
+          <input id="regEmail" type="email" required>
+        </div>
+        <div class="field">
+          <label for="regUsuario">Seu nome capitão</label>
+          <input id="regUsuario" required>
+        </div>
+        <div class="field">
+          <label for="regSenha">Senha</label>
+          <input id="regSenha" type="password" required>
+        </div>
+        <button class="btn full" type="submit">Criar Conta Estelar</button>
+      </form>
+    </div>
+
+    <div id="authMsg" class="msg"></div>
+  </div>
+
+  <div id="privateArea" class="hidden center private">
+    <p id="welcomeUser"></p>
+    <button id="logoutBtn" class="btn">Sair</button>
+  </div>
+
+ <script type="module" src="js/login.js"></script>
+
+  <!-- MODAL DE REDEFINIÇÃO DE SENHA -->
+  <div id="resetPasswordModal" class="modal-overlay">
+    <div class="modal-content">
+      <span id="closeModal" class="close-modal-btn">&times;</span>
+      <h2>Redefinir Senha</h2>
+      <p>Digite seu e-mail para receber um link de redefinição de senha.</p>
+      <form id="resetPasswordForm" class="form">
+        <div class="field">
+          <label for="resetEmail">E-mail</label>
+          <input id="resetEmail" type="email" required placeholder="seu-email@universo.com">
+        </div>
+        <button class="btn full" type="submit">Enviar Link</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL DE CONFIRMAÇÃO DO MODO CONVIDADO -->
+  <div id="guestModeModal" class="modal-overlay">
+    <div class="modal-content">
+      <h2>Atenção</h2>
+      <p>Jogando como convidado, seu progresso não será salvo. Deseja continuar?</p>
+      <div class="modal-actions" style="display: flex; justify-content: space-between; margin-top: 20px;">
+        <button id="guestCancelBtn" class="btn" style="background-color: #555;">Cancelar</button>
+        <button id="guestConfirmBtn" class="btn">Continuar Mesmo Assim</button>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
