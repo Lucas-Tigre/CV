@@ -3,16 +3,18 @@ import { SUPABASE_URL, SUPABASE_ANON_KEY } from './supabaseConfig.js';
 
 // Cria o cliente Supabase apenas se as credenciais estiverem disponíveis e não forem placeholders.
 let supabase = null;
-if (SUPABASE_URL && SUPABASE_ANON_KEY && !SUPABASE_URL.includes("https://koliolijmlzifxulyejz.supabase.co")) {
+if (SUPABASE_URL && SUPABASE_ANON_KEY && SUPABASE_URL !== "SUA_URL_DO_SUPABASE_AQUI" && SUPABASE_ANON_KEY !== "SUA_CHAVE_ANON_AQUI") {
     try {
         supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     } catch (error) {
         console.error("Falha ao inicializar o Supabase. Verifique suas credenciais.", error);
     }
 } else {
-    console.warn("Credenciais do Supabase não encontradas. As funcionalidades do placar estão desativadas.");
+    console.warn("Credenciais do Supabase não encontradas. As funcionalidades online estão desativadas.");
 }
 
+// Exporta a instância do cliente para ser usada em outros módulos
+export { supabase };
 
 /**
  * Envia a pontuação de um jogador para a tabela 'leaderboard'.

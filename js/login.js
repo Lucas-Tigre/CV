@@ -1,11 +1,4 @@
-import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
-import { SUPABASE_URL, SUPABASE_ANON_KEY } from './supabaseConfig.js';
-
-let supabase = null;
-// Tenta inicializar o Supabase
-if (SUPABASE_URL && SUPABASE_ANON_KEY && SUPABASE_URL !== "SUA_URL_DO_SUPABASE_AQUI" && SUPABASE_ANON_KEY !== "SUA_CHAVE_ANON_AQUI") {
-    supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-}
+import { supabase } from './supabaseService.js';
 
 // ===== ELEMENTOS =====
 const tabs = document.querySelectorAll('.tab');
