@@ -6,7 +6,7 @@ try {
   const SUPABASE_URL = "https://koliolijmlzifxulyejz.supabase.co"; 
   const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtvbGlvbGlqbWx6aWZ4dWx5ZWp6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgyOTEwNDAsImV4cCI6MjA3Mzg2NzA0MH0.s44jYbJDjZqjKwPBCdsJ5WZhmXI9xVggxMgH7IKFGYE"; // Substitua com sua chave
 
-  if (!SUPABASE_URL.includes('xxx') && !SUPABASE_ANON_KEY.includes('xxx')) {
+  if (!SUPABASE_URL.includes('https://koliolijmlzifxulyejz.supabase.co') && !SUPABASE_ANON_KEY.includes('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtvbGlvbGlqbWx6aWZ4dWx5ZWp6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgyOTEwNDAsImV4cCI6MjA3Mzg2NzA0MH0.s44jYbJDjZqjKwPBCdsJ5WZhmXI9xVggxMgH7IKFGYE')) {
     supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   }
 } catch (error) {
