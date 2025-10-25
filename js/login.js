@@ -1,3 +1,57 @@
+ bugfix-login-spawn-scoreboard
+import { supabase } from './supabaseService.js';
+
+// ===== ELEMENTOS =====
+const tabs = document.querySelectorAll('.tab');
+const panes = document.querySelectorAll('.pane');
+const loginForm = document.getElementById('loginForm');
+const registerForm = document.getElementById('registerForm');
+const authMsg = document.getElementById('authMsg');
+const googleLoginBtn = document.getElementById("googleLoginBtn");
+const forgotPasswordLink = document.getElementById('forgotPasswordLink');
+const resetPasswordModal = document.getElementById('resetPasswordModal');
+const closeModal = document.getElementById('closeModal');
+const resetPasswordForm = document.getElementById('resetPasswordForm');
+const guestModeBtn = document.getElementById('guestModeBtn');
+const guestModeModal = document.getElementById('guestModeModal');
+const guestConfirmBtn = document.getElementById('guestConfirmBtn');
+const guestCancelBtn = document.getElementById('guestCancelBtn');
+
+const showMsg = (text, type = "success") => {
+  if (!authMsg) return;
+  authMsg.textContent = text;
+  authMsg.className = `msg ${type}`;
+};
+const clearMsg = () => showMsg("");
+
+// ===== LÓGICA QUE NÃO DEPENDE DO SUPABASE =====
+
+// Troca de Abas
+tabs.forEach(btn => {
+  btn.addEventListener('click', () => {
+    tabs.forEach(b => b.classList.remove('active'));
+    panes.forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    const paneId = btn.getAttribute('data-tab');
+    const pane = document.getElementById(paneId);
+    if(pane) pane.classList.add('active');
+  });
+});
+
+// Modal de Redefinição de Senha
+forgotPasswordLink?.addEventListener('click', (e) => {
+  e.preventDefault();
+  resetPasswordModal?.classList.add('active');
+});
+
+closeModal?.addEventListener('click', () => {
+  resetPasswordModal?.classList.remove('active');
+});
+
+resetPasswordModal?.addEventListener('click', (e) => {
+  if (e.target === resetPasswordModal) {
+    resetPasswordModal.classList.remove('active');
+
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from './supabaseConfig.js';
 
@@ -15,54 +69,45 @@ document.addEventListener("DOMContentLoaded", () => {
       document.getElementById('googleLoginBtn')?.remove();
       document.querySelector('.container.auth').innerHTML += '<p class="msg error">A autenticação não está configurada corretamente.</p>';
       return; // Impede a execução do resto do script
+ main
   }
+});
 
-  // ===== ELEMENTOS =====
-  const tabs = document.querySelectorAll('.tab');
-  const panes = document.querySelectorAll('.pane');
-  const loginForm = document.getElementById('loginForm');
-  const registerForm = document.getElementById('registerForm');
-  const authMsg = document.getElementById('authMsg');
-  const googleLoginBtn = document.getElementById("googleLoginBtn");
-  const forgotPasswordLink = document.getElementById('forgotPasswordLink');
-  const resetPasswordModal = document.getElementById('resetPasswordModal');
-  const closeModal = document.getElementById('closeModal');
-  const resetPasswordForm = document.getElementById('resetPasswordForm');
-  const guestModeBtn = document.getElementById('guestModeBtn');
-  const guestModeModal = document.getElementById('guestModeModal');
-  const guestConfirmBtn = document.getElementById('guestConfirmBtn');
-  const guestCancelBtn = document.getElementById('guestCancelBtn');
+// Modo Convidado
+guestModeBtn?.addEventListener('click', () => {
+  guestModeModal?.classList.add('active');
+});
 
-  const showMsg = (text, type = "success") => {
-    if (!authMsg) return;
-    authMsg.textContent = text;
-    authMsg.className = `msg ${type}`;
-  };
-  const clearMsg = () => showMsg("");
+guestCancelBtn?.addEventListener('click', () => {
+  guestModeModal?.classList.remove('active');
+});
 
-  // ===== TROCA DE ABAS =====
-  tabs.forEach(btn => {
-    btn.addEventListener('click', () => {
-      tabs.forEach(b => b.classList.remove('active'));
-      panes.forEach(p => p.classList.remove('active'));
-      btn.classList.add('active');
-      const paneId = btn.getAttribute('data-tab'); // Correção aqui
-      const pane = document.getElementById(paneId);
-      if(pane) pane.classList.add('active');
-    });
-  });
+guestModeModal?.addEventListener('click', (e) => {
+  if (e.target === guestModeModal) {
+    guestModeModal.classList.remove('active');
+  }
+});
 
-  // ===== LOGIN COM GOOGLE =====
+guestConfirmBtn?.addEventListener('click', () => {
+  localStorage.setItem('username', 'Convidado');
+  window.location.href = 'game.html';
+});
+
+// ===== LÓGICA QUE DEPENDE DO SUPABASE =====
+
+if (supabase) {
+  // Se o Supabase foi inicializado, adicione os eventos que dependem dele.
+
+  // LOGIN COM GOOGLE
   googleLoginBtn?.addEventListener("click", async () => {
     const { error } = await supabase.auth.signInWithOAuth({ provider: 'google' });
     if (error) showMsg("Erro ao entrar com Google: " + error.message, "error");
   });
 
-  // ===== CADASTRO =====
+  // CADASTRO
   registerForm?.addEventListener('submit', async (e) => {
     e.preventDefault();
     clearMsg();
-
     const nome = document.getElementById('regNome').value.trim();
     const email = document.getElementById('regEmail').value.trim().toLowerCase();
     const usuario = document.getElementById('regUsuario').value.trim().toLowerCase();
@@ -72,145 +117,81 @@ document.addEventListener("DOMContentLoaded", () => {
         showMsg("A senha deve ter pelo menos 6 caracteres.", "error");
         return;
     }
-
-    try {
-      const { error } = await supabase.auth.signUp({
-        email,
-        password: senha,
-        options: {
-          data: { full_name: nome, username: usuario }
-        }
-      });
-
-      if (error) return showMsg("Erro ao cadastrar: " + error.message, "error");
-
-      showMsg("Conta criada! Verifique seu e-mail para confirmação.", "success");
-      registerForm.reset();
-      document.querySelector('.tab[data-tab="login-pane"]').click();
-    } catch {
-      showMsg("Erro inesperado ao cadastrar.", "error");
-    }
+    const { error } = await supabase.auth.signUp({
+      email,
+      password: senha,
+      options: { data: { full_name: nome, username: usuario } }
+    });
+    if (error) return showMsg("Erro ao cadastrar: " + error.message, "error");
+    showMsg("Conta criada! Verifique seu e-mail para confirmação.", "success");
+    registerForm.reset();
+    document.querySelector('.tab[data-tab="login-pane"]').click();
   });
 
-  // ===== LOGIN =====
+  // LOGIN
   loginForm?.addEventListener('submit', async (e) => {
     e.preventDefault();
     clearMsg();
-
     const email = document.getElementById('loginUser').value.trim().toLowerCase();
     const pass = document.getElementById('loginPass').value;
+    if (!email.includes('@')) return showMsg("Por favor, insira um e-mail válido.", "error");
 
-    // Validação de e-mail simples.
-    if (!email.includes('@')) {
-      return showMsg("Por favor, insira um e-mail válido.", "error");
-    }
-
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: email,
-        password: pass
-      });
-
-      if (error) {
-        if (error.message.includes("Email not confirmed")) {
-          return showMsg("Seu e-mail ainda não foi confirmado. Por favor, verifique sua caixa de entrada.", "error");
-        }
-        return showMsg("Erro ao entrar: " + error.message, "error");
+    const { error } = await supabase.auth.signInWithPassword({ email, password: pass });
+    if (error) {
+      if (error.message.includes("Email not confirmed")) {
+        return showMsg("Seu e-mail ainda não foi confirmado.", "error");
       }
-
-    } catch {
-      showMsg("Erro inesperado no login.", "error");
+      return showMsg("Erro ao entrar: " + error.message, "error");
     }
   });
 
-  // ===== ESTADO DE AUTENTICAÇÃO =====
+  // ESTADO DE AUTENTICAÇÃO
   supabase.auth.onAuthStateChange((_event, session) => {
     if (session?.user) {
         const username = session.user.user_metadata?.full_name || session.user.user_metadata?.username || session.user.email;
         localStorage.setItem('username', username);
-
         showMsg("Login bem-sucedido! Redirecionando...", "success");
-        setTimeout(() => {
-            window.location.href = 'game.html';
-        }, 1000);
-
+        setTimeout(() => { window.location.href = 'game.html'; }, 1000);
     }
   });
 
-    // ===== LOGOUT (Lógica de exemplo se houvesse um botão de logout nesta página) =====
-    const logoutBtn = document.getElementById('logoutBtn');
-    logoutBtn?.addEventListener('click', async () => {
-        await supabase.auth.signOut();
-        localStorage.removeItem('username');
-        showMsg("Você saiu da conta.", "success");
-        setTimeout(() => {
-            window.location.href = 'index.html';
-        }, 1000);
-    });
+  // LOGOUT
+  const logoutBtn = document.getElementById('logoutBtn');
+  logoutBtn?.addEventListener('click', async () => {
+      await supabase.auth.signOut();
+      localStorage.removeItem('username');
+      showMsg("Você saiu da conta.", "success");
+      setTimeout(() => { window.location.href = 'index.html'; }, 1000);
+  });
 
-  // Checa se o usuário já tem uma sessão ativa ao carregar a página
+  // Checa sessão ativa
   supabase.auth.getSession().then(({ data: { session } }) => {
     if (session) {
-      const username = session.user.user_metadata?.full_name || session.user.email;
-      localStorage.setItem('username', username);
+      localStorage.setItem('username', session.user.user_metadata?.full_name || session.user.email);
       window.location.href = 'game.html';
     }
   });
 
-  // ===== LÓGICA DO MODAL DE REDEFINIÇÃO DE SENHA =====
-  forgotPasswordLink?.addEventListener('click', (e) => {
-    e.preventDefault();
-    resetPasswordModal?.classList.remove('hidden');
-  });
-
-  closeModal?.addEventListener('click', () => {
-    resetPasswordModal?.classList.add('hidden');
-  });
-
-  resetPasswordModal?.addEventListener('click', (e) => {
-    if (e.target === resetPasswordModal) {
-      resetPasswordModal.classList.add('hidden');
-    }
-  });
-
+  // Redefinição de Senha
   resetPasswordForm?.addEventListener('submit', async (e) => {
     e.preventDefault();
     clearMsg();
     const email = document.getElementById('resetEmail').value.trim().toLowerCase();
+    if (!email.includes('@')) return showMsg("Por favor, insira um e-mail válido.", "error");
 
-    if (!email.includes('@')) {
-      return showMsg("Por favor, insira um e-mail válido.", "error");
-    }
-
-    try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: window.location.origin, // URL para onde o usuário será redirecionado após redefinir a senha
-      });
-
-      if (error) {
-        return showMsg("Erro ao enviar e-mail de redefinição: " + error.message, "error");
-      }
-
-      showMsg("E-mail de redefinição enviado! Verifique sua caixa de entrada.", "success");
-      resetPasswordModal.classList.remove('active');
-    } catch {
-      showMsg("Erro inesperado ao tentar redefinir a senha.", "error");
-    }
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin,
+    });
+    if (error) return showMsg("Erro ao enviar e--mail: " + error.message, "error");
+    showMsg("E-mail de redefinição enviado!", "success");
+    resetPasswordModal.classList.remove('active');
   });
 
-  // ===== LÓGICA DO MODO CONVIDADO =====
-  guestModeBtn?.addEventListener('click', () => {
-    guestModeModal?.classList.remove('hidden');
-  });
-
-  guestCancelBtn?.addEventListener('click', () => {
-    guestModeModal?.classList.add('hidden');
-  });
-
-  guestConfirmBtn?.addEventListener('click', () => {
-    // Define um nome de usuário genérico para o modo convidado
-    localStorage.setItem('username', 'Convidado');
-    // Redireciona para a página do jogo
-    window.location.href = 'game.html';
-  });
-});
+} else {
+  // Se o Supabase não foi inicializado, desabilite os formulários e mostre o erro.
+  console.warn("Credenciais do Supabase não configuradas. A autenticação está desativada.");
+  document.getElementById('loginForm')?.remove();
+  document.getElementById('registerForm')?.remove();
+  document.getElementById('googleLoginBtn')?.remove();
+  document.querySelector('.container.auth').innerHTML += '<p class="msg error">A autenticação não está configurada corretamente.</p>';
+}

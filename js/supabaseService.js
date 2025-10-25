@@ -10,9 +10,11 @@ if (SUPABASE_URL && SUPABASE_ANON_KEY && SUPABASE_URL !== "https://koliolijmlzif
         console.error("Falha ao inicializar o Supabase. Verifique suas credenciais.", error);
     }
 } else {
-    console.warn("Credenciais do Supabase não encontradas. As funcionalidades do placar estão desativadas.");
+    console.warn("Credenciais do Supabase não encontradas. As funcionalidades online estão desativadas.");
 }
 
+// Exporta a instância do cliente para ser usada em outros módulos
+export { supabase };
 
 /**
  * Envia a pontuação de um jogador para a tabela 'leaderboard'.
