@@ -1,4 +1,4 @@
-import { getLeaderboard } from './supabaseService.js';
+import { getLeaderboard, submitScore } from './supabaseService.js';
 
 /**
  * Busca os dados do placar de líderes e os exibe na tabela.
@@ -113,6 +113,15 @@ export function showGameOver(stats) {
     document.getElementById('go-enemies').textContent = stats.enemiesDestroyed;
     createStars(); // Cria o efeito de estrelas no fundo.
     document.getElementById('game-over-screen').style.display = 'flex';
+
+    // Envia a pontuação para o Supabase
+    const username = localStorage.getItem('username') || 'Anônimo';
+    const score = stats.particlesAbsorbed;
+
+    if (score > 0 && username) {
+        console.log(`Enviando pontuação: ${score} para o usuário: ${username}`);
+        submitScore(username, score);
+    }
 }
 
 /** Cria um fundo de estrelas animadas para a tela de fim de jogo. */
