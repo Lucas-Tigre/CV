@@ -437,7 +437,7 @@ function updatePhysics(deltaTime) {
             config.gamePaused = true;
             playSound('gameOver');
             stopMusic();
-            ui.showGameOver({ level: config.level, wave: config.wave.number, particles: config.particlesAbsorbed, enemies: config.enemiesDestroyed });
+            ui.showGameOver({ level: config.level, wave: config.wave.number, particlesAbsorbed: config.particlesAbsorbed, enemiesDestroyed: config.enemiesDestroyed });
         }
     }
 }
