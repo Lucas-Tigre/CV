@@ -127,86 +127,74 @@ export function spawnEnemy(currentEnemies, typeKey = null) {
  */
 export function updateEnemies(enemies, player, deltaTime, projectiles) {
     let xpFromDefeatedEnemies = 0;
-    let remainingEnemies = [];
     let newlyCreatedParticles = [];
     let newProjectiles = [...projectiles];
 
-    enemies.forEach(enemy => {
-        // Lógica de ataque especial do chefe.
+    const remainingEnemies = enemies.filter(enemy => {
+        // Primeiro, aplique a lógica de dano para ver se o inimigo sobrevive.
+        const dx = player.x - enemy.x;
+        const dy = player.y - enemy.y;
+        const distSq = dx * dx + dy * dy;
+        const enemyType = config.enemySystem.types[enemy.type];
+        const effectiveRadius = player.isPoweredUp ? player.radius * 1.5 : player.radius;
+
+        if (player.mode === 'attract' && distSq < effectiveRadius * effectiveRadius && !enemyType.ignoresAttraction) {
+            const damage = player.isPoweredUp ? player.attractionDamage * 3 : player.attractionDamage;
+            enemy.health -= damage;
+        }
+
+        // Se o inimigo foi derrotado por dano neste frame, processe a morte e o remova.
+        if (enemy.health <= 0) {
+            xpFromDefeatedEnemies += enemy.isElite ? 10 : 3;
+            config.enemiesDestroyed++;
+            config.bigBangCharge = Math.min(100, config.bigBangCharge + config.bigBangChargeRate);
+            if (Math.random() < 0.05) { // 5% de chance de dropar cura.
+                newlyCreatedParticles.push(particle.createHealParticle(enemy.x, enemy.y));
+            }
+            return false; // Remove o inimigo da lista para o próximo frame.
+        }
+
+        // Se o inimigo sobreviveu, aplique a lógica de movimento, ataque e colisão.
         if (enemy.attackCooldown !== undefined) {
             enemy.attackCooldown--;
             if (enemy.attackCooldown <= 0) {
                 newlyCreatedParticles.push(...particle.createParticleExplosion(enemy.x, enemy.y, []));
-                enemy.attackCooldown = Math.random() * 120 + 180; // Reinicia o cooldown.
+                enemy.attackCooldown = Math.random() * 120 + 180;
             }
         }
 
-        const dx = player.x - enemy.x;
-        const dy = player.y - enemy.y;
-        const distSq = dx * dx + dy * dy;
-
-        // Lógica de Atração e Dano do Vórtice do jogador.
-        const enemyType = config.enemySystem.types[enemy.type];
-        const effectiveRadius = player.isPoweredUp ? player.radius * 1.5 : player.radius;
+        // Lógica de movimento e ataque
         if (player.mode === 'attract' && distSq < effectiveRadius * effectiveRadius && !enemyType.ignoresAttraction) {
-            // Amortecimento: Reduz a velocidade atual do inimigo. Chefes têm mais inércia.
-            const damping = (enemy.type === 'boss' || enemy.type === 'finalBoss') ? 0.98 : 0.9;
-            enemy.speedX *= damping;
-            enemy.speedY *= damping;
+             const dist = Math.sqrt(distSq);
+             const damping = (enemy.type === 'boss' || enemy.type === 'finalBoss') ? 0.98 : 0.9;
+             enemy.speedX *= damping;
+             enemy.speedY *= damping;
 
-            const dist = Math.sqrt(distSq);
-            const radialForce = 0.5; // Força de puxada para o centro.
-            const tangentialForce = 0.25; // Força orbital (cria o efeito de vórtice).
-            const radial_nx = dx / dist;
-            const radial_ny = dy / dist;
-            const tangential_nx = -radial_ny;
-            const tangential_ny = radial_nx;
+             const radialForce = 0.5;
+             const tangentialForce = 0.25;
+             const radial_nx = dx / dist;
+             const radial_ny = dy / dist;
+             const tangential_nx = -radial_ny;
+             const tangential_ny = radial_nx;
 
-            const forceMagnitude = (1 - dist / effectiveRadius);
-            enemy.speedX += (radial_nx * radialForce + tangential_nx * tangentialForce) * forceMagnitude;
-            enemy.speedY += (radial_ny * radialForce + tangential_ny * tangentialForce) * forceMagnitude;
-
-            const damage = player.isPoweredUp ? player.attractionDamage * 3 : player.attractionDamage;
-            enemy.health -= damage;
-
-            if (enemy.health <= 0) {
-                xpFromDefeatedEnemies += enemy.isElite ? 10 : 3;
-                config.enemiesDestroyed++;
-                config.bigBangCharge = Math.min(100, config.bigBangCharge + config.bigBangChargeRate);
-                if (Math.random() < 0.05) { // 5% de chance de dropar cura.
-                    newlyCreatedParticles.push(particle.createHealParticle(enemy.x, enemy.y));
-                }
-                return; // Pula o resto da lógica para este inimigo, que já foi derrotado.
-            }
+             const forceMagnitude = (1 - dist / effectiveRadius);
+             enemy.speedX += (radial_nx * radialForce + tangential_nx * tangentialForce) * forceMagnitude;
+             enemy.speedY += (radial_ny * radialForce + tangential_ny * tangentialForce) * forceMagnitude;
         } else {
-             // Comportamento normal dos inimigos (quando não estão sendo atraídos).
             switch (enemy.behavior) {
-                case 'huntAndShoot':
-                    {
-                        const dist = Math.sqrt(distSq);
-                        if (dist > enemy.preferredDistance) {
-                            enemy.speedX = (dx / dist) * enemy.baseSpeed;
-                            enemy.speedY = (dy / dist) * enemy.baseSpeed;
-                        } else if (dist < enemy.preferredDistance * 0.8) {
-                            enemy.speedX = -(dx / dist) * enemy.baseSpeed;
-                            enemy.speedY = -(dy / dist) * enemy.baseSpeed;
-                        } else {
-                            enemy.speedX *= 0.8;
-                            enemy.speedY *= 0.8;
-                        }
-
-                        enemy.shootCooldown--;
-                        if (enemy.shootCooldown <= 0) {
-                            newProjectiles.push(projectile.createProjectile(enemy.x, enemy.y, player.x, player.y, enemy.projectileType));
-                            enemy.shootCooldown = config.enemySystem.types[enemy.type].shootCooldown;
-                        }
-                    }
-                    break;
-                case 'static':
-                    {
+                case 'huntAndShoot': {
+                    const dist = Math.sqrt(distSq);
+                    if (dist > enemy.preferredDistance) {
+                        enemy.speedX = (dx / dist) * enemy.baseSpeed;
+                        enemy.speedY = (dy / dist) * enemy.baseSpeed;
+                    } else if (dist < enemy.preferredDistance * 0.8) {
+                        enemy.speedX = -(dx / dist) * enemy.baseSpeed;
+                        enemy.speedY = -(dy / dist) * enemy.baseSpeed;
+                    } else {
                         enemy.speedX *= 0.8;
                         enemy.speedY *= 0.8;
-
+                    }
+                    if (enemy.shootCooldown) {
                         enemy.shootCooldown--;
                         if (enemy.shootCooldown <= 0) {
                             newProjectiles.push(projectile.createProjectile(enemy.x, enemy.y, player.x, player.y, enemy.projectileType));
@@ -214,12 +202,25 @@ export function updateEnemies(enemies, player, deltaTime, projectiles) {
                         }
                     }
                     break;
+                }
+                case 'static': {
+                    enemy.speedX *= 0.8;
+                    enemy.speedY *= 0.8;
+                    if (enemy.shootCooldown) {
+                        enemy.shootCooldown--;
+                        if (enemy.shootCooldown <= 0) {
+                            newProjectiles.push(projectile.createProjectile(enemy.x, enemy.y, player.x, player.y, enemy.projectileType));
+                            enemy.shootCooldown = config.enemySystem.types[enemy.type].shootCooldown;
+                        }
+                    }
+                    break;
+                }
                 case 'hunt':
-                     if (enemy.huntRadius && distSq < enemy.huntRadius * enemy.huntRadius) {
+                    if (enemy.huntRadius && distSq < enemy.huntRadius * enemy.huntRadius) {
                         const dist = Math.sqrt(distSq);
                         if (dist > 0) {
-                           enemy.speedX = (dx / dist) * enemy.baseSpeed;
-                           enemy.speedY = (dy / dist) * enemy.baseSpeed;
+                            enemy.speedX = (dx / dist) * enemy.baseSpeed;
+                            enemy.speedY = (dy / dist) * enemy.baseSpeed;
                         }
                     } else {
                         enemy.speedX += (Math.random() - 0.5) * 0.5;
@@ -227,41 +228,40 @@ export function updateEnemies(enemies, player, deltaTime, projectiles) {
                     }
                     break;
                 case 'crossScreen':
-                    // A velocidade inicial já foi definida no spawn e não deve ser alterada.
-                    break;
-                default: // 'wander' e outros comportamentos futuros
+                    break; // A velocidade já foi definida no spawn.
+                default:
                     enemy.speedX += (Math.random() - 0.5) * 0.5;
                     enemy.speedY += (Math.random() - 0.5) * 0.5;
-                    // Aplica fricção apenas para inimigos que não têm movimento constante.
                     enemy.speedX *= 0.95;
                     enemy.speedY *= 0.95;
             }
         }
 
-        // Atualização de posição.
         enemy.x += enemy.speedX * (deltaTime / 16.67);
         enemy.y += enemy.speedY * (deltaTime / 16.67);
 
-        // Atualiza a posição e verifica os limites da tela
-        if (enemy.behavior === 'crossScreen') {
-            const padding = 200;
-            if (enemy.x < -padding || enemy.x > window.innerWidth + padding || enemy.y < -padding || enemy.y > window.innerHeight + padding) {
-                // Inimigo está fora da tela, será removido
-            } else {
-                remainingEnemies.push(enemy);
-            }
-        } else {
-            enemy.x = Math.max(10, Math.min(window.innerWidth - 10, enemy.x));
-            enemy.y = Math.max(10, Math.min(window.innerHeight - 10, enemy.y));
-            remainingEnemies.push(enemy);
-        }
-
-        // Lógica de colisão com o jogador (movida para ser aplicada a todos os inimigos que ainda estão no jogo)
+        // Lógica de colisão com o jogador
         const distToPlayer = Math.sqrt(distSq);
         if (distToPlayer < (player.size + enemy.size) * 0.6) {
             const damage = (config.enemySystem.types[enemy.type].damage || 5) * (deltaTime / 16.67);
             player.health -= damage;
         }
+
+        // Verifica se o inimigo deve ser removido por sair da tela.
+        if (enemy.behavior === 'crossScreen') {
+            const padding = 200;
+            if (enemy.x < -padding || enemy.x > window.innerWidth + padding || enemy.y < -padding || enemy.y > window.innerHeight + padding) {
+                return false; // Remove o inimigo.
+            }
+        }
+
+        // Mantém o inimigo dentro da tela se não for do tipo 'crossScreen'.
+        if (enemy.behavior !== 'crossScreen') {
+            enemy.x = Math.max(10, Math.min(window.innerWidth - 10, enemy.x));
+            enemy.y = Math.max(10, Math.min(window.innerHeight - 10, enemy.y));
+        }
+
+        return true; // Mantém o inimigo vivo para o próximo frame.
     });
 
     return { xpFromDefeatedEnemies, newEnemies: remainingEnemies, newlyCreatedParticles, newProjectiles };
