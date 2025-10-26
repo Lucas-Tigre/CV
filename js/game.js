@@ -403,9 +403,7 @@ function updatePhysics(deltaTime) {
     // (O código antigo de colisão foi removido daqui para evitar processamento duplo e bugs)
 
     // Colisão: Jogador vs Projéteis de Inimigos.
-    let currentProjectiles = state.projectiles;
-    for (let i = currentProjectiles.length - 1; i >= 0; i--) {
-        const proj = currentProjectiles[i];
+    const remainingProjectiles = state.projectiles.filter(proj => {
         const dx = player.x - proj.x;
         const dy = player.y - proj.y;
         if (Math.sqrt(dx * dx + dy * dy) < player.size + proj.size) {
@@ -415,10 +413,11 @@ function updatePhysics(deltaTime) {
                 state.setExplosions([...state.explosions, { x: proj.x, y: proj.y, radius: proj.explosionRadius, damage: proj.damage, duration: 30, color: proj.color }]);
                 playSound('enemyDefeat');
             }
-            currentProjectiles.splice(i, 1);
+            return false; // Remove o projétil da lista.
         }
-    }
-    state.setProjectiles(currentProjectiles);
+        return true; // Mantém o projétil na lista.
+    });
+    state.setProjectiles(remainingProjectiles);
 
     // Colisão: Jogador vs Explosões.
     state.explosions.forEach(exp => {
