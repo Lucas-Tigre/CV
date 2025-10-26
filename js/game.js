@@ -4,7 +4,6 @@
 import { config } from './config.js';
 import * as state from './state.js';
 import * as ui from './ui.js';
-import { displayLeaderboard } from './ui.js';
 import * as particle from './particle.js';
 import * as enemy from './enemy.js';
 import * as projectile from './projectile.js';
@@ -638,9 +637,6 @@ function initGame() {
     setupControls();
     state.setGameLoopRunning(true);
     requestAnimationFrame(gameLoop);
-
-    // Carrega a tabela de pontuação
-    displayLeaderboard();
 }
 
 // Configura os listeners de eventos globais.
