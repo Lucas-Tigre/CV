@@ -4,6 +4,7 @@
 import { config } from './config.js';
 import * as state from './state.js';
 import * as ui from './ui.js';
+import { displayLeaderboard } from './ui.js';
 import * as particle from './particle.js';
 import * as enemy from './enemy.js';
 import * as projectile from './projectile.js';
@@ -403,7 +404,9 @@ function updatePhysics(deltaTime) {
     // (O código antigo de colisão foi removido daqui para evitar processamento duplo e bugs)
 
     // Colisão: Jogador vs Projéteis de Inimigos.
-    const remainingProjectiles = state.projectiles.filter(proj => {
+    let currentProjectiles = state.projectiles;
+    for (let i = currentProjectiles.length - 1; i >= 0; i--) {
+        const proj = currentProjectiles[i];
         const dx = player.x - proj.x;
         const dy = player.y - proj.y;
         if (Math.sqrt(dx * dx + dy * dy) < player.size + proj.size) {
@@ -413,11 +416,10 @@ function updatePhysics(deltaTime) {
                 state.setExplosions([...state.explosions, { x: proj.x, y: proj.y, radius: proj.explosionRadius, damage: proj.damage, duration: 30, color: proj.color }]);
                 playSound('enemyDefeat');
             }
-            return false; // Remove o projétil da lista.
+            currentProjectiles.splice(i, 1);
         }
-        return true; // Mantém o projétil na lista.
-    });
-    state.setProjectiles(remainingProjectiles);
+    }
+    state.setProjectiles(currentProjectiles);
 
     // Colisão: Jogador vs Explosões.
     state.explosions.forEach(exp => {
@@ -636,6 +638,9 @@ function initGame() {
     setupControls();
     state.setGameLoopRunning(true);
     requestAnimationFrame(gameLoop);
+
+    // Carrega a tabela de pontuação
+    displayLeaderboard();
 }
 
 // Configura os listeners de eventos globais.
