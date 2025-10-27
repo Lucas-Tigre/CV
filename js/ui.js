@@ -286,13 +286,16 @@ export function updateBigBangChargeBar(chargePercent) {
  */
 export function updateBigBangIndicator(chargePercent) {
     const indicator = document.getElementById('bigbang-indicator');
-    if (!indicator) return;
+    const bigBangBtn = document.getElementById('bigbang-btn');
+    if (!indicator || !bigBangBtn) return;
 
     if (chargePercent >= 100) {
         indicator.style.display = 'block';
         indicator.classList.add('ready');
+        bigBangBtn.classList.add('bigbang-ready');
     } else {
         indicator.style.display = 'none';
         indicator.classList.remove('ready');
+        bigBangBtn.classList.remove('bigbang-ready');
     }
 }

@@ -23,27 +23,24 @@ describe('Lógica Modular do Jogo', () => {
 
     describe('Sistema de Inimigos', () => {
         it('deve gerar um inimigo aleatório', () => {
-            const initialEnemies = [];
-            const newEnemies = spawnEnemy(initialEnemies);
-            expect(newEnemies.length).toBe(1);
-            expect(newEnemies[0]).toHaveProperty('health');
-            expect(newEnemies[0]).toHaveProperty('type');
+            const newEnemy = spawnEnemy('fast', testConfig, testConfig.players[0]);
+            expect(newEnemy).toBeDefined();
+            expect(newEnemy).toHaveProperty('health');
+            expect(newEnemy).toHaveProperty('typeKey');
         });
 
         it('deve gerar um inimigo chefe específico', () => {
-            const initialEnemies = [];
-            const newEnemies = spawnEnemy(initialEnemies, 'boss');
-            expect(newEnemies.length).toBe(1);
-            expect(newEnemies[0].type).toBe('boss');
-            expect(newEnemies[0].health).toBe(200);
+            const newEnemy = spawnEnemy('boss', testConfig, testConfig.players[0]);
+            expect(newEnemy).toBeDefined();
+            expect(newEnemy.typeKey).toBe('boss');
+            expect(newEnemy.health).toBe(300);
         });
 
         it('deve gerar um inimigo chefe final', () => {
-            const initialEnemies = [];
-            const newEnemies = spawnEnemy(initialEnemies, 'finalBoss');
-            expect(newEnemies.length).toBe(1);
-            expect(newEnemies[0].type).toBe('finalBoss');
-            expect(newEnemies[0].health).toBe(600);
+            const newEnemy = spawnEnemy('finalBoss', testConfig, testConfig.players[0]);
+            expect(newEnemy).toBeDefined();
+            expect(newEnemy.typeKey).toBe('finalBoss');
+            expect(newEnemy.health).toBe(900);
         });
     });
 
