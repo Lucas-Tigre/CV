@@ -25,7 +25,7 @@ export function spawnEnemy(typeKey, config, player) {
   let health = type.health || (config.enemySystem.baseHealth + (waveNumber * config.enemySystem.healthIncreasePerLevel));
 
   // 🔹 Define dano base
-  let damage = type.damage || (config.enemySystem.baseDamage + (waveNumber * config.enemySystem.damageIncreasePerLevel));
+  let damage = type.damage || config.enemySystem.baseDamage;
 
   // 🔹 Define velocidade
   let baseSpeed = type.speed || config.enemySystem.baseSpeed;
@@ -67,7 +67,8 @@ export function spawnEnemy(typeKey, config, player) {
     health,
     maxHealth: health,
     damage,
-    radius: type.radius || 15,
+    size: type.size || config.enemySystem.baseSize,
+    radius: type.size || config.enemySystem.baseSize,
     color: isElite ? 'gold' : type.color || 'red',
     isElite,
     typeKey

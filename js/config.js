@@ -72,6 +72,7 @@ export const config = {
     // =============================================
     enemySystem: {
         baseHealth: 5,
+        baseDamage: 5, // Dano base que os inimigos causam ao colidir.
         baseSize: 20,
         eliteSizeMultiplier: 1.3,
         healthIncreasePerLevel: 0.3,
