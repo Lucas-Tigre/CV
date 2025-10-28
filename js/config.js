@@ -61,7 +61,7 @@ export const config = {
             health: 100,
             maxHealth: 100,
             damage: 0.5,             // Dano de colisão com inimigos (não implementado).
-            attractionDamage: 10,  // Dano por segundo do vórtice de atração.
+            attractionDamage: 4,  // Dano por segundo do vórtice de atração.
             isPoweredUp: false,
             powerUpTimer: 0,
         }
@@ -71,8 +71,8 @@ export const config = {
     // SISTEMA DE INIMIGOS
     // =============================================
     enemySystem: {
-        baseHealth: 5,
-        baseDamage: 5, // Dano base que os inimigos causam ao colidir.
+        baseHealth: 20,
+        baseDamage: 10, // Dano base que os inimigos causam ao colidir.
         baseSize: 20,
         eliteSizeMultiplier: 1.3,
         healthIncreasePerLevel: 0.3,

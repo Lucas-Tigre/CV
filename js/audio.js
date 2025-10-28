@@ -72,7 +72,6 @@ export function playMusic(trackName) {
             if (currentTrack.audio.volume === 0) {
                 clearInterval(fadeOutInterval);
                 currentTrack.audio.pause();
-                currentTrack.audio.src = ''; // Força o descarregamento do áudio.
                 startFadeIn();
             }
         }, 100);
