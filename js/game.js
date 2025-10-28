@@ -305,7 +305,7 @@ function render() {
     const player = config.players[0];
 
     particle.renderParticles(ctx, state.particles);
-    enemy.renderEnemies(ctx, state.enemies);
+    enemy.drawEnemies(ctx, state.enemies);
     projectile.renderProjectiles(ctx, state.projectiles);
     explosion.renderExplosions(ctx, state.explosions);
 
