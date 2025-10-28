@@ -115,10 +115,13 @@ export function updateEnemies(enemies, player, deltaTime, existingProjectiles, c
         // Lógica de colisão com o jogador
         const distPlayer = Math.sqrt((player.x - enemy.x) ** 2 + (player.y - enemy.y) ** 2);
         if (distPlayer < enemy.radius + player.size) {
-            if (player.health > 0) {
+            // Se o jogador não estiver invencível, ele sofre dano e fica invencível.
+            if (player.invincibleTimer <= 0) {
                 player.health -= enemy.damage;
+                player.invincibleTimer = player.invincibilityCooldown; // Ativa a invencibilidade.
             }
-            enemy.health = 0;
+            // O inimigo também sofre dano ao colidir com o jogador.
+            enemy.health -= player.collisionDamage;
         }
 
         // Verifica se o inimigo foi derrotado
