@@ -120,8 +120,11 @@ export function updateEnemies(enemies, player, deltaTime, existingProjectiles, c
                 player.health -= enemy.damage;
                 player.invincibleTimer = player.invincibilityCooldown; // Ativa a invencibilidade.
             }
-            // O inimigo também sofre dano ao colidir com o jogador.
-            enemy.health -= player.collisionDamage;
+
+            // O inimigo só sofre dano de colisão se a configuração dele permitir.
+            if (!typeConfig.ignoresCollision) {
+                enemy.health -= player.collisionDamage;
+            }
         }
 
         // Verifica se o inimigo foi derrotado

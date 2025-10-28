@@ -109,7 +109,8 @@ export const config = {
                 face: ["☄️", "🌠"],
                 color: '#00AAFF',
                 damage: 25,
-                ignoresAttraction: true
+                ignoresAttraction: true,
+                ignoresCollision: true
             },
             shooter: {
                 name: "Atirador",
