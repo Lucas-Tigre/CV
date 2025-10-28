@@ -22,22 +22,25 @@ describe('Lógica Modular do Jogo', () => {
     });
 
     describe('Sistema de Inimigos', () => {
+        // Mock do canvas para os testes, já que as funções agora esperam as dimensões da tela.
+        const mockCanvas = { width: 800, height: 600 };
+
         it('deve gerar um inimigo aleatório', () => {
-            const newEnemy = spawnEnemy('fast', testConfig, testConfig.players[0]);
+            const newEnemy = spawnEnemy('fast', testConfig, testConfig.players[0], mockCanvas);
             expect(newEnemy).toBeDefined();
             expect(newEnemy).toHaveProperty('health');
             expect(newEnemy).toHaveProperty('typeKey');
         });
 
         it('deve gerar um inimigo chefe específico', () => {
-            const newEnemy = spawnEnemy('boss', testConfig, testConfig.players[0]);
+            const newEnemy = spawnEnemy('boss', testConfig, testConfig.players[0], mockCanvas);
             expect(newEnemy).toBeDefined();
             expect(newEnemy.typeKey).toBe('boss');
             expect(newEnemy.health).toBe(300);
         });
 
         it('deve gerar um inimigo chefe final', () => {
-            const newEnemy = spawnEnemy('finalBoss', testConfig, testConfig.players[0]);
+            const newEnemy = spawnEnemy('finalBoss', testConfig, testConfig.players[0], mockCanvas);
             expect(newEnemy).toBeDefined();
             expect(newEnemy.typeKey).toBe('finalBoss');
             expect(newEnemy.health).toBe(900);
