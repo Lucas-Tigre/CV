@@ -60,10 +60,12 @@ export const config = {
             faceSize: 28,
             health: 100,
             maxHealth: 100,
-            damage: 0.5,             // Dano de colisão com inimigos (não implementado).
+            collisionDamage: 10,     // Dano que o jogador causa ao colidir com inimigos.
             attractionDamage: 4,  // Dano por segundo do vórtice de atração.
             isPoweredUp: false,
             powerUpTimer: 0,
+            invincibilityCooldown: 60, // Duração da invencibilidade em frames após sofrer dano.
+            invincibleTimer: 0         // Timer atual da invencibilidade.
         }
     ],
 
@@ -72,7 +74,7 @@ export const config = {
     // =============================================
     enemySystem: {
         baseHealth: 20,
-        baseDamage: 10, // Dano base que os inimigos causam ao colidir.
+        baseDamage: 5, // Dano base que os inimigos causam ao colidir.
         baseSize: 20,
         eliteSizeMultiplier: 1.3,
         healthIncreasePerLevel: 0.3,
