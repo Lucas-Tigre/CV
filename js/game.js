@@ -341,6 +341,11 @@ function updatePhysics(deltaTime) {
 
     handlePowerUpTimer();
 
+    // Gerencia o timer de invencibilidade do jogador
+    if (player.invincibleTimer > 0) {
+        player.invincibleTimer--;
+    }
+
     // Atualiza a animação da aura pulsante.
     const effectiveRadius = player.isPoweredUp ? player.radius * 1.5 : player.radius;
     let newAuraRadius = state.auraPulseRadius + 2;
@@ -657,3 +662,4 @@ window.addEventListener('resize', () => {
 });
 
 // O estado não é mais exposto globalmente para segurança.
+window.config = config; // Exposto APENAS para verificação via Playwright.
