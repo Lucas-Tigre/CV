@@ -145,8 +145,6 @@ export function updateParticles(currentParticles, player, deltaTime, lastUpdateI
     let absorbedXp = 0;
     let absorbedCount = 0;
     let powerupCollected = false;
-    let healCollected = false;
-    let healAmount = 0;
     const updatesThisFrame = Math.min(100, newParticles.length); // Limita o número de atualizações por frame.
     let newLastUpdateIndex = lastUpdateIndex;
 
@@ -205,9 +203,9 @@ export function updateParticles(currentParticles, player, deltaTime, lastUpdateI
                 if (isVeryClose && dist < player.size * 0.8) {
                     if (p.special === 'powerup') {
                         powerupCollected = true;
-                    } else if (p.special === 'heal') {
-                        healCollected = true;
-                        healAmount = p.healAmount;
+                    } else if (p.type === 'health') {
+                        player.health = Math.min(player.maxHealth, player.health + 10);
+                        playSound('levelUp'); // Reutiliza um som existente para feedback.
                     }
                     absorbedXp += p.xpValue || 1;
                     absorbedCount++;
@@ -238,7 +236,7 @@ export function updateParticles(currentParticles, player, deltaTime, lastUpdateI
 
     newLastUpdateIndex = (newLastUpdateIndex + updatesThisFrame) % (newParticles.length || 1);
 
-    return { newParticles, absorbedXp, absorbedCount, newLastUpdateIndex, powerupCollected, healCollected, healAmount };
+    return { newParticles, absorbedXp, absorbedCount, newLastUpdateIndex, powerupCollected };
 }
 
 /**

@@ -1,3 +1,4 @@
+import { createProjectile } from './projectile.js';
 // ======================
 // SISTEMA DE INIMIGOS v2.0
 // ======================
@@ -44,8 +45,20 @@ export function spawnEnemy(typeKey, config, player) {
     color: isElite ? 'gold' : type.color || 'red',
     face: Array.isArray(type.face) ? type.face[Math.floor(Math.random() * type.face.length)] : type.face,
     isElite,
-    typeKey
+    typeKey,
+    shootCooldownTimer: type.shootCooldown || 0
   };
+
+  // Define a velocidade inicial para inimigos que atravessam a tela
+  if (type.behavior === 'crossScreen') {
+    const targetX = rand(0, screenWidth);
+    const targetY = rand(0, screenHeight);
+    const dx = targetX - enemy.x;
+    const dy = targetY - enemy.y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    enemy.speedX = (dx / dist) * enemy.baseSpeed;
+    enemy.speedY = (dy / dist) * enemy.baseSpeed;
+  }
 
   return enemy;
 }
@@ -53,7 +66,7 @@ export function spawnEnemy(typeKey, config, player) {
 // ======================
 // ATUALIZAÇÃO DOS INIMIGOS
 // ======================
-export function updateEnemies(enemies, player, deltaTime, existingProjectiles) {
+export function updateEnemies(enemies, player, deltaTime, existingProjectiles, config) {
     const newEnemies = [];
     const newlyCreatedParticles = [];
     const newProjectiles = [...existingProjectiles];
@@ -61,16 +74,36 @@ export function updateEnemies(enemies, player, deltaTime, existingProjectiles) {
 
     for (const enemy of enemies) {
         let isAlive = true;
+        const typeConfig = config.enemySystem.types[enemy.typeKey];
 
-        const dx = player.x - enemy.x;
-        const dy = player.y - enemy.y;
-        const dist = Math.sqrt(dx * dx + dy * dy) || 0.001;
-        enemy.speedX = (dx / dist) * enemy.baseSpeed;
-        enemy.speedY = (dy / dist) * enemy.baseSpeed;
-        enemy.x += enemy.speedX;
-        enemy.y += enemy.speedY;
+        // Lógica de movimento baseada no comportamento
+        if (typeConfig.behavior === 'crossScreen') {
+            enemy.x += enemy.speedX;
+            enemy.y += enemy.speedY;
+            if (enemy.x < -100 || enemy.x > screenWidth + 100 || enemy.y < -100 || enemy.y > screenHeight + 100) {
+                isAlive = false;
+            }
+        } else if (typeConfig.behavior !== 'static') {
+            const dx = player.x - enemy.x;
+            const dy = player.y - enemy.y;
+            const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+            enemy.speedX = (dx / dist) * enemy.baseSpeed;
+            enemy.speedY = (dy / dist) * enemy.baseSpeed;
+            enemy.x += enemy.speedX;
+            enemy.y += enemy.speedY;
+        }
 
-        if (player.mode === 'attract' || player.mode === 'vortex') {
+        // Lógica de disparo
+        if (enemy.shootCooldownTimer > 0) {
+            enemy.shootCooldownTimer--;
+        }
+        if (typeConfig.shootCooldown && enemy.shootCooldownTimer <= 0) {
+            newProjectiles.push(createProjectile(enemy.x, enemy.y, player.x, player.y, typeConfig.projectileType));
+            enemy.shootCooldownTimer = typeConfig.shootCooldown;
+        }
+
+        // Lógica de dano do jogador (vórtice, etc.)
+        if ((player.mode === 'attract' || player.mode === 'vortex') && !typeConfig.ignoresAttraction) {
             const distFromPlayer = Math.sqrt((player.x - enemy.x) ** 2 + (player.y - enemy.y) ** 2);
             if (distFromPlayer < player.radius) {
                 const damagePerSecond = player.attractionDamage || 10;
@@ -79,6 +112,7 @@ export function updateEnemies(enemies, player, deltaTime, existingProjectiles) {
             }
         }
 
+        // Lógica de colisão com o jogador
         const distPlayer = Math.sqrt((player.x - enemy.x) ** 2 + (player.y - enemy.y) ** 2);
         if (distPlayer < enemy.radius + player.size) {
             if (player.health > 0) {
@@ -87,9 +121,11 @@ export function updateEnemies(enemies, player, deltaTime, existingProjectiles) {
             enemy.health = 0;
         }
 
+        // Verifica se o inimigo foi derrotado
         if (enemy.health <= 0) {
             isAlive = false;
             xpFromDefeatedEnemies += enemy.maxHealth / 4;
+            // Chance de dropar item de vida
             if (Math.random() < 0.15) {
                 newlyCreatedParticles.push({
                     x: enemy.x, y: enemy.y, size: 7, color: 'lightgreen',
