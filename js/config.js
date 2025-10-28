@@ -73,11 +73,12 @@ export const config = {
     // SISTEMA DE INIMIGOS
     // =============================================
     enemySystem: {
-        baseHealth: 20,
+        baseHealth: 30, // Aumentado para dar uma base mais sólida
         baseDamage: 5, // Dano base que os inimigos causam ao colidir.
         baseSize: 20,
         eliteSizeMultiplier: 1.3,
-        healthIncreasePerLevel: 0.3,
+        healthIncreasePerLevel: 0.08, // Reduzido drasticamente para evitar que inimigos virem "esponjas de dano"
+        collisionCooldown: 30, // Frames de invencibilidade do inimigo após colidir com o jogador.
         types: {
             fast: {
                 name: "Rápido",

@@ -144,7 +144,7 @@ function updateWave() {
     // Condição para gerar um novo inimigo na onda atual
     else if (config.wave.spawned < config.wave.enemiesToSpawn && config.wave.timer > 90) {
         console.log("Gerando novo inimigo.");
-        const newEnemy = enemy.spawnRandomEnemy(config, config.players[0]);
+        const newEnemy = enemy.spawnRandomEnemy(config, config.players[0], canvas);
         if (newEnemy) {
             state.setEnemies([...state.enemies, newEnemy]);
         }
@@ -390,7 +390,7 @@ function updatePhysics(deltaTime) {
     state.setExplosions(explosion.updateExplosions(state.explosions));
 
     if (state.enemies.length > 0) {
-        const enemyUpdate = enemy.updateEnemies(state.enemies, player, deltaTime, state.projectiles, config);
+        const enemyUpdate = enemy.updateEnemies(state.enemies, player, deltaTime, state.projectiles, config, canvas);
         state.setEnemies(enemyUpdate.newEnemies);
 
         if (enemyUpdate.newlyCreatedParticles.length > 0) {

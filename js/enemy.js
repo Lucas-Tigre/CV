@@ -3,10 +3,6 @@ import { createProjectile } from './projectile.js';
 // SISTEMA DE INIMIGOS v2.0
 // ======================
 
-// ✅ Pega dimensões da tela com segurança (sem travar fora do navegador)
-const screenWidth = typeof window !== 'undefined' ? window.innerWidth : 800;
-const screenHeight = typeof window !== 'undefined' ? window.innerHeight : 600;
-
 // 🔹 Função utilitária para gerar números aleatórios de forma simples
 function rand(min = 0, max = 1) {
   return Math.random() * (max - min) + min;
@@ -15,9 +11,12 @@ function rand(min = 0, max = 1) {
 // ======================
 // GERAR INIMIGOS
 // ======================
-export function spawnEnemy(typeKey, config, player) {
+export function spawnEnemy(typeKey, config, player, canvas) {
   const type = config.enemySystem.types[typeKey];
   if (!type) return null; // segurança extra
+
+  const screenWidth = canvas.width;
+  const screenHeight = canvas.height;
 
   const waveNumber = config.wave?.number ?? 1;
   let health = type.health || (config.enemySystem.baseHealth + (waveNumber * config.enemySystem.healthIncreasePerLevel));
@@ -33,10 +32,10 @@ export function spawnEnemy(typeKey, config, player) {
 
   const side = Math.floor(rand(0, 4));
   let x, y;
-  if (side === 0) { x = -50; y = rand(0, screenHeight); }
-  else if (side === 1) { x = screenWidth + 50; y = rand(0, screenHeight); }
-  else if (side === 2) { x = rand(0, screenWidth); y = -50; }
-  else { x = rand(0, screenWidth); y = screenHeight + 50; }
+  if (side === 0) { x = -50; y = rand(0, canvas.height); }
+  else if (side === 1) { x = canvas.width + 50; y = rand(0, canvas.height); }
+  else if (side === 2) { x = rand(0, canvas.width); y = -50; }
+  else { x = rand(0, canvas.width); y = canvas.height + 50; }
 
   const enemy = {
     x, y, baseSpeed, speedX: 0, speedY: 0, health, maxHealth: health, damage,
@@ -46,13 +45,14 @@ export function spawnEnemy(typeKey, config, player) {
     face: Array.isArray(type.face) ? type.face[Math.floor(Math.random() * type.face.length)] : type.face,
     isElite,
     typeKey,
-    shootCooldownTimer: type.shootCooldown || 0
+    shootCooldownTimer: type.shootCooldown || 0,
+    collisionTimer: 0 // Novo: Timer para o cooldown de dano de colisão
   };
 
   // Define a velocidade inicial para inimigos que atravessam a tela
   if (type.behavior === 'crossScreen') {
-    const targetX = rand(0, screenWidth);
-    const targetY = rand(0, screenHeight);
+    const targetX = rand(0, canvas.width);
+    const targetY = rand(0, canvas.height);
     const dx = targetX - enemy.x;
     const dy = targetY - enemy.y;
     const dist = Math.sqrt(dx * dx + dy * dy);
@@ -66,7 +66,7 @@ export function spawnEnemy(typeKey, config, player) {
 // ======================
 // ATUALIZAÇÃO DOS INIMIGOS
 // ======================
-export function updateEnemies(enemies, player, deltaTime, existingProjectiles, config) {
+export function updateEnemies(enemies, player, deltaTime, existingProjectiles, config, canvas) {
     const newEnemies = [];
     const newlyCreatedParticles = [];
     const newProjectiles = [...existingProjectiles];
@@ -76,19 +76,35 @@ export function updateEnemies(enemies, player, deltaTime, existingProjectiles, c
         let isAlive = true;
         const typeConfig = config.enemySystem.types[enemy.typeKey];
 
+        // Novo: Decrementa o timer de cooldown de colisão do inimigo
+        if (enemy.collisionTimer > 0) {
+            enemy.collisionTimer--;
+        }
+
         // Lógica de movimento baseada no comportamento
         if (typeConfig.behavior === 'crossScreen') {
             enemy.x += enemy.speedX;
             enemy.y += enemy.speedY;
-            if (enemy.x < -100 || enemy.x > screenWidth + 100 || enemy.y < -100 || enemy.y > screenHeight + 100) {
+            if (enemy.x < -100 || enemy.x > canvas.width + 100 || enemy.y < -100 || enemy.y > canvas.height + 100) {
                 isAlive = false;
             }
         } else if (typeConfig.behavior !== 'static') {
             const dx = player.x - enemy.x;
             const dy = player.y - enemy.y;
             const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-            enemy.speedX = (dx / dist) * enemy.baseSpeed;
-            enemy.speedY = (dy / dist) * enemy.baseSpeed;
+
+            // Por padrão, o inimigo se move em direção ao jogador.
+            let moveX = (dx / dist) * enemy.baseSpeed;
+            let moveY = (dy / dist) * enemy.baseSpeed;
+
+            // Se o inimigo (como o "Hunter") tem uma distância preferencial e está muito perto, ele para.
+            if (typeConfig.preferredDistance && dist < typeConfig.preferredDistance) {
+                moveX = 0;
+                moveY = 0;
+            }
+
+            enemy.speedX = moveX;
+            enemy.speedY = moveY;
             enemy.x += enemy.speedX;
             enemy.y += enemy.speedY;
         }
@@ -121,9 +137,10 @@ export function updateEnemies(enemies, player, deltaTime, existingProjectiles, c
                 player.invincibleTimer = player.invincibilityCooldown; // Ativa a invencibilidade.
             }
 
-            // O inimigo só sofre dano de colisão se a configuração dele permitir.
-            if (!typeConfig.ignoresCollision) {
+            // O inimigo só sofre dano de colisão se a configuração dele permitir E se não estiver em cooldown.
+            if (!typeConfig.ignoresCollision && enemy.collisionTimer <= 0) {
                 enemy.health -= player.collisionDamage;
+                enemy.collisionTimer = config.enemySystem.collisionCooldown; // Reinicia o cooldown
             }
         }
 
@@ -183,7 +200,7 @@ export function drawEnemies(ctx, enemies) {
 // ======================
 // GERADOR DE INIMIGOS ALEATÓRIOS
 // ======================
-export function spawnRandomEnemy(config, player) {
+export function spawnRandomEnemy(config, player, canvas) {
   const enemyTypes = Object.keys(config.enemySystem.types);
   const totalChance = enemyTypes.reduce(
     (sum, key) => sum + (config.enemySystem.types[key].chance || 0),
@@ -194,9 +211,9 @@ export function spawnRandomEnemy(config, player) {
   for (const key of enemyTypes) {
     const chance = config.enemySystem.types[key].chance || 0;
     if (random < chance) {
-      return spawnEnemy(key, config, player);
+      return spawnEnemy(key, config, player, canvas);
     }
     random -= chance;
   }
-  return spawnEnemy(enemyTypes[0], config, player);
+  return spawnEnemy(enemyTypes[0], config, player, canvas);
 }
