@@ -18,26 +18,35 @@ export let accumulator = 0;     // Acumulador de tempo para a física do jogo.
 // =============================================
 // FUNÇÕES SETTER
 // Permitem que outros módulos modifiquem o estado de forma controlada.
+// Adicionada verificação para prevenir erros se um array inválido for passado.
 // =============================================
 
 export function setParticles(newParticles) {
     particles.length = 0;
-    particles.push(...newParticles);
+    if (newParticles) {
+        particles.push(...newParticles);
+    }
 }
 
 export function setEnemies(newEnemies) {
     enemies.length = 0;
-    enemies.push(...newEnemies);
+    if (newEnemies) {
+        enemies.push(...newEnemies);
+    }
 }
 
 export function setProjectiles(newProjectiles) {
     projectiles.length = 0;
-    projectiles.push(...newProjectiles);
+    if (newProjectiles) {
+        projectiles.push(...newProjectiles);
+    }
 }
 
 export function setExplosions(newExplosions) {
     explosions.length = 0;
-    explosions.push(...newExplosions);
+    if (newExplosions) {
+        explosions.push(...newExplosions);
+    }
 }
 
 export function setGameLoopRunning(value) {

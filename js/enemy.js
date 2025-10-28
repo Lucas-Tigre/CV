@@ -79,34 +79,81 @@ export function spawnEnemy(typeKey, config, player) {
 // ======================
 // ATUALIZAÇÃO DOS INIMIGOS
 // ======================
-export function updateEnemies(enemies, player) {
-  enemies.forEach(enemy => {
-    // 🔹 Calcula a direção para o jogador
-    const dx = player.x - enemy.x;
-    const dy = player.y - enemy.y;
-    const dist = Math.sqrt(dx * dx + dy * dy) || 0.001; // evita divisão por 0
+export function updateEnemies(enemies, player, deltaTime, existingProjectiles) {
+    const newEnemies = [];
+    const newlyCreatedParticles = [];
+    // Começa com os projéteis existentes para não perdê-los.
+    const newProjectiles = [...existingProjectiles];
+    let xpFromDefeatedEnemies = 0;
 
-    // 🔹 Define velocidade de movimento (seguindo o jogador)
-    enemy.speedX = (dx / dist) * enemy.baseSpeed;
-    enemy.speedY = (dy / dist) * enemy.baseSpeed;
+    for (const enemy of enemies) {
+        let isAlive = true;
 
-    // 🔹 Atualiza posição
-    enemy.x += enemy.speedX;
-    enemy.y += enemy.speedY;
+        // --- LÓGICA DE MOVIMENTO ---
+        const dx = player.x - enemy.x;
+        const dy = player.y - enemy.y;
+        const dist = Math.sqrt(dx * dx + dy * dy) || 0.001;
 
-    // 🔹 Limita velocidade mínima (evita congelamento)
-    const minSpeed = 0.05;
-    if (Math.abs(enemy.speedX) < minSpeed) enemy.speedX = 0;
-    if (Math.abs(enemy.speedY) < minSpeed) enemy.speedY = 0;
+        enemy.speedX = (dx / dist) * enemy.baseSpeed;
+        enemy.speedY = (dy / dist) * enemy.baseSpeed;
+        enemy.x += enemy.speedX;
+        enemy.y += enemy.speedY;
 
-    // 🔹 Detecta colisão com jogador
-    const distPlayer = Math.sqrt((player.x - enemy.x) ** 2 + (player.y - enemy.y) ** 2);
-    if (distPlayer < enemy.radius + player.radius) {
-      if (player.health > 0) {
-        player.health -= enemy.damage;
-      }
+        // --- LÓGICA DE DANO E MORTE ---
+
+        // Dano do vortex do jogador (modo 'attract')
+        if (player.mode === 'attract' || player.mode === 'vortex') {
+            const distFromPlayer = Math.sqrt((player.x - enemy.x) ** 2 + (player.y - enemy.y) ** 2);
+            if (distFromPlayer < player.radius) {
+                const damagePerSecond = player.attractionDamage || 10;
+                // Aplica dano proporcional ao tempo, para ser independente do framerate
+                const damageThisFrame = damagePerSecond * (deltaTime / 1000);
+                enemy.health -= damageThisFrame;
+            }
+        }
+
+        // Colisão direta com o jogador
+        const distPlayer = Math.sqrt((player.x - enemy.x) ** 2 + (player.y - enemy.y) ** 2);
+        if (distPlayer < enemy.radius + player.size) {
+            if (player.health > 0) {
+                player.health -= enemy.damage;
+            }
+            enemy.health = 0; // Inimigo é destruído na colisão
+        }
+
+        // Verifica se o inimigo foi derrotado
+        if (enemy.health <= 0) {
+            isAlive = false;
+            // Recompensa em XP é proporcional à vida máxima do inimigo
+            xpFromDefeatedEnemies += enemy.maxHealth / 4;
+
+            // 15% de chance de dropar uma partícula de cura
+            if (Math.random() < 0.15) {
+                newlyCreatedParticles.push({
+                    x: enemy.x,
+                    y: enemy.y,
+                    size: 7,
+                    color: 'lightgreen',
+                    type: 'health', // Identificador para a lógica de absorção
+                    isAttracted: false,
+                    speedX: rand(-1, 1),
+                    speedY: rand(-1, 1)
+                });
+            }
+        }
+
+        if (isAlive) {
+            newEnemies.push(enemy);
+        }
     }
-  });
+
+    // Retorna um objeto estruturado que o game loop espera
+    return {
+        newEnemies,
+        newlyCreatedParticles,
+        newProjectiles,
+        xpFromDefeatedEnemies,
+    };
 }
 
 // ======================
