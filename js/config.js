@@ -73,11 +73,11 @@ export const config = {
     // SISTEMA DE INIMIGOS
     // =============================================
     enemySystem: {
-        baseHealth: 30, // Aumentado para dar uma base mais sólida
-        baseDamage: 5, // Dano base que os inimigos causam ao colidir.
+        baseHealth: 20, // REBALANCEAMENTO: Reduzido para facilitar o início.
+        baseDamage: 3, // REBALANCEAMENTO: Reduzido para diminuir a dificuldade.
         baseSize: 20,
         eliteSizeMultiplier: 1.3,
-        healthIncreasePerLevel: 0.08, // Reduzido drasticamente para evitar que inimigos virem "esponjas de dano"
+        healthIncreasePerLevel: 0.05, // REBALANCEAMENTO: Reduzido para uma curva de dificuldade mais suave.
         collisionCooldown: 30, // Frames de invencibilidade do inimigo após colidir com o jogador.
         types: {
             fast: {
@@ -203,7 +203,7 @@ export const config = {
     particlesAbsorbed: 0,
     enemiesDestroyed: 0,
     gameTime: 0,
-    wave: { number: 1, enemiesToSpawn: 5, spawned: 0, timer: 0 },
+    wave: { number: 1, enemiesToSpawn: 3, spawned: 0, timer: 0 }, // REBALANCEAMENTO: Reduzido o número inicial de inimigos.
     bigBangCharge: 0,
     bigBangChargeRate: 2, // Pontos de carga por inimigo derrotado.
 
