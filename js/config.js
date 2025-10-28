@@ -61,7 +61,7 @@ export const config = {
             health: 100,
             maxHealth: 100,
             damage: 0.5,             // Dano de colisão com inimigos (não implementado).
-            attractionDamage: 0.05,  // Dano por segundo do vórtice de atração.
+            attractionDamage: 10,  // Dano por segundo do vórtice de atração.
             isPoweredUp: false,
             powerUpTimer: 0,
         }
