@@ -22,30 +22,27 @@ export let accumulator = 0;     // Acumulador de tempo para a física do jogo.
 // =============================================
 
 export function setParticles(newParticles) {
-    particles.length = 0;
-    if (newParticles) {
-        particles.push(...newParticles);
+    // Apenas modifica o array se newParticles for um array válido.
+    if (Array.isArray(newParticles)) {
+        particles = newParticles;
     }
 }
 
 export function setEnemies(newEnemies) {
-    enemies.length = 0;
-    if (newEnemies) {
-        enemies.push(...newEnemies);
+    if (Array.isArray(newEnemies)) {
+        enemies = newEnemies;
     }
 }
 
 export function setProjectiles(newProjectiles) {
-    projectiles.length = 0;
-    if (newProjectiles) {
-        projectiles.push(...newProjectiles);
+    if (Array.isArray(newProjectiles)) {
+        projectiles = newProjectiles;
     }
 }
 
 export function setExplosions(newExplosions) {
-    explosions.length = 0;
-    if (newExplosions) {
-        explosions.push(...newExplosions);
+    if (Array.isArray(newExplosions)) {
+        explosions = newExplosions;
     }
 }
 
