@@ -144,6 +144,13 @@ export function updateEnemies(enemies, player, deltaTime, existingProjectiles, c
             }
         }
 
+        // REDE DE SEGURANÇA: Remove inimigos que saem muito da tela, independente do tipo.
+        // Isso previne que inimigos perdidos bloqueiem o avanço das ondas.
+        const safetyMargin = 200;
+        if (enemy.x < -safetyMargin || enemy.x > canvas.width + safetyMargin || enemy.y < -safetyMargin || enemy.y > canvas.height + safetyMargin) {
+            isAlive = false;
+        }
+
         // Verifica se o inimigo foi derrotado
         if (enemy.health <= 0) {
             isAlive = false;
