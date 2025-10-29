@@ -406,7 +406,14 @@ function updatePhysics(deltaTime) {
             checkLevelUp();
         }
     }
-    updateWave();
+
+    // CORREÇÃO CRÍTICA: Só chama `updateWave` se uma luta de chefe NÃO estiver ativa.
+    // Isso previne a condição de corrida onde uma nova onda normal começa no mesmo
+    // quadro em que um chefe deveria aparecer.
+    if (!config.bossFightActive) {
+        updateWave();
+    }
+
 
     // --- DETECÇÃO DE COLISÃO ---
 
