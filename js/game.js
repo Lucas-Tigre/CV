@@ -390,21 +390,22 @@ function updatePhysics(deltaTime) {
     state.setExplosions(explosion.updateExplosions(state.explosions));
 
     if (state.enemies.length > 0) {
-        const enemyUpdate = enemy.updateEnemies(state.enemies, player, deltaTime, state.projectiles, config, canvas);
-        state.setEnemies(enemyUpdate.newEnemies);
+        // Chamada da função CORRIGIDA com os argumentos certos.
+        const enemyUpdate = enemy.updateEnemies(state.enemies, player, config, canvas, false); // bigBangActive é falso aqui porque o dano é instantâneo
 
-        if (enemyUpdate.newlyCreatedParticles.length > 0) {
-            state.setParticles([...state.particles, ...enemyUpdate.newlyCreatedParticles]);
+        // Atualiza o estado do jogo com os dados retornados pela função.
+        state.setEnemies(enemyUpdate.updatedEnemies);
+
+        if (enemyUpdate.newProjectiles && enemyUpdate.newProjectiles.length > 0) {
+            state.setProjectiles([...state.projectiles, ...enemyUpdate.newProjectiles]);
         }
 
-        state.setProjectiles(enemyUpdate.newProjectiles);
-
-        if (enemyUpdate.xpFromDefeatedEnemies > 0) {
-            const finalXp = Math.round(enemyUpdate.xpFromDefeatedEnemies * config.globalXpMultiplier);
-            config.xp += finalXp;
-            updateQuest('defeat20', 1);
-            checkLevelUp();
+        if (enemyUpdate.newExplosions && enemyUpdate.newExplosions.length > 0) {
+            state.setExplosions([...state.explosions, ...enemyUpdate.newExplosions]);
         }
+
+        // A lógica de XP e partículas de cura será adicionada aqui se necessário no futuro.
+        // Por enquanto, o XP é adicionado dentro de updateEnemies, o que será refatorado depois.
     }
 
     // CORREÇÃO CRÍTICA: Só chama `updateWave` se uma luta de chefe NÃO estiver ativa.
