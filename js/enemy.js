@@ -79,34 +79,129 @@ export function spawnEnemy(typeKey, config, player) {
 // ======================
 // ATUALIZAÇÃO DOS INIMIGOS
 // ======================
-export function updateEnemies(enemies, player) {
-  enemies.forEach(enemy => {
-    // 🔹 Calcula a direção para o jogador
-    const dx = player.x - enemy.x;
-    const dy = player.y - enemy.y;
-    const dist = Math.sqrt(dx * dx + dy * dy) || 0.001; // evita divisão por 0
+export function updateEnemies(enemies, player, config, canvas, bigBangActive) {
+    const newProjectiles = [];
+    const newExplosions = [];
 
-    // 🔹 Define velocidade de movimento (seguindo o jogador)
-    enemy.speedX = (dx / dist) * enemy.baseSpeed;
-    enemy.speedY = (dy / dist) * enemy.baseSpeed;
+    // Usar filter para criar a nova lista de inimigos, removendo os que morreram ou saíram da tela
+    const updatedEnemies = enemies.filter(enemy => {
+        // Decrementa timers
+        if (enemy.collisionTimer > 0) enemy.collisionTimer -= 16.67; // Aproximado para 60 FPS
+        if (enemy.shootCooldown > 0) enemy.shootCooldown -= 16.67;
 
-    // 🔹 Atualiza posição
-    enemy.x += enemy.speedX;
-    enemy.y += enemy.speedY;
+        // Lógica de movimento baseada no comportamento
+        const type = config.enemySystem.types[enemy.typeKey] || {};
+        const behavior = type.behavior || 'hunter';
 
-    // 🔹 Limita velocidade mínima (evita congelamento)
-    const minSpeed = 0.05;
-    if (Math.abs(enemy.speedX) < minSpeed) enemy.speedX = 0;
-    if (Math.abs(enemy.speedY) < minSpeed) enemy.speedY = 0;
+        // Lógica de dano e morte pelo Big Bang
+        if (bigBangActive && !type.isBoss) {
+            enemy.health = 0; // Inimigos normais morrem instantaneamente
+        }
 
-    // 🔹 Detecta colisão com jogador
-    const distPlayer = Math.sqrt((player.x - enemy.x) ** 2 + (player.y - enemy.y) ** 2);
-    if (distPlayer < enemy.radius + player.radius) {
-      if (player.health > 0) {
-        player.health -= enemy.damage;
-      }
-    }
-  });
+        if (enemy.health <= 0) {
+            // Se o inimigo morreu, cria uma explosão e não o inclui na nova lista
+            newExplosions.push({
+                x: enemy.x,
+                y: enemy.y,
+                radius: enemy.radius * 2,
+                color: enemy.color,
+                duration: 1000
+            });
+            // Adiciona XP ao jogador pela morte do inimigo
+            if (player) {
+                player.xp += type.xpValue || 10;
+            }
+            return false; // Remove o inimigo
+        }
+
+        // Lógica de movimento
+        const dx = player.x - enemy.x;
+        const dy = player.y - enemy.y;
+        const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+
+        switch (behavior) {
+            case 'hunter':
+                // Para a uma certa distância do jogador
+                if (dist > (type.preferredDistance || 100)) {
+                    enemy.speedX = (dx / dist) * enemy.baseSpeed;
+                    enemy.speedY = (dy / dist) * enemy.baseSpeed;
+                } else {
+                    enemy.speedX *= 0.9; // Desacelera perto do jogador
+                    enemy.speedY *= 0.9;
+                }
+                break;
+            case 'shooter':
+                // Tenta manter distância e atira
+                if (dist < (type.shootDistance || 200)) { // se muito perto, afasta
+                    enemy.speedX = -(dx / dist) * enemy.baseSpeed * 0.7;
+                    enemy.speedY = -(dy / dist) * enemy.baseSpeed * 0.7;
+                } else { // se longe, aproxima
+                    enemy.speedX = (dx / dist) * enemy.baseSpeed * 0.5;
+                    enemy.speedY = (dy / dist) * enemy.baseSpeed * 0.5;
+                }
+                if (!enemy.shootCooldown || enemy.shootCooldown <= 0) {
+                    newProjectiles.push({
+                        x: enemy.x,
+                        y: enemy.y,
+                        speedX: (dx / dist) * config.projectile.speed,
+                        speedY: (dy / dist) * config.projectile.speed,
+                        radius: config.projectile.radius,
+                        color: config.projectile.color,
+                        damage: enemy.damage * 0.8, // Dano do projétil
+                        owner: 'enemy'
+                    });
+                    enemy.shootCooldown = type.shootCooldown || 2000; // Recarga
+                }
+                break;
+            case 'stationary':
+                // Fica parado
+                enemy.speedX = 0;
+                enemy.speedY = 0;
+                break;
+            case 'crossScreen':
+                // Atravessa a tela - a velocidade inicial é mantida
+                break;
+            default:
+                // Comportamento padrão: Perseguir
+                enemy.speedX = (dx / dist) * enemy.baseSpeed;
+                enemy.speedY = (dy / dist) * enemy.baseSpeed;
+                break;
+        }
+
+        enemy.x += enemy.speedX;
+        enemy.y += enemy.speedY;
+
+        // Lógica de colisão com o jogador
+        const distPlayer = Math.sqrt(Math.pow(player.x - enemy.x, 2) + Math.pow(player.y - enemy.y, 2));
+        if (distPlayer < enemy.radius + player.radius && !type.ignoresCollision) {
+            // Dano no jogador
+            if (player.invincibilityTimer <= 0) {
+                player.health -= enemy.damage * config.player.collisionDamageModifier;
+                player.invincibilityTimer = config.player.invincibilityDuration;
+            }
+            // Dano no inimigo
+            if (enemy.collisionTimer <= 0) {
+                enemy.health -= player.collisionDamage;
+                enemy.collisionTimer = config.enemySystem.collisionInvincibilityDuration;
+            }
+        }
+
+        // "Rede de segurança" para remover inimigos que saem da tela
+        const margin = 200;
+        if (canvas && (enemy.x < -margin || enemy.x > canvas.width + margin || enemy.y < -margin || enemy.y > canvas.height + margin)) {
+            return false; // Remove o inimigo
+        }
+
+        return true; // Mantém o inimigo na lista
+    });
+
+    // Ponto de retorno ÚNICO e ESTRUTURADO
+    return {
+        updatedEnemies,
+        newProjectiles,
+        newExplosions,
+        newEnemies: [] // Novos inimigos são gerados pela função updateWave em game.js
+    };
 }
 
 // ======================
