@@ -14,7 +14,7 @@ function rand(min = 0, max = 1) {
 // ======================
 // GERAR INIMIGOS
 // ======================
-function spawnEnemy(typeKey, config, player) {
+export function spawnEnemy(typeKey, config, player) {
   const type = config.enemySystem.types[typeKey];
   if (!type) return null; // segurança extra
 
@@ -79,7 +79,7 @@ function spawnEnemy(typeKey, config, player) {
 // ======================
 // ATUALIZAÇÃO DOS INIMIGOS
 // ======================
-function updateEnemies(enemies, player) {
+export function updateEnemies(enemies, player) {
   enemies.forEach(enemy => {
     // 🔹 Calcula a direção para o jogador
     const dx = player.x - enemy.x;
@@ -112,7 +112,7 @@ function updateEnemies(enemies, player) {
 // ======================
 // DESENHAR INIMIGOS NA TELA
 // ======================
-function drawEnemies(ctx, enemies) {
+export function drawEnemies(ctx, enemies) {
   enemies.forEach(enemy => {
     // 🔹 Corpo do inimigo
     ctx.beginPath();
@@ -138,7 +138,7 @@ function drawEnemies(ctx, enemies) {
 // ======================
 // GERADOR DE INIMIGOS ALEATÓRIOS
 // ======================
-function spawnRandomEnemy(config, player) {
+export function spawnRandomEnemy(config, player) {
   const enemyTypes = Object.keys(config.enemySystem.types);
   const totalChance = enemyTypes.reduce(
     (sum, key) => sum + (config.enemySystem.types[key].chance || 0),
