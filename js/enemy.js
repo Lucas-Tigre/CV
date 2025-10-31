@@ -135,6 +135,15 @@ export function updateEnemies(enemies, player, config, canvas, bigBangActive) {
         const dy = player.y - enemy.y;
         const dist = Math.sqrt(dx * dx + dy * dy) || 1;
 
+        // APLICA DANO DE ATRAÇÃO (VÓRTICE)
+        // Se o jogador estiver no modo 'attract' e o inimigo estiver dentro do raio,
+        // aplica dano contínuo.
+        if (player.mode === 'attract' && dist < player.radius && !type.ignoresAttraction) {
+            // O dano é aplicado por segundo, então dividimos por 60 para aplicar por frame.
+            const damagePerFrame = player.attractionDamage / 60;
+            enemy.health -= damagePerFrame;
+        }
+
         switch (behavior) {
             case 'hunter':
                 if (dist > (type.preferredDistance || 100)) {
