@@ -185,7 +185,12 @@ export function updateEnemies(enemies, player, config, canvas, bigBangActive) {
         const distPlayer = Math.sqrt(Math.pow(player.x - enemy.x, 2) + Math.pow(player.y - enemy.y, 2));
         if (distPlayer < enemy.radius + player.size && !type.ignoresCollision) {
             if (player.invincibleTimer <= 0) {
-                damageToPlayer += enemy.damage;
+                // CORREÇÃO: Garante que o dano do inimigo é sempre um número válido antes de ser aplicado.
+                // Isso previne a corrupção do estado de vida do jogador para NaN.
+                const enemyDamage = enemy.damage;
+                const baseDamage = config.enemySystem.baseDamage || 1; // Fallback para o dano base ou 1.
+                const damageToApply = (typeof enemyDamage === 'number' && !isNaN(enemyDamage)) ? enemyDamage : baseDamage;
+                damageToPlayer += damageToApply;
             }
             if (enemy.collisionTimer <= 0) {
                 enemy.health -= player.collisionDamage;
