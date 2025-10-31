@@ -124,7 +124,8 @@ export function updateEnemies(enemies, player, config, canvas, bigBangActive) {
                     isHealing: true,
                     speedX: (Math.random() - 0.5) * 2,
                     speedY: (Math.random() - 0.5) * 2,
-                    healingAmount: config.healingParticle.amount
+                    healingAmount: config.healingParticle.amount,
+                    trail: []
                 });
             }
 
