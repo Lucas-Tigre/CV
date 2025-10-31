@@ -108,7 +108,7 @@ export function updateEnemies(enemies, player, config, canvas, bigBangActive) {
                 y: enemy.y,
                 radius: enemy.radius * 2,
                 color: enemy.color,
-                duration: 1000
+                duration: 30
             });
 
             xpGained += type.xpValue || 10;
