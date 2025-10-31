@@ -10,6 +10,11 @@ export const config = {
         checkInterval: 30      // Intervalo (em frames) para verificar a necessidade de gerar novas partículas.
     },
 
+    healingParticle: {
+        dropChance: 0.1, // 10% de chance de um inimigo dropar uma partícula de cura
+        amount: 5        // Quantidade de vida que a partícula restaura
+    },
+
     // =============================================
     // GALÁXIAS (APARÊNCIA E FUNDOS DE TELA)
     // =============================================
@@ -75,6 +80,7 @@ export const config = {
     enemySystem: {
         baseHealth: 20, // REBALANCEAMENTO: Reduzido para facilitar o início.
         baseDamage: 3, // REBALANCEAMENTO: Reduzido para diminuir a dificuldade.
+        damageIncreasePerLevel: 0.2, // Dano adicional por onda.
         baseSize: 20,
         eliteSizeMultiplier: 1.3,
         healthIncreasePerLevel: 0.05, // REBALANCEAMENTO: Reduzido para uma curva de dificuldade mais suave.

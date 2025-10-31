@@ -369,7 +369,6 @@ function updatePhysics(deltaTime) {
         // Atualiza a contagem de partículas absorvidas para o placar.
         if (particleUpdate.absorbedCount > 0) {
             config.particlesAbsorbed += particleUpdate.absorbedCount;
-            console.log(`DEBUG: Absorveu ${particleUpdate.absorbedCount} partículas. Total agora: ${config.particlesAbsorbed}`);
         }
         updateQuest('absorb100', finalXp);
         checkLevelUp();
@@ -390,22 +389,47 @@ function updatePhysics(deltaTime) {
     state.setExplosions(explosion.updateExplosions(state.explosions));
 
     if (state.enemies.length > 0) {
-        // Chamada da função CORRIGIDA com os argumentos certos.
-        const enemyUpdate = enemy.updateEnemies(state.enemies, player, config, canvas, false); // bigBangActive é falso aqui porque o dano é instantâneo
+        const enemyUpdate = enemy.updateEnemies(state.enemies, player, config, canvas, false);
 
-        // Atualiza o estado do jogo com os dados retornados pela função.
         state.setEnemies(enemyUpdate.updatedEnemies);
 
-        if (enemyUpdate.newProjectiles && enemyUpdate.newProjectiles.length > 0) {
+        if (enemyUpdate.newProjectiles?.length > 0) {
             state.setProjectiles([...state.projectiles, ...enemyUpdate.newProjectiles]);
         }
 
-        if (enemyUpdate.newExplosions && enemyUpdate.newExplosions.length > 0) {
+        if (enemyUpdate.newExplosions?.length > 0) {
             state.setExplosions([...state.explosions, ...enemyUpdate.newExplosions]);
         }
 
-        // A lógica de XP e partículas de cura será adicionada aqui se necessário no futuro.
-        // Por enquanto, o XP é adicionado dentro de updateEnemies, o que será refatorado depois.
+        // Aplica o dano de colisão ao jogador, respeitando o tempo de invencibilidade.
+        if (enemyUpdate.damageToPlayer > 0 && player.invincibleTimer <= 0) {
+            player.health -= enemyUpdate.damageToPlayer;
+            playSound('hit');
+            player.invincibleTimer = config.players[0].invincibilityCooldown; // Ativa a invencibilidade
+        }
+
+        // Adiciona XP ganho ao derrotar inimigos.
+        if (enemyUpdate.xpGained > 0) {
+            const finalXp = Math.round(enemyUpdate.xpGained * (config.xpMultiplier || 1) * config.globalXpMultiplier);
+            config.xp += finalXp;
+            checkLevelUp(); // Verifica se o jogador subiu de nível
+        }
+
+        // Adiciona carga ao Big Bang.
+        if (enemyUpdate.bigBangChargeGained > 0) {
+            config.bigBangCharge = Math.min(100, config.bigBangCharge + enemyUpdate.bigBangChargeGained);
+        }
+
+        // Adiciona novas partículas de cura ao mundo do jogo.
+        if (enemyUpdate.healingParticles?.length > 0) {
+            state.setParticles([...state.particles, ...enemyUpdate.healingParticles]);
+        }
+
+        // Atualiza a contagem de inimigos destruídos para as missões.
+        if (enemyUpdate.enemiesDefeated > 0) {
+             config.enemiesDestroyed += enemyUpdate.enemiesDefeated;
+             updateQuest('destroy50', enemyUpdate.enemiesDefeated);
+        }
     }
 
     // CORREÇÃO CRÍTICA: Só chama `updateWave` se uma luta de chefe NÃO estiver ativa.
@@ -670,4 +694,3 @@ window.addEventListener('resize', () => {
 });
 
 // O estado não é mais exposto globalmente para segurança.
-window.config = config; // Exposto APENAS para verificação via Playwright.
