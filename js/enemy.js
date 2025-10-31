@@ -41,22 +41,23 @@ export function spawnEnemy(typeKey, config, player) {
     baseSpeed *= 1.1;
   }
 
-  // 🔹 Posição aleatória fora da tela (pra parecer que vem “de longe”)
+  // 🔹 Posição aleatória fora da tela, usando a margem configurável.
+  const margin = config.enemySystem.spawnMargin || 50; // Usa 50 como fallback.
   const side = Math.floor(rand(0, 4)); // 0: esquerda, 1: direita, 2: cima, 3: baixo
   let x, y;
 
   if (side === 0) { // esquerda
-    x = -50;
+    x = -margin;
     y = rand(0, screenHeight);
   } else if (side === 1) { // direita
-    x = screenWidth + 50;
+    x = screenWidth + margin;
     y = rand(0, screenHeight);
   } else if (side === 2) { // cima
     x = rand(0, screenWidth);
-    y = -50;
+    y = -margin;
   } else { // baixo
     x = rand(0, screenWidth);
-    y = screenHeight + 50;
+    y = screenHeight + margin;
   }
 
   // 🔹 Cria o inimigo com todas as propriedades iniciais
@@ -208,9 +209,23 @@ export function updateEnemies(enemies, player, config, canvas, bigBangActive) {
             }
         }
 
-        const margin = 200;
-        if (canvas && (enemy.x < -margin || enemy.x > canvas.width + margin || enemy.y < -margin || enemy.y > canvas.height + margin)) {
-            return false;
+        // NOVO SISTEMA DE CONTENÇÃO NA TELA ("QUICAR")
+        // Removemos a lógica antiga de deletar inimigos fora da tela.
+        // Agora, eles quicam nas bordas para permanecer na área de jogo.
+        const bounceDamping = 0.8; // Fator de amortecimento para tornar o quicar mais suave.
+        if (canvas) {
+            if (enemy.x - enemy.radius < 0 && enemy.speedX < 0) {
+                enemy.speedX *= -bounceDamping;
+            }
+            if (enemy.x + enemy.radius > canvas.width && enemy.speedX > 0) {
+                enemy.speedX *= -bounceDamping;
+            }
+            if (enemy.y - enemy.radius < 0 && enemy.speedY < 0) {
+                enemy.speedY *= -bounceDamping;
+            }
+            if (enemy.y + enemy.radius > canvas.height && enemy.speedY > 0) {
+                enemy.speedY *= -bounceDamping;
+            }
         }
 
         return true;
