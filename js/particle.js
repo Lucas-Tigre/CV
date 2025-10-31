@@ -203,9 +203,12 @@ export function updateParticles(currentParticles, player, deltaTime, lastUpdateI
                 if (isVeryClose && dist < player.size * 0.8) {
                     if (p.special === 'powerup') {
                         powerupCollected = true;
-                    } else if (p.type === 'health') {
-                        player.health = Math.min(player.maxHealth, player.health + 10);
-                        playSound('levelUp'); // Reutiliza um som existente para feedback.
+                    } else if (p.isHealing) {
+                        const healing = p.healingAmount || 0;
+                        if (!isNaN(healing)) {
+                            player.health = Math.min(player.maxHealth, player.health + healing);
+                            playSound('levelUp');
+                        }
                     }
                     absorbedXp += p.xpValue || 1;
                     absorbedCount++;
