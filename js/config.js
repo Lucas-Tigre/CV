@@ -28,7 +28,7 @@ export const config = {
                 unlockCondition: "Inicial",
                 particleColorRange: { h: [0, 360], s: [80, 90], l: [50, 70] },
                 // FUNDO 1: Imagem de fundo para a galáxia Clássico.
-                background: "url('assets/images/MapaFN.png')"
+                background: url('assets/images/MapaFN.png')
             },
             neon: {
                 name: "Neon",
@@ -36,7 +36,7 @@ export const config = {
                 unlockCondition: "Alcançar nível 5",
                 particleColorRange: { h: [280, 320], s: [100, 100], l: [60, 80] },
                 // FUNDO 2: Imagem de fundo para a galáxia Neon.
-                background: "url('assets/images/MapaIN.png')"
+                background: url('assets/images/MapaIN.png')
             },
             fire: {
                 name: "Inferno",
@@ -44,7 +44,7 @@ export const config = {
                 unlockCondition: "Derrotar 50 inimigos",
                 particleColorRange: { h: [10, 40], s: [80, 100], l: [50, 70] },
                 // FUNDO 3: Imagem de fundo para a galáxia Inferno.
-                background: "url('assets/images/MapaME.png')"
+                background: url('assets/images/MapaME.png')
             },
         }
     },
@@ -58,14 +58,14 @@ export const config = {
             x: null,
             y: null,
             mode: 'attract',
-            color: '#4A00E0',
+            color: '#3d0aa3ff',
             radius: 150,
             size: 30,
             face: "🐶",
             faceSize: 28,
             health: 100,
             maxHealth: 100,
-            collisionDamage: 10,     // Dano que o jogador causa ao colidir com inimigos.
+            collisionDamage: 20,     // Dano que o jogador causa ao colidir com inimigos.
             attractionDamage: 4,  // Dano por segundo do vórtice de atração.
             isPoweredUp: false,
             powerUpTimer: 0,
@@ -91,7 +91,7 @@ export const config = {
                 name: "Rápido",
                 chance: 0.55,
                 speed: 3.5,
-                behavior: 'hunt', // Alterado de 'wander' para 'hunt'
+                behavior: 'hunt', 
                 huntRadius: 500,   // Adicionado raio de perseguição
                 face: ["😠", "😡", "😤"],
                 color: '#FFDD00',
@@ -122,12 +122,12 @@ export const config = {
             },
             shooter: {
                 name: "Atirador",
-                chance: 0.10,
+                chance: 0.05,
                 speed: 1.5,
                 behavior: 'shooter',
                 face: ["🛰️", "📡"],
                 color: '#00FFFF',
-                healthMultiplier: 1.2,
+                healthMultiplier: 0.1,
                 shootCooldown: 180,
                 projectileType: 'explosive'
             },
@@ -212,7 +212,7 @@ export const config = {
     gameTime: 0,
     wave: { number: 1, enemiesToSpawn: 3, spawned: 0, timer: 0 }, // REBALANCEAMENTO: Reduzido o número inicial de inimigos.
     bigBangCharge: 0,
-    bigBangChargeRate: 2, // Pontos de carga por inimigo derrotado.
+    bigBangChargeRate: 5, // Pontos de carga por inimigo derrotado.
 
     // =============================================
     // OUTRAS CONFIGURAÇÕES
