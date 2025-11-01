@@ -185,25 +185,16 @@ export function updateEnemies(enemies, player, config, canvas, bigBangActive) {
                 }
                 break;
             case 'shooter':
-                // O 'shooter' agora é estacionário e apenas atira.
-                enemy.speedX = 0;
-                enemy.speedY = 0;
-
-                // Lógica de tiro em linha reta.
+                if (dist < (type.shootDistance || 200)) {
+                    enemy.speedX = -(dx / dist) * enemy.baseSpeed * 0.7;
+                    enemy.speedY = -(dy / dist) * enemy.baseSpeed * 0.7;
+                } else {
+                    enemy.speedX = (dx / dist) * enemy.baseSpeed * 0.5;
+                    enemy.speedY = (dy / dist) * enemy.baseSpeed * 0.5;
+                }
                 if (!enemy.shootCooldown || enemy.shootCooldown <= 0) {
-                    // Atira apenas se o jogador estiver dentro do alcance.
-                    if (dist < (type.shootDistance || 400)) {
-                         newProjectiles.push(
-                           createProjectile(
-                             enemy.x,
-                             enemy.y,
-                             player.x,
-                             player.y,
-                             'explosive'
-                           )
-                         );
-                        enemy.shootCooldown = type.shootCooldown || 2000;
-                    }
+                    newProjectiles.push(createProjectile(enemy.x, enemy.y, player.x, player.y, 'explosive'));
+                    enemy.shootCooldown = type.shootCooldown || 2000;
                 }
                 break;
             case 'stationary':
