@@ -78,6 +78,7 @@ export const config = {
     // SISTEMA DE INIMIGOS
     // =============================================
     enemySystem: {
+        spawnMargin: 100, // Distância da borda da tela para o nascimento de inimigos.
         baseHealth: 20, // REBALANCEAMENTO: Reduzido para facilitar o início.
         baseDamage: 3, // REBALANCEAMENTO: Reduzido para diminuir a dificuldade.
         damageIncreasePerLevel: 0.2, // Dano adicional por onda.
