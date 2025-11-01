@@ -125,6 +125,11 @@ function updateWave() {
             config.bossFightActive = false;
             showUnlockMessage(`Chefe derrotado!`);
             playMusic('mainTheme');
+
+            // CORREÇÃO: Reseta o estado da onda para forçar o início de uma nova onda no próximo quadro.
+            config.wave.spawned = 0;
+            config.wave.timer = 999; // Força o timer a ativar a próxima onda.
+            config.wave.enemiesToSpawn = 5 + Math.floor(config.wave.number * 1.5);
         }
         return;
     }

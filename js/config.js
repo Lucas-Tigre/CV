@@ -124,7 +124,7 @@ export const config = {
                 name: "Atirador",
                 chance: 0.10,
                 speed: 0,
-                behavior: 'static',
+                behavior: 'stationary',
                 face: ["🛰️", "📡"],
                 color: '#00FFFF',
                 healthMultiplier: 1.2,

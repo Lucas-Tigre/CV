@@ -77,6 +77,32 @@ export function spawnEnemy(typeKey, config, player) {
     collisionTimer: 0 // Inicializa o timer de colisão
   };
 
+  // LÓGICA DE MOVIMENTO PARA O INIMIGO "CÓSMICO"
+  // Define uma velocidade inicial para que ele atravesse a tela.
+  if (typeKey === 'cosmic') {
+    // Define um alvo no lado oposto da tela
+    let targetX, targetY;
+    if (side === 0) { // Nasceu na esquerda, alvo na direita
+        targetX = screenWidth + margin;
+        targetY = rand(0, screenHeight);
+    } else if (side === 1) { // Nasceu na direita, alvo na esquerda
+        targetX = -margin;
+        targetY = rand(0, screenHeight);
+    } else if (side === 2) { // Nasceu em cima, alvo embaixo
+        targetX = rand(0, screenWidth);
+        targetY = screenHeight + margin;
+    } else { // Nasceu embaixo, alvo em cima
+        targetX = rand(0, screenWidth);
+        targetY = -margin;
+    }
+
+    const dx = targetX - enemy.x;
+    const dy = targetY - enemy.y;
+    const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+    enemy.speedX = (dx / dist) * enemy.baseSpeed;
+    enemy.speedY = (dy / dist) * enemy.baseSpeed;
+  }
+
   return enemy;
 }
 
