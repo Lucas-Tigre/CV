@@ -72,7 +72,7 @@ export function spawnEnemy(typeKey, config, player) {
     health,
     maxHealth: health,
     damage,
-    radius: type.radius || 15,
+    radius: (type.size || config.enemySystem.baseSize || 20) * (isElite ? (config.enemySystem.eliteSizeMultiplier || 1.3) : 1),
     color: isElite ? 'gold' : type.color || 'red',
     isElite,
     typeKey,
