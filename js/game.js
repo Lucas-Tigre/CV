@@ -125,11 +125,6 @@ function updateWave() {
             config.bossFightActive = false;
             showUnlockMessage(`Chefe derrotado!`);
             playMusic('mainTheme');
-
-            // CORREÇÃO: Reseta o estado da onda para forçar o início de uma nova onda no próximo quadro.
-            config.wave.spawned = 0;
-            config.wave.timer = 999; // Força o timer a ativar a próxima onda.
-            config.wave.enemiesToSpawn = 5 + Math.floor(config.wave.number * 1.5);
         }
         return;
     }
@@ -408,12 +403,9 @@ function updatePhysics(deltaTime) {
 
         // Aplica o dano de colisão ao jogador, respeitando o tempo de invencibilidade.
         if (enemyUpdate.damageToPlayer > 0 && player.invincibleTimer <= 0) {
-            // CORREÇÃO DEFENSIVA: Garante que a vida do jogador só seja modificada por um número válido.
-            if (typeof enemyUpdate.damageToPlayer === 'number' && !isNaN(enemyUpdate.damageToPlayer)) {
-                player.health -= enemyUpdate.damageToPlayer;
-                playSound('hit');
-                player.invincibleTimer = config.players[0].invincibilityCooldown; // Ativa a invencibilidade
-            }
+            player.health -= enemyUpdate.damageToPlayer;
+            playSound('hit');
+            player.invincibleTimer = config.players[0].invincibilityCooldown; // Ativa a invencibilidade
         }
 
         // Adiciona XP ganho ao derrotar inimigos.
@@ -461,9 +453,7 @@ function updatePhysics(deltaTime) {
         const dx = player.x - proj.x;
         const dy = player.y - proj.y;
         if (Math.sqrt(dx * dx + dy * dy) < player.size + proj.size) {
-            if (typeof proj.damage === 'number' && !isNaN(proj.damage)) {
-                player.health -= proj.damage;
-            }
+            player.health -= proj.damage;
             playSound('hit');
             if (proj.onDeath === 'explode') {
                 state.setExplosions([...state.explosions, { x: proj.x, y: proj.y, radius: proj.explosionRadius, damage: proj.damage, duration: 30, color: proj.color }]);
@@ -479,10 +469,7 @@ function updatePhysics(deltaTime) {
         const dx = player.x - exp.x;
         const dy = player.y - exp.y;
         if (Math.sqrt(dx * dx + dy * dy) < exp.radius) {
-            const damage = exp.damage * (deltaTime / 16.67);
-            if (typeof damage === 'number' && !isNaN(damage)) {
-                player.health -= damage;
-            }
+            player.health -= exp.damage * (deltaTime / 16.67);
         }
     });
 
