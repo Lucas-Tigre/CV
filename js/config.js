@@ -123,7 +123,7 @@ export const config = {
             shooter: {
                 name: "Atirador",
                 chance: 0.10,
-                speed: 0,
+                speed: 1.5,
                 behavior: 'shooter',
                 face: ["🛰️", "📡"],
                 color: '#00FFFF',

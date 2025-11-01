@@ -213,7 +213,7 @@ export function updateEnemies(enemies, player, config, canvas, bigBangActive) {
         enemy.y += enemy.speedY;
 
         const distPlayer = Math.sqrt(Math.pow(player.x - enemy.x, 2) + Math.pow(player.y - enemy.y, 2));
-        if (distPlayer < enemy.radius + player.size && !type.ignoresCollision) {
+        if (distPlayer < enemy.radius + player.size) { // A verificação de `ignoresCollision` foi movida para ser mais específica.
             if (player.invincibleTimer <= 0) {
                 // CORREÇÃO: Garante que o dano do inimigo é sempre um número válido antes de ser aplicado.
                 // Isso previne a corrupção do estado de vida do jogador para NaN.
@@ -222,7 +222,9 @@ export function updateEnemies(enemies, player, config, canvas, bigBangActive) {
                 const damageToApply = (typeof enemyDamage === 'number' && !isNaN(enemyDamage)) ? enemyDamage : baseDamage;
                 damageToPlayer += damageToApply;
             }
-            if (enemy.collisionTimer <= 0) {
+
+            // O "Cósmico" ignora o dano de colisão, mas o jogador não.
+            if (enemy.collisionTimer <= 0 && !type.ignoresCollision) {
                 enemy.health -= player.collisionDamage;
                 enemy.collisionTimer = config.enemySystem.collisionCooldown;
             }
