@@ -1,3 +1,4 @@
+import { createProjectile } from './projectile.js';
 // ======================
 // SISTEMA DE INIMIGOS v2.0
 // ======================
@@ -64,6 +65,7 @@ export function spawnEnemy(typeKey, config, player) {
   const enemy = {
     x,
     y,
+    face: Array.isArray(type.face) ? type.face[Math.floor(Math.random() * type.face.length)] : type.face,
     baseSpeed,
     speedX: 0,
     speedY: 0,
@@ -165,8 +167,8 @@ export function updateEnemies(enemies, player, config, canvas, bigBangActive) {
 
         // APLICA DANO DE ATRAÇÃO (VÓRTICE)
         // Se o jogador estiver no modo 'attract' e o inimigo estiver dentro do raio,
-        // aplica dano contínuo.
-        if (player.mode === 'attract' && dist < player.radius && !type.ignoresAttraction) {
+        // aplica dano contínuo, a menos que seja o "Cósmico".
+        if (player.mode === 'attract' && dist < player.radius && enemy.typeKey !== 'cosmic') {
             // O dano é aplicado por segundo, então dividimos por 60 para aplicar por frame.
             const damagePerFrame = player.attractionDamage / 60;
             enemy.health -= damagePerFrame;
@@ -183,25 +185,25 @@ export function updateEnemies(enemies, player, config, canvas, bigBangActive) {
                 }
                 break;
             case 'shooter':
-                if (dist < (type.shootDistance || 200)) {
-                    enemy.speedX = -(dx / dist) * enemy.baseSpeed * 0.7;
-                    enemy.speedY = -(dy / dist) * enemy.baseSpeed * 0.7;
-                } else {
-                    enemy.speedX = (dx / dist) * enemy.baseSpeed * 0.5;
-                    enemy.speedY = (dy / dist) * enemy.baseSpeed * 0.5;
-                }
+                // O 'shooter' agora é estacionário e apenas atira.
+                enemy.speedX = 0;
+                enemy.speedY = 0;
+
+                // Lógica de tiro em linha reta.
                 if (!enemy.shootCooldown || enemy.shootCooldown <= 0) {
-                    newProjectiles.push({
-                        x: enemy.x,
-                        y: enemy.y,
-                        speedX: (dx / dist) * config.projectile.speed,
-                        speedY: (dy / dist) * config.projectile.speed,
-                        radius: config.projectile.radius,
-                        color: config.projectile.color,
-                        damage: enemy.damage * 0.8,
-                        owner: 'enemy'
-                    });
-                    enemy.shootCooldown = type.shootCooldown || 2000;
+                    // Atira apenas se o jogador estiver dentro do alcance.
+                    if (dist < (type.shootDistance || 400)) {
+                         newProjectiles.push(
+                           createProjectile(
+                             enemy.x,
+                             enemy.y,
+                             player.x,
+                             player.y,
+                             'explosive'
+                           )
+                         );
+                        enemy.shootCooldown = type.shootCooldown || 2000;
+                    }
                 }
                 break;
             case 'stationary':
@@ -235,22 +237,30 @@ export function updateEnemies(enemies, player, config, canvas, bigBangActive) {
             }
         }
 
-        // NOVO SISTEMA DE CONTENÇÃO NA TELA ("QUICAR")
-        // Removemos a lógica antiga de deletar inimigos fora da tela.
-        // Agora, eles quicam nas bordas para permanecer na área de jogo.
-        const bounceDamping = 0.8; // Fator de amortecimento para tornar o quicar mais suave.
-        if (canvas) {
-            if (enemy.x - enemy.radius < 0 && enemy.speedX < 0) {
-                enemy.speedX *= -bounceDamping;
+        // SISTEMA DE CONTENÇÃO E REMOÇÃO DE INIMIGOS
+        // O padrão é "quicar" nas bordas, mas o "Cósmico" é uma exceção.
+        if (enemy.typeKey === 'cosmic') {
+            // REGRA ESPECIAL PARA O "CÓSMICO": É removido ao sair da tela.
+            const margin = (config.enemySystem.spawnMargin || 50) + 10;
+            if (enemy.x < -margin || enemy.x > canvas.width + margin || enemy.y < -margin || enemy.y > canvas.height + margin) {
+                return false; // Deleta o inimigo.
             }
-            if (enemy.x + enemy.radius > canvas.width && enemy.speedX > 0) {
-                enemy.speedX *= -bounceDamping;
-            }
-            if (enemy.y - enemy.radius < 0 && enemy.speedY < 0) {
-                enemy.speedY *= -bounceDamping;
-            }
-            if (enemy.y + enemy.radius > canvas.height && enemy.speedY > 0) {
-                enemy.speedY *= -bounceDamping;
+        } else {
+            // REGRA PADRÃO: Quica nas bordas para permanecer na área de jogo.
+            const bounceDamping = 0.8;
+            if (canvas) {
+                if (enemy.x - enemy.radius < 0 && enemy.speedX < 0) {
+                    enemy.speedX *= -bounceDamping;
+                }
+                if (enemy.x + enemy.radius > canvas.width && enemy.speedX > 0) {
+                    enemy.speedX *= -bounceDamping;
+                }
+                if (enemy.y - enemy.radius < 0 && enemy.speedY < 0) {
+                    enemy.speedY *= -bounceDamping;
+                }
+                if (enemy.y + enemy.radius > canvas.height && enemy.speedY > 0) {
+                    enemy.speedY *= -bounceDamping;
+                }
             }
         }
 
@@ -281,6 +291,14 @@ export function drawEnemies(ctx, enemies) {
     ctx.arc(enemy.x, enemy.y, enemy.radius, 0, Math.PI * 2);
     ctx.fill();
     ctx.closePath();
+
+    // 🔹 "Face" do inimigo (emoji)
+    if (enemy.face) {
+        ctx.font = `${enemy.radius * 1.5}px Arial`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(enemy.face, enemy.x, enemy.y);
+    }
 
     // 🔹 Barra de vida
     const healthPercentage = Math.max(0, enemy.health / enemy.maxHealth);
