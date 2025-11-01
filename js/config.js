@@ -28,7 +28,7 @@ export const config = {
                 unlockCondition: "Inicial",
                 particleColorRange: { h: [0, 360], s: [80, 90], l: [50, 70] },
                 // FUNDO 1: Imagem de fundo para a galáxia Clássico.
-                background: url('assets/images/MapaFN.png')
+                background: "url('assets/images/MapaFN.png')"
             },
             neon: {
                 name: "Neon",
@@ -36,7 +36,7 @@ export const config = {
                 unlockCondition: "Alcançar nível 5",
                 particleColorRange: { h: [280, 320], s: [100, 100], l: [60, 80] },
                 // FUNDO 2: Imagem de fundo para a galáxia Neon.
-                background: url('assets/images/MapaIN.png')
+                background: "url('assets/images/MapaIN.png')"
             },
             fire: {
                 name: "Inferno",
@@ -44,7 +44,7 @@ export const config = {
                 unlockCondition: "Derrotar 50 inimigos",
                 particleColorRange: { h: [10, 40], s: [80, 100], l: [50, 70] },
                 // FUNDO 3: Imagem de fundo para a galáxia Inferno.
-                background: url('assets/images/MapaME.png')
+                background: "url('assets/images/MapaME.png')"
             },
         }
     },
@@ -65,7 +65,7 @@ export const config = {
             faceSize: 28,
             health: 100,
             maxHealth: 100,
-            collisionDamage: 20,     // Dano que o jogador causa ao colidir com inimigos.
+            collisionDamage: 10,     // Dano que o jogador causa ao colidir com inimigos.
             attractionDamage: 4,  // Dano por segundo do vórtice de atração.
             isPoweredUp: false,
             powerUpTimer: 0,
