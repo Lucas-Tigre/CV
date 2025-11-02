@@ -49,25 +49,42 @@ export async function submitScore(username, score) {
 }
 
 /**
- * Busca os 10 melhores jogadores da tabela 'leaderboard'.
+ * Busca os 10 melhores jogadores da tabela 'leaderboard', garantindo que cada jogador apareça apenas uma vez com sua maior pontuação.
  * @returns {Promise<Array<object>>} Uma lista com os melhores jogadores ou uma lista vazia em caso de erro.
  */
 export async function getLeaderboard() {
-    if (!supabase) return []; // Retorna uma lista vazia se o Supabase não foi inicializado
+    if (!supabase) return [];
 
     try {
+        // 1. Busca um número maior de pontuações para ter uma boa base de dados.
         const { data, error } = await supabase
             .from('leaderboard')
             .select('username, score')
             .order('score', { ascending: false })
-            .limit(10);
+            .limit(100); // Aumenta o limite para capturar mais entradas
 
         if (error) {
             console.error('Erro ao buscar placar:', error);
             return [];
         }
 
-        return data;
+        // 2. Processa os dados para encontrar a pontuação mais alta de cada jogador.
+        const highestScores = new Map();
+        for (const entry of data) {
+            if (!highestScores.has(entry.username) || entry.score > highestScores.get(entry.username)) {
+                highestScores.set(entry.username, entry.score);
+            }
+        }
+
+        // 3. Converte o mapa de volta para um array.
+        const uniqueScores = Array.from(highestScores, ([username, score]) => ({ username, score }));
+
+        // 4. Ordena o array pela pontuação.
+        uniqueScores.sort((a, b) => b.score - a.score);
+
+        // 5. Retorna os 10 melhores.
+        return uniqueScores.slice(0, 10);
+
     } catch (error) {
         console.error('Falha inesperada ao buscar placar:', error);
         return [];
